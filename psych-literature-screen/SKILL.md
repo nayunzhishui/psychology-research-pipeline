@@ -1,9 +1,9 @@
 ---
 name: psych-literature-screen
-description: Screen psychology literature at title/abstract and full-text levels, link duplicate reports of the same study, appraise design-specific quality, extract traceable evidence, and create structured reading cards and an evidence matrix. Use after search/acquisition, for corpus organization and reading, or when $psychology-research-pipeline delegates screening.
+description: Use this skill to screen psychology literature at title-abstract and full-text levels, record inclusion and exclusion decisions, link multiple reports from the same study, assess study quality, and build evidence matrices. 适用于文献筛查、纳入排除、阅读卡和证据矩阵；不要用于重新检索数据库或下载 PDF。 Use this skill after search/acquisition, for corpus organization and reading, or when $psychology-research-pipeline delegates screening. Do not use this skill to replace unavailable full text with abstract-only claims unless that limitation is explicitly recorded.
 ---
 
-# Psychology Literature Screening and Reading
+# Psychology Literature Screening and Reading / 心理学文献筛查与阅读
 
 Apply the frozen inclusion/exclusion criteria consistently. Do not use citation count or journal prestige as a proxy for methodological quality.
 
