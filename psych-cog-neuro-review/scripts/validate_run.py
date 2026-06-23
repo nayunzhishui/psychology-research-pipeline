@@ -91,6 +91,8 @@ CSV_HEADERS = {
         "doi",
         "pmid",
         "cnki_id",
+        "wanfang_id",
+        "vip_id",
         "source",
         "abstract",
         "landing_url",
