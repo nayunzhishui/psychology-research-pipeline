@@ -1,9 +1,9 @@
 ---
 name: psych-project-scope
-description: Inspect an existing psychology research workspace, dataset, instruments, drafts, and seed papers to determine the feasible research direction, population, constructs, temporal design, research questions, hypotheses, scope boundaries, and unresolved assumptions. Use when starting or resuming a psychology empirical project, when the topic is broad, or when $psychology-research-pipeline delegates its scope stage.
+description: Use this skill to audit a psychology research workspace, define the research scope, identify constructs, variables, waves, datasets, seed literature, feasibility constraints, and research questions. 适用于项目定标、变量与数据可行性判断；不要用于文献下载、数据建模或论文正文写作。 Use this skill when starting or resuming a psychology empirical project, when the topic is broad, or when $psychology-research-pipeline delegates its scope stage. Do not use this skill when the project scope and analysis-ready variable map are already frozen.
 ---
 
-# Psychology Project Scope
+# Psychology Project Scope / 心理学项目定标
 
 Produce a defensible project brief from available evidence. Do not infer a construct solely from a filename when instruments, variable labels, or data dictionaries are available.
 
