@@ -1,9 +1,9 @@
 ---
 name: psych-manuscript-write
-description: Draft, revise, and audit an empirical psychology manuscript from verified literature, a frozen protocol, reproducible analysis outputs, and current reporting standards. Use for complete IMRaD writing, thesis/article sections, claim-citation checks, results reconciliation, discussion calibration, or when $psychology-research-pipeline delegates manuscript composition.
+description: Use this skill to draft, revise, and audit empirical psychology manuscripts from verified evidence, frozen methods, reproducible analysis outputs, tables, figures, and reporting standards. 适用于心理学实证论文正文写作；不要用于编造文献、补造结果或脱离分析输出自由写作。 Use this skill for complete IMRaD writing, thesis or article sections, claim-citation checks, results reconciliation, discussion calibration, or when $psychology-research-pipeline delegates manuscript composition. Do not use this skill before literature, methods, and analysis artifacts exist.
 ---
 
-# Psychology Manuscript Writing
+# Psychology Manuscript Writing / 心理学手稿写作
 
 Write from artifacts, not memory. Literature supports the rationale and interpretation; analysis outputs supply this study's numbers.
 
