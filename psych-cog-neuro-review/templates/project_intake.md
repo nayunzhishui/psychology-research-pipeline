@@ -5,6 +5,8 @@
 - review_run_id：
 - 综述题目：
 - 暂定英文题目：
+- 运行模式：lite / standard / strict（默认 standard）
+- 默认综述定位：混合型机制综述；是否升级为范围综述/系统综述：否 / 是，说明：
 - 综述类型：叙事综述 / 理论综述 / 范围综述 / 系统综述 / 机制综述 / 测量工具综述 / 混合型综述
 - 目标风格：中文核心综述 / 外文 Q1 review 预备稿 / 课程论文 / 开题报告 / 学位论文综述
 - 输出语言：中文 / 英文 / 中英双语
@@ -21,6 +23,7 @@
 
 - 核心主题：
 - 优先主题：REM sleep and emotional memory / 其他：
+- 是否加载 topic pack：`topic_packs/rem_emotional_memory/` 是 / 否 / 不适用
 - 核心概念：
 - 相邻但不等同概念：
 - 明确排除的主题：
@@ -59,31 +62,35 @@
 
 ## 7. 数据库与资料来源
 
-- PubMed：
-- Web of Science：
-- PsycINFO：
-- Scopus：
-- CNKI：
-- Google Scholar：
-- Semantic Scholar：
-- Crossref：
-- Zotero 本地库：
-- 已有 PDF/Word/CSV/BibTeX/RIS 文件：
+| 来源 | 是否使用 | 用途 | 无法使用时的替代/说明 |
+|---|---|---|---|
+| PubMed |  | 生物医学与神经科学 |  |
+| Web of Science |  | 引文与跨学科检索 |  |
+| PsycINFO |  | 心理学核心文献 |  |
+| Scopus |  | 跨学科检索 |  |
+| CNKI |  | 中文期刊/学位论文 |  |
+| 万方 |  | 中文期刊/学位论文补充 |  |
+| 维普 |  | 中文期刊补充 |  |
+| Google Scholar |  | 补充发现和引文追踪 |  |
+| Semantic Scholar |  | 语义检索和补充发现 |  |
+| Crossref |  | DOI/元数据核查 |  |
+| Zotero 本地库 |  | 已保存文献复核 |  |
+| 已有 PDF/Word/CSV/BibTeX/RIS 文件 |  | 本地证据来源 |  |
 
 ## 8. 阶段门控选择
 
-| 阶段 | 是否执行 | 可跳过条件 | 备注 |
-|---|---|---|---|
-| 00 Scope | 是 | 不建议跳过 |  |
-| 01 Protocol | 是 | 不建议跳过 |  |
-| 02 Search | 是 | 仅在用户已有完整可复现检索记录时可跳过 |  |
-| 03 Acquire | 是 | 仅在已有验证过的文献库清单时可跳过 |  |
-| 04 Screen | 是 | 仅在已有筛查表与纳排理由时可跳过 |  |
-| 05 Extract | 是 | 仅在已有阅读矩阵与证据位置时可跳过 |  |
-| 06 Synthesize | 是 | 不建议跳过 |  |
-| 07 Prewrite | 是 | 不建议跳过 |  |
-| 08 Manuscript | 是 | 用户只要前期材料时可暂缓 |  |
-| 09 Audit | 是 | 不建议跳过 |  |
+| 阶段 | lite | standard | strict | 备注 |
+|---|---|---|---|---|
+| 00 Scope | 必须 | 必须 | 必须 |  |
+| 01 Protocol | 简化 | 必须 | 强制详细 |  |
+| 02 Search | 必须 | 必须 | 强制详细 |  |
+| 03 Acquire | 可简化 | 必须 | 必须 |  |
+| 04 Screen | 可简化 | 必须 | 强制详细 |  |
+| 05 Extract | 必须 | 必须 | 必须 |  |
+| 06 Synthesize | 必须 | 必须 | 必须 |  |
+| 07 Prewrite | 必须 | 必须 | 必须 |  |
+| 08 Manuscript | 可暂缓 | 必须 | 必须 |  |
+| 09 Audit | 可暂缓 | 必须 | 强制详细 |  |
 
 ## 9. 输出要求
 
@@ -93,6 +100,8 @@
 - 神经机制矩阵：需要 / 不需要
 - BibTeX/RIS 整理：需要 / 不需要
 - Zotero 标签方案：需要 / 不需要
+- 中文核心格式：需要 / 不需要
+- 外文 Q1 review 结构：需要 / 不需要
 - 综述原文—参考文献对应矩阵：必须 / 可选
 
 ## 10. 决策记录
