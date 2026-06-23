@@ -1,9 +1,9 @@
 ---
 name: psych-evidence-search
-description: Generate bilingual, reproducible psychology literature queries and run bounded multi-database searches with exact logs, exports, candidate normalization, citation chasing, and deduplication. Use for empirical psychology evidence discovery, search updates, protocol searches, or when $psychology-research-pipeline delegates its search stage.
+description: Use this skill to build reproducible psychology literature search strategies, bilingual query blocks, database-specific search strings, metadata exports, search logs, and candidate reference lists. 适用于心理学文献检索和候选题录生成；不要用于全文下载或 Zotero 附件处理。 Use this skill for empirical psychology evidence discovery, search updates, protocol searches, or when $psychology-research-pipeline delegates its search stage. Do not use this skill for unauthorized scraping, CAPTCHA bypass, or claiming a convenience source is exhaustive.
 ---
 
-# Psychology Evidence Search
+# Psychology Evidence Search / 心理学证据检索
 
 Search for coverage and traceability, not an impressive raw count.
 
