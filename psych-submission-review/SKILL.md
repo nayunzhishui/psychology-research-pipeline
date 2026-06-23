@@ -1,9 +1,9 @@
 ---
 name: psych-submission-review
-description: Simulate psychology journal selection, author-guideline compliance, editorial triage, independent domain and methods/statistics review, integrity review, decision letters, revision matrices, response-to-reviewers, and final submission-readiness audits. Use after a complete manuscript, for mock peer review or revision, or when $psychology-research-pipeline delegates review.
+description: Use this skill to prepare psychology manuscript submission packages, simulate editorial and peer review, generate revision matrices, draft response letters, and run final pre-submission audits. 适用于投稿包、模拟审稿和修改计划；不要把模拟审稿意见当作真实期刊反馈。 Use this skill after a complete manuscript, for mock peer review or revision, or when $psychology-research-pipeline delegates review. Do not use this skill for actual journal submission, payments, author-account actions, or editor communications unless the user separately requests and confirms those actions.
 ---
 
-# Psychology Submission and Review Simulation
+# Psychology Submission and Review Simulation / 心理学投稿与审稿模拟
 
 Simulate rigorously but label every artifact as simulated. Never submit, message editors/reviewers, create accounts, pay fees, or upload private files unless separately requested and confirmed where required.
 
@@ -27,7 +27,7 @@ Simulate rigorously but label every artifact as simulated. Never submit, message
 - Separate major validity threats from minor presentation issues.
 - Make every criticism specific, evidence-based, proportionate, and actionable.
 - Do not demand analyses that contradict the estimand or invent unavailable data.
-- Treat correlation/causation, within/between-person conflation, weak measurement invariance, attrition, NSSI distribution, subgroup power, and post hoc analyses as priority checks for longitudinal adolescent research.
+- Treat correlation/causation, within/between-person conflation, weak measurement invariance, attrition, sparse outcome distribution, subgroup power, and post hoc analyses as priority checks for longitudinal adolescent research.
 - Never present simulated reviewer identities, communications, or decisions as genuine.
 
 Write `editorial_decision.md`, `reviewer_report.md`, `revision_matrix.csv`, `final_audit.md`, and optional `response_to_reviewers.md`. “Submission-ready” requires zero unresolved critical issues.
