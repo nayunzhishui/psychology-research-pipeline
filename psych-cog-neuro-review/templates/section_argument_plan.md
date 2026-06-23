@@ -1,0 +1,1 @@
+section_id,section_title,paragraph_id_range,section_question,core_argument,claim_ids,required_sources,contradictory_sources,transition_logic,planned_table_or_figure,writing_status,notes
