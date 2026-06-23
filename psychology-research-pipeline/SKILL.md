@@ -1,9 +1,9 @@
 ---
 name: psychology-research-pipeline
-description: Orchestrate an auditable end-to-end empirical psychology research workflow from workspace intake and question scoping through reporting standards, reproducible literature search, Chrome/Zotero acquisition, attachment verification, screening, evidence synthesis, method design, longitudinal data analysis, manuscript writing, and simulated journal submission and peer review. Use when the user asks to automate a complete psychology literature-to-paper workflow, resume such a project, or coordinate multiple psych-* phase skills in order.
+description: Use this skill to orchestrate an auditable end-to-end empirical psychology research workflow, including project scoping, reporting standards, evidence search, Zotero ingestion, literature screening, evidence synthesis, methods design, data analysis, manuscript writing, and submission review. 适用于心理学实证研究从文献到投稿的完整流程；不要用于单一文件修改、临时问答或无需阶段控制的任务。 Use this skill when the user asks to automate a complete psychology literature-to-paper workflow, resume such a project, or coordinate multiple psych-* phase skills in order. Do not use this skill for isolated edits that should be handled by a single phase skill.
 ---
 
-# Psychology Research Pipeline
+# Psychology Research Pipeline / 心理学研究管道
 
 Run one ordered, stateful workflow. Delegate phase work to the registered `psych-*` skills, but retain responsibility for scope, gates, logs, and final integrity.
 
@@ -14,6 +14,7 @@ Run one ordered, stateful workflow. Delegate phase work to the registered `psych
 - Read `references/tool-routing.md` before search, download, Zotero, Chrome, or Computer Use work.
 - Read `references/project-profile.md` only for the named current project or as an intake example.
 - Read `references/github-provenance.md` only when maintaining this skill package.
+- When a project-specific workflow file exists, such as `投稿规划工作流程.md`, treat it as the project contract. Map skill outputs to that file's directory structure unless the user explicitly requests a different structure. If English run directories and Chinese project directories coexist, keep machine logs and intermediate artifacts in the run directory and put final project deliverables in the project-specific directories.
 
 ## Start or resume a run
 
