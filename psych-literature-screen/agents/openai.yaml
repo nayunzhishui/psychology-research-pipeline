@@ -1,0 +1,4 @@
+interface:
+  display_name: "Psychology Literature Screen"
+  short_description: "Screen papers and build evidence matrices"
+  default_prompt: "Use $psych-literature-screen to screen papers and build a verified evidence matrix."

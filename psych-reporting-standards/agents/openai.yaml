@@ -1,0 +1,4 @@
+interface:
+  display_name: "Psychology Reporting Standards"
+  short_description: "Operationalize reporting and integrity rules"
+  default_prompt: "Use $psych-reporting-standards to create a reporting and integrity plan for this study."

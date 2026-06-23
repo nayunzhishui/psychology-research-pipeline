@@ -1,0 +1,4 @@
+interface:
+  display_name: "Psychology Manuscript Writing"
+  short_description: "Draft and audit empirical manuscripts"
+  default_prompt: "Use $psych-manuscript-write to draft and audit the empirical psychology manuscript."

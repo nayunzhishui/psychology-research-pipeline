@@ -1,0 +1,4 @@
+interface:
+  display_name: "Psychology Research Pipeline"
+  short_description: "Auditable literature-to-publication workflow"
+  default_prompt: "Use $psychology-research-pipeline to run an auditable psychology research-to-publication workflow."

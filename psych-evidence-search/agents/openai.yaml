@@ -1,0 +1,4 @@
+interface:
+  display_name: "Psychology Evidence Search"
+  short_description: "Run reproducible multi-database searches"
+  default_prompt: "Use $psych-evidence-search to build and run a reproducible literature search."

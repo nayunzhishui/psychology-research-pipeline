@@ -1,0 +1,2 @@
+claim_id,claim_text,claim_type,study_ids,support_level,contradictions,verification_status,manuscript_destination
+__REQUIRED__,__REQUIRED__,__REQUIRED__,__REQUIRED__,__REQUIRED__,__REQUIRED__,__REQUIRED__,__REQUIRED__

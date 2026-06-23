@@ -1,0 +1,4 @@
+interface:
+  display_name: "Psychology Project Scope"
+  short_description: "Lock evidence-backed questions and boundaries"
+  default_prompt: "Use $psych-project-scope to inspect this project and lock a feasible research question."

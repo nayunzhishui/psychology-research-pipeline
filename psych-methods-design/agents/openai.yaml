@@ -1,0 +1,4 @@
+interface:
+  display_name: "Psychology Methods Design"
+  short_description: "Freeze defensible methods and analysis plans"
+  default_prompt: "Use $psych-methods-design to design the study methods and preregistered analysis plan."

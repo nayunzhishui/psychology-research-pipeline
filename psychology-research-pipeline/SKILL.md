@@ -76,4 +76,3 @@ Use stable IDs across candidate, Zotero, screening, evidence, citation, and clai
 ## Completion
 
 Finish only when Stage 10 passes or when the user explicitly requested a bounded earlier stage. Return the run directory, completed stages, changed artifacts, verification results, unresolved blockers, and the next useful action. Do not claim “submission-ready” while any critical citation, methods, analysis, ethics, or reporting gate remains open.
-

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Psychology Mini Review"
+  short_description: "Write traceable thematic evidence syntheses"
+  default_prompt: "Use $psych-mini-review to write a source-grounded mini literature review."

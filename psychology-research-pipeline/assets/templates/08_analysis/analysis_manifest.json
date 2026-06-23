@@ -1,0 +1,11 @@
+{
+  "data_files": ["__REQUIRED__"],
+  "file_hashes": {"__REQUIRED__": "__REQUIRED__"},
+  "software": ["__REQUIRED__"],
+  "packages": ["__REQUIRED__"],
+  "code_files": ["__REQUIRED__"],
+  "random_seed": "__REQUIRED__",
+  "analysis_plan": "__REQUIRED__",
+  "deviations": ["__REQUIRED__"],
+  "outputs": ["__REQUIRED__"]
+}
