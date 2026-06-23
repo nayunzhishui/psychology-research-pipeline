@@ -1,8 +1,8 @@
 # psych-cog-neuro-review
 
-这是一个面向心理学与认知神经科学文献综述的 Codex skill 文件夹。它把“项目定标—协议冻结—检索—文献库获取—筛查—提取—质量评价—证据综合—脱稿前写作计划—正文写作—参考文献对应核查”固定成可复用流程。
+这是一个面向心理学与认知神经科学文献综述的 Codex skill 文件夹。它把“项目定标—协议冻结—检索—文献库获取/Zotero 自动入库—筛查—提取—质量评价—证据综合—脱稿前写作计划—正文写作—参考文献对应核查”固定成可复用流程。
 
-该 skill 不是单纯写综述正文，而是复现 `psychology-research-pipeline` 中数据分析与实证论文写作之前的阶段控制思路，并把这些步骤改写为综述写作场景。
+该 skill 不是单纯写综述正文，而是复现 `psychology-research-pipeline` 中数据分析与实证论文写作之前的阶段控制思路，并把这些步骤改写为综述写作场景。Stage 03 现在也复现了 main 仓库的 Zotero ingest 能力：Zotero helper 状态检查、精确 collection、Zotero Connector、RIS/BibTeX 兜底、合法 PDF 获取与校验、去重和 manifest 报告。
 
 ## 默认定位
 
@@ -16,9 +16,9 @@
 
 | 模式 | 适用场景 | 特点 |
 |---|---|---|
-| `lite` | 课程论文、快速选题、早期综述草图 | 允许跳过完整筛查和正式质量评价，但必须记录跳过原因 |
-| `standard` | 研究生综述、中文核心预备稿、普通机制综述 | 默认模式，执行 00–09 全流程，允许单人筛查但必须披露 |
-| `strict` | 系统综述、范围综述、外文 Q1 review 预备稿 | 强化检索、筛查、质量评价、PRISMA-style traceability 和段落来源核查 |
+| `lite` | 课程论文、快速选题、早期综述草图 | 允许跳过完整筛查和正式质量评价；Zotero 导入可选，但必须记录跳过原因 |
+| `standard` | 研究生综述、中文核心预备稿、普通机制综述 | 默认模式，执行 00–09 全流程，允许单人筛查但必须披露；可调用 Zotero 入库子流程 |
+| `strict` | 系统综述、范围综述、外文 Q1 review 预备稿 | 强化检索、筛查、质量评价、PRISMA-style traceability、Zotero/PDF 获取记录和段落来源核查 |
 
 ## 适用范围
 
@@ -34,9 +34,9 @@
 | 阶段 | 目标 | 主要产出 |
 |---|---|---|
 | 00 Scope | 项目定标、运行模式、概念边界、工作区盘点 | `review_scope.md`, `concept_map.md` |
-| 01 Protocol | 报告规范、综述协议、纳排标准冻结 | `reporting_plan.md`, `review_protocol.md` |
+| 01 Protocol | 报告规范、综述协议、纳排标准冻结、Zotero 策略 | `reporting_plan.md`, `review_protocol.md` |
 | 02 Search | 中英文检索式与数据库记录 | `search_strategy.md`, `database_search_log.csv`, `candidate_records.csv` |
-| 03 Acquire | DOI/PMID/CNKI/万方/维普/Zotero/PDF 状态核查 | `library_acquisition_manifest.csv`, `acquisition_report.md` |
+| 03 Acquire | DOI/PMID/CNKI/万方/维普/Zotero/PDF 状态核查；Zotero 自动入库与合法 PDF 校验 | `library_acquisition_manifest.csv`, `zotero_manifest.csv`, `zotero_collection_plan.md`, `acquisition_report.md` |
 | 04 Screen | 标题摘要与全文筛查、PRISMA flow counts | `screening_table.csv`, `prisma_flow_counts.csv` |
 | 05 Extract | 阅读矩阵、神经机制矩阵、质量评价 | `literature_matrix.csv`, `neural_mechanism_matrix.csv`, `quality_appraisal.csv` |
 | 06 Synthesize | 脱稿前证据综合、claim-evidence map | `prewriting_synthesis_plan.md`, `claim_evidence_map.csv` |
@@ -51,11 +51,14 @@ psych-cog-neuro-review/
 ├── SKILL.md
 ├── README.md
 ├── references/
-│   └── review_stage_contracts.md
+│   ├── review_stage_contracts.md
+│   └── zotero_tool_routing.md
 ├── scripts/
 │   └── validate_run.py
 ├── subskills/
-│   └── source-alignment/
+│   ├── source-alignment/
+│   │   └── SKILL.md
+│   └── zotero-ingest/
 │       └── SKILL.md
 ├── topic_packs/
 │   └── rem_emotional_memory/
@@ -71,6 +74,8 @@ psych-cog-neuro-review/
 │   ├── database_search_log.csv
 │   ├── candidate_records.csv
 │   ├── library_acquisition_manifest.csv
+│   ├── zotero_manifest.csv
+│   ├── zotero_collection_plan.md
 │   ├── screening_table.csv
 │   ├── prisma_flow_counts.csv
 │   ├── literature_matrix.csv
@@ -95,7 +100,16 @@ psych-cog-neuro-review/
 
 ## 使用方式
 
-把研究主题、边界、数据库、目标风格和可用文件交给 Codex，并要求它调用 `psych-cog-neuro-review`。如果主题是 REM 与情绪记忆，可以直接复制 `examples/rem_emotional_memory_prompt.md`。
+把研究主题、边界、数据库、目标风格、Zotero collection、record cap、全文获取策略和可用文件交给 Codex，并要求它调用 `psych-cog-neuro-review`。如果主题是 REM 与情绪记忆，可以直接复制 `examples/rem_emotional_memory_prompt.md`。
+
+## Zotero 入库边界
+
+- 只允许 additive workflow：新增题录、添加到指定 collection、给正确 parent item 附加已验证 PDF。
+- 不允许删除、合并、重命名、移动或覆盖已有 Zotero 记录。
+- 不读取、不保存、不请求账号密码、cookie、token、浏览器 profile 或认证材料。
+- 不绕过付费墙、验证码、MFA、IP 限制、数据库下载限制、robots 控制或出版商限制。
+- 遇到登录、验证码、付款、访问权限不确定、异常下载警告时，标记 `manual_needed` 并交给用户。
+- 不把 PDF、Zotero 数据库、下载全文、浏览器数据、凭据或临时文件提交到 GitHub。
 
 ## 核心特点
 
@@ -103,9 +117,9 @@ psych-cog-neuro-review/
 - 中英文文献均纳入。
 - 覆盖 PubMed、Web of Science、PsycINFO、Scopus、CNKI、万方、维普、Google Scholar、Semantic Scholar、Crossref、Zotero。
 - 默认执行 `standard` 全流程；也可用 `lite` 快速试跑或 `strict` 强化为范围/系统综述预备流程。
-- 先完成协议、检索、获取、筛查、提取、质量评价和证据综合，再写综述正文。
+- 先完成协议、检索、Zotero/文献库获取、筛查、提取、质量评价和证据综合，再写综述正文。
 - 支持自定义质量评价，并可按研究类型选择 MMAT、JBI、RoB 2、ROBINS-I、SYRCLE、AMSTAR 2。
-- 强制输出检索记录、筛选表、阅读矩阵、神经机制矩阵、证据映射、综述正文、Word 草稿、参考文献核查表。
+- 强制输出检索记录、筛选表、Zotero manifest、阅读矩阵、神经机制矩阵、证据映射、综述正文、Word 草稿、参考文献核查表。
 - 写完综述后，使用子 skill 生成“综述段落—文献原文/结果段落”的对应矩阵。
 - 明确限制 AI 式空泛表达、虚假引用、过度因果推断和脑区功能泛化。
-- 附带 `scripts/validate_run.py`，用于检查阶段文件、CSV 表头和关键 ID 连贯性。
+- 附带 `scripts/validate_run.py`，用于检查阶段文件、CSV 表头、Zotero manifest 和关键 ID 连贯性。
