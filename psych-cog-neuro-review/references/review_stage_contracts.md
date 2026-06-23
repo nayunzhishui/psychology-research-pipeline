@@ -26,19 +26,31 @@ logs/decisions.md
 
 Artifacts are UTF-8. CSV files use one header row and RFC 4180 quoting. Use `unknown` rather than an invented value. Dates use ISO 8601.
 
+## Run mode contract
+
+The run must declare one mode in `state.json` and `00_scope/review_scope.md`.
+
+| Mode | Gate strength | Minimum expectation |
+|---|---|---|
+| `lite` | exploratory | transparent assumptions, at least two academic sources when searching, no claim of exhaustiveness |
+| `standard` | default | complete 00–09 workflow, reproducible search log, screening reasons, extraction with source locations, paragraph-source audit |
+| `strict` | publication-grade traceability | formal protocol, database-specific search, stronger screening/appraisal, PRISMA-style counts, formal quality tools where applicable |
+
+A run may move from `lite` to `standard` or from `standard` to `strict`. Downgrades require a decision log entry and must be visible in the final handoff.
+
 ## Gate contracts
 
 ### 00 Scope
 
 Required: `workspace_inventory.md`, `review_scope.md`, `concept_map.md`.
 
-Pass when the review type, topic boundary, population/species boundary, developmental/clinical boundary, core constructs, neuroscience methods, seed papers, source availability, and excluded claims are explicit. For REM and emotional memory, REM sleep, NREM sleep, sleep deprivation, sleep quality, emotional memory, fear extinction, encoding, consolidation, retrieval, and reconsolidation must not be collapsed into one vague construct.
+Pass when the run mode, review type, topic boundary, population/species boundary, developmental/clinical boundary, core constructs, neuroscience methods, seed papers, source availability, and excluded claims are explicit. For REM and emotional memory, REM sleep, NREM sleep, sleep deprivation, sleep quality, emotional memory, fear extinction, encoding, consolidation, retrieval, and reconsolidation must not be collapsed into one vague construct.
 
 ### 01 Protocol
 
 Required: `reporting_plan.md`, `review_protocol.md`, `review_stage_gates.md`.
 
-Pass when review type, reporting standard, databases, languages, year range, inclusion/exclusion criteria, full-text handling, extraction fields, quality-appraisal plan, AI-use policy, deviation policy, and target output style are frozen. Do not claim systematic/scoping status unless the protocol supports it.
+Pass when review type, reporting standard, databases, languages, year range, inclusion/exclusion criteria, full-text handling, extraction fields, quality-appraisal plan, AI-use policy, deviation policy, target output style, and run-mode-specific gates are frozen. Do not claim systematic/scoping status unless the protocol supports it.
 
 ### 02 Search
 
@@ -48,13 +60,13 @@ Required: `search_strategy.md`, `database_search_log.csv`, `candidate_records.cs
 
 `candidate_records.csv` minimum columns: `candidate_id,title,authors,year,doi,pmid,cnki_id,source,abstract,landing_url,database,search_id,dedup_status,record_status`.
 
-Pass when bilingual concept blocks exist; database-specific queries are reproducible; exact counts, dates, and filters are logged; at least two appropriate academic databases are used unless justified; citation chasing and Zotero/library searches are separately logged; no convenience source is described as exhaustive.
+Pass when bilingual concept blocks exist; database-specific queries are reproducible; exact counts, dates, and filters are logged; citation chasing and Zotero/library searches are separately logged; no convenience source is described as exhaustive. For `standard` and `strict`, English sources normally include PubMed, Web of Science, PsycINFO, Scopus, Google Scholar, Semantic Scholar, Crossref, Zotero; Chinese sources normally include CNKI, 万方, 维普. Unsearched sources require a reason.
 
 ### 03 Acquire
 
 Required: `library_acquisition_manifest.csv`, `zotero_collection_plan.md`, `acquisition_report.md`.
 
-Manifest minimum columns: `candidate_id,study_id,zotero_item_key,bibtex_key,title,year,doi,pmid,cnki_id,collection,attachment_status,full_text_status,validation_status,dedup_group,source_url,notes`.
+Manifest minimum columns: `candidate_id,study_id,zotero_item_key,bibtex_key,title,year,doi,pmid,cnki_id,wanfang_id,vip_id,collection,attachment_status,full_text_status,validation_status,dedup_group,source_url,notes`.
 
 Allowed attachment/full-text status: `readable_pdf`, `metadata_only`, `abstract_only`, `access_blocked`, `duplicate_skipped`, `failed_validation`, `user_provided`.
 
@@ -72,7 +84,7 @@ Pass when title/abstract and full-text screening decisions have explicit reasons
 
 Required: `literature_matrix.csv`, `neural_mechanism_matrix.csv`, `quality_appraisal.csv`, and reading cards for central studies.
 
-Pass when extracted claims contain source locations; sample, design, measures, task, analysis, main findings, limitations, quality judgments, and neuroscience indicators are recorded where available; primary studies and review/theory papers are separated; null and contradictory findings are retained.
+Pass when extracted claims contain source locations; sample, design, measures, task, analysis, main findings, limitations, quality judgments, and neuroscience indicators are recorded where available; primary studies and review/theory papers are separated; null and contradictory findings are retained. Quality appraisal must record both custom judgment and whether formal tools were used or intentionally not used.
 
 ### 06 Synthesize
 
@@ -86,13 +98,13 @@ Pass when synthesis is thematic/mechanistic rather than one-paper-per-paragraph;
 
 Required: `review_methods_plan.md`, `section_argument_plan.md`, `stage_handoff.md`.
 
-Pass when the review-methods paragraph, section-level argument path, planned figures/tables, paragraph ID policy, allowed/prohibited claims, and citation strategy are frozen before drafting. For non-systematic reviews, the method description must be transparent without overclaiming exhaustiveness.
+Pass when the review-methods paragraph, section-level argument path, planned figures/tables, paragraph ID policy, allowed/prohibited claims, manuscript format, and citation strategy are frozen before drafting. For non-systematic reviews, the method description must be transparent without overclaiming exhaustiveness.
 
 ### 08 Manuscript
 
-Required: `review_outline.md`, `review_draft.md`, `review_draft.docx` when document tooling is available.
+Required: `review_outline.md`, `review_draft.md`, `review_draft.docx` when document tooling is available. `manuscript_format_check.md` is required when the run asks for Word output.
 
-Pass when every empirical or definitional claim maps to `claim_id` or a source ID; each paragraph has a stable ID; section logic follows `section_argument_plan.md`; causal and mechanism language is calibrated; AI-like filler phrases are removed.
+Pass when every empirical, theoretical, methodological, or definitional judgment maps to `claim_id` or a source ID; each paragraph has a stable ID; section logic follows `section_argument_plan.md`; manuscript format follows Chinese-core or Q1-review plan; causal and mechanism language is calibrated; AI-like filler phrases are removed.
 
 ### 09 Audit
 
@@ -109,6 +121,16 @@ Pass when every claim-bearing paragraph is mapped to source passages or marked u
 - `claim_id`: connects synthesis, manuscript, and paragraph-source audit.
 - `paragraph_id`: stable manuscript paragraph ID, e.g., `P001`.
 - `zotero_item_key` and `bibtex_key` are different; store both when used.
+
+## Validation contract
+
+When local execution is available, run:
+
+```bash
+python psych-cog-neuro-review/scripts/validate_run.py <path-to-cog_neuro_review_run>
+```
+
+Validation checks are supportive, not a replacement for scholarly judgment. A passing script does not prove the review is correct; it only confirms that required files, headers, and key IDs are structurally coherent.
 
 ## Handoff rules
 
