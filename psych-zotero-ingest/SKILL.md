@@ -1,9 +1,9 @@
 ---
 name: psych-zotero-ingest
-description: Use the installed Chrome, Zotero, literature-to-Zotero, and Computer Use workflows to deduplicate candidates, download authorized papers, validate PDFs, save metadata and attachments to an exact Zotero collection, verify every write, and report exceptions. Use when populating a psychology project library or when $psychology-research-pipeline delegates acquisition.
+description: Use this skill to import literature metadata into Zotero, use authenticated browser sessions for legally accessible scholarly PDFs, trigger Zotero Connector, attach verified PDFs, deduplicate records, and report missing full text. 适用于 Zotero 文献入库、合法全文获取和 PDF 匹配；不要用于绕过付费墙、验证码、数据库限制、cookie 提取或盗版全文获取。 Use this skill when populating a psychology project library or when $psychology-research-pipeline delegates acquisition. Do not use this skill for unauthorized access, high-frequency unattended bulk downloading, or modifying existing Zotero records.
 ---
 
-# Psychology Zotero Ingest
+# Psychology Zotero Ingest / Zotero 文献入库
 
 Run an additive, bounded acquisition workflow. Read `$CODEX_HOME/skills/psychology-research-pipeline/references/tool-routing.md` and follow the current installed tool skills.
 
@@ -21,6 +21,16 @@ Run an additive, bounded acquisition workflow. Read `$CODEX_HOME/skills/psycholo
 4. Download only authorized scholarly files. Validate signature, size, first-page readability, page count, and title/DOI agreement before import.
 5. Prefer Zotero Connector into the exact collection. Fallback to RIS/BibTeX import, then use Computer Use in Zotero Desktop to attach the verified PDF to its parent.
 6. Verify title, creators, year, DOI, collection, parent key, attachment child key, and readable full text. Only then mark `complete` and remove temporary files.
+
+## Additional hard boundaries
+
+- Do not read, save, enter, or request campus account, database account, or publisher-account passwords.
+- Do not extract, copy, save, export, or reuse cookies, session storage, local storage, browser profiles, saved passwords, tokens, or authentication artifacts.
+- Do not use unauthorized full-text sources, shadow libraries, piracy mirrors, PDF bots, leaked credentials, or non-authorized repository copies.
+- Do not bypass CAPTCHA, MFA, IP limits, database download limits, robots controls, publisher restrictions, or paywalls.
+- Stop the item and record `manual_needed` when CAPTCHA, secondary authentication, abnormal-download warnings, account-risk warnings, license ambiguity, payment prompts, or access uncertainty appears.
+- Do not run unattended high-frequency bulk acquisition. Process bounded batches under the configured record cap and stop when the cap or warning condition is reached.
+- Do not commit PDFs, Zotero databases, downloaded full text, browser artifacts, credentials, API keys, tokens, or cookies to GitHub.
 
 ## Boundaries and output
 
