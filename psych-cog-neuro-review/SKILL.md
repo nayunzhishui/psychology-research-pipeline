@@ -1,6 +1,6 @@
 ---
 name: psych-cog-neuro-review
-description: Use this skill to run an auditable Chinese-first psychology and cognitive neuroscience review pipeline, including scope definition, reporting standards, protocol freeze, bilingual search, record acquisition, Zotero/library verification, screening, quality appraisal, evidence extraction, pre-writing synthesis, manuscript drafting, Word/CSV/BibTeX/RIS outputs, and paragraph-to-source alignment audit. 适用于 REM 与情绪记忆等认知神经科学方向综述；不要用于未检索、未筛选、无来源支持的自由写作。
+description: Use this skill to run an auditable Chinese-first psychology and cognitive neuroscience review pipeline, including run-mode selection, scope definition, reporting standards, protocol freeze, bilingual search, record acquisition, Zotero/library verification, screening, quality appraisal, evidence extraction, pre-writing synthesis, manuscript drafting, Word/CSV/BibTeX/RIS outputs, and paragraph-to-source alignment audit. 默认定位为混合型机制综述，可按需要升级为范围综述或系统综述；适用于 REM 与情绪记忆等认知神经科学方向综述。不要用于未检索、未筛选、无来源支持的自由写作。
 ---
 
 # Cognitive Neuroscience Psychology Review / 认知神经科学心理学综述
@@ -11,12 +11,35 @@ Use this skill to produce reusable, source-backed literature reviews in psycholo
 
 This skill mirrors the upstream psychology-research-pipeline logic before empirical data analysis and empirical manuscript writing: scope → standards/protocol → search → acquire/library → screen → extract/appraise → synthesize/prewrite → write → audit. It adapts those steps for a review article rather than an empirical dataset.
 
+## Default positioning
+
+- Default review type: `mixed mechanism review` / 混合型机制综述。
+- Upgrade path: when the user explicitly needs transparent mapping of a field, upgrade to `scoping review`; when the user explicitly freezes exhaustive search, dual screening, and risk-of-bias logic, upgrade to `systematic review`.
+- Default run mode: `standard`.
+- Default topic pack: none, but use `topic_packs/rem_emotional_memory/` whenever the topic involves REM sleep, emotional memory, fear conditioning, extinction, memory consolidation, reconsolidation, dream affect, PSG, or sleep-dependent affective processing.
+- Default output style: Chinese-core-journal review draft plus English Q1-review structural compatibility.
+
+## Run modes / 运行模式
+
+Read `templates/run_mode_policy.md` before starting. Choose one mode and record it in `state.json`, `00_scope/review_scope.md`, and `01_protocol/review_protocol.md`.
+
+| Mode | Use case | Required minimum | Typical output |
+|---|---|---|---|
+| `lite` | 快速综述、课程论文、早期选题、初步文献图谱 | 00, 02, 05, 06, 07, optional 08 | scope, search sketch, initial matrices, outline |
+| `standard` | 研究生综述、中文核心预备稿、普通机制综述 | 00–09 all stages, but single-reviewer screening allowed if disclosed | full auditable review run, Word draft, source alignment |
+| `strict` | 系统综述、范围综述、外文 Q1 review 预备稿、高风险引用核查 | 00–09 all stages, formal protocol, stricter search/screening/appraisal gates | PRISMA-style traceability, formal quality tools, complete audit |
+
+Do not silently downgrade a user-requested `strict` run. If access or time makes `strict` impossible, mark blockers and continue only with an explicit logged downgrade.
+
 ## Load only what is needed
 
 - Read `references/review_stage_contracts.md` before starting or resuming a run.
+- Read `templates/run_mode_policy.md` before choosing how strict the workflow should be.
 - Read `templates/project_intake.md` for topic scoping.
 - Read `templates/review_protocol.md` before any database search or screening.
 - Read `templates/search_strategy.md` before database-specific query construction.
+- For REM/emotional memory topics, read all files under `topic_packs/rem_emotional_memory/` before search and extraction.
+- Read `templates/manuscript_format_spec.md` before drafting Word/Markdown outputs.
 - Read `templates/writing_style_rules.md` before drafting prose.
 - Read `subskills/source-alignment/SKILL.md` only after a complete draft exists.
 - Do not load all templates into context unless the current stage requires them.
@@ -27,14 +50,16 @@ This skill mirrors the upstream psychology-research-pipeline logic before empiri
 - 文献题名、量表名、实验范式、脑区、神经网络、统计指标、数据库字段保留英文原文。
 - 首次出现的重要术语使用“中文解释 + English term”，例如“快速眼动睡眠（rapid eye movement sleep, REM sleep）”。
 - 正文默认先产出中文综述草稿；如用户指定，可追加英文 Q1 review preparatory draft。
+- 中文文献与英文文献均可纳入；中文数据库默认包含 CNKI、万方、维普。
 
 ## Required inputs
 
-- research topic and target review type: narrative review, theoretical review, scoping review, systematic review, mechanism review, measurement review, or mixed review
+- run mode: `lite`, `standard`, or `strict`; default `standard`
+- research topic and target review type: default mixed mechanism review; optional narrative review, theoretical review, scoping review, systematic review, measurement review, or meta-analysis-prep review
 - population, age range, clinical/non-clinical boundary, human/animal/computational boundary
 - target language: Chinese, English, or bilingual
 - target style: 中文核心综述, 外文 Q1 review, thesis literature review, proposal review
-- database access plan: PubMed, Web of Science, PsycINFO, Scopus, CNKI, Google Scholar, Semantic Scholar, Crossref, Zotero local library
+- database access plan: PubMed, Web of Science, PsycINFO, Scopus, CNKI, 万方, 维普, Google Scholar, Semantic Scholar, Crossref, Zotero local library
 - available source files: PDF, RIS, BibTeX, CSV, Word, Zotero export, notes
 - whether meta-analysis or quantitative evidence summary is planned; default is no formal meta-analysis unless user explicitly asks
 
@@ -88,7 +113,8 @@ Create or update one run directory. Keep machine-readable files in CSV/Markdown 
 ├── 08_manuscript/
 │   ├── review_outline.md
 │   ├── review_draft.md
-│   └── review_draft.docx
+│   ├── review_draft.docx
+│   └── manuscript_format_check.md
 └── 09_audit/
     ├── paragraph_source_alignment_matrix.csv
     ├── reference_consistency_check.csv
@@ -99,16 +125,16 @@ Create or update one run directory. Keep machine-readable files in CSV/Markdown 
 
 | Stage | Purpose | Required result |
 |---|---|---|
-| 00 Scope / 项目定标 | define review type, constructs, populations, mechanisms, boundaries, seed literature, and feasibility | `review_scope.md`, `concept_map.md` |
-| 01 Protocol / 规范与协议 | choose PRISMA/PRISMA-S/PRISMA-ScR or narrative-review standard as applicable; freeze RQ, inclusion/exclusion, databases, search bounds, extraction plan, AI-use policy | `reporting_plan.md`, `review_protocol.md` |
+| 00 Scope / 项目定标 | define run mode, review type, constructs, populations, mechanisms, boundaries, seed literature, and feasibility | `review_scope.md`, `concept_map.md` |
+| 01 Protocol / 规范与协议 | choose PRISMA/PRISMA-S/PRISMA-ScR or transparent narrative/mechanism-review standard; freeze RQ, inclusion/exclusion, databases, search bounds, extraction plan, AI-use policy | `reporting_plan.md`, `review_protocol.md` |
 | 02 Search / 检索 | build bilingual concept blocks and database-specific queries; record exact dates/counts/filters | `search_strategy.md`, `database_search_log.csv`, `candidate_records.csv` |
 | 03 Acquire / 获取与文献库 | verify metadata, DOI/PMID/CNKI/Zotero keys, PDF availability, duplicates, attachments, and access states | `library_acquisition_manifest.csv`, `acquisition_report.md` |
 | 04 Screen / 筛查 | title-abstract and full-text screening with explicit reasons; PRISMA-style flow counts when relevant | `screening_table.csv`, `prisma_flow_counts.csv` |
-| 05 Extract / 提取与质量评价 | extract study, sample, method, result, neural mechanism, and source-location fields; appraise quality | `literature_matrix.csv`, `neural_mechanism_matrix.csv`, `quality_appraisal.csv` |
+| 05 Extract / 提取与质量评价 | extract study, sample, method, result, neural mechanism, and source-location fields; appraise quality with custom plus optional formal tools | `literature_matrix.csv`, `neural_mechanism_matrix.csv`, `quality_appraisal.csv` |
 | 06 Synthesize / 证据综合 | produce thematic synthesis, contradictions, null findings, gaps, and claim-evidence mapping before prose | `prewriting_synthesis_plan.md`, `claim_evidence_map.csv`, `evidence_gap_register.csv` |
-| 07 Prewrite / 脱稿前计划 | freeze section logic, review-methods paragraph, argument hierarchy, figures/tables, and allowed claims before drafting | `review_methods_plan.md`, `section_argument_plan.md`, `stage_handoff.md` |
-| 08 Manuscript / 正文写作 | draft review in Chinese-first publishable style and export Word when possible | `review_draft.md`, `review_draft.docx` |
-| 09 Audit / 源文献对应核查 | map each paragraph/claim to source passages and audit references | `paragraph_source_alignment_matrix.csv`, `reference_consistency_check.csv` |
+| 07 Prewrite / 脱稿前计划 | freeze section logic, review-methods paragraph, argument hierarchy, figures/tables, manuscript format, and allowed claims before drafting | `review_methods_plan.md`, `section_argument_plan.md`, `stage_handoff.md` |
+| 08 Manuscript / 正文写作 | draft review in Chinese-first publishable style, keep Q1-review structural compatibility, and export Word when possible | `review_draft.md`, `review_draft.docx` |
+| 09 Audit / 源文献对应核查 | map each claim-bearing paragraph to source passages and audit references | `paragraph_source_alignment_matrix.csv`, `reference_consistency_check.csv` |
 
 Do not reorder stages. Loop within the current stage when a gate fails. Reopen an earlier stage only with a logged reason and a dependency-impact note.
 
@@ -120,7 +146,7 @@ For every stage:
 2. Append a short event to `logs/decisions.md` with inputs, action, outputs, decisions, unresolved items, and next gate.
 3. Save only into the current stage directory unless updating `state.json`, `manifest.json`, or the log.
 4. Separate evidence, inference, recommendation, and unresolved items.
-5. Run the stage gate from `references/review_stage_contracts.md` manually or with the user's validation scripts if available.
+5. Run the stage gate from `references/review_stage_contracts.md` manually and, when available, with `scripts/validate_run.py`.
 6. Fix failures in the same stage. Never mark a failed gate complete.
 7. After a pass, write a concise handoff stating what the next stage must not silently change.
 
@@ -128,9 +154,9 @@ For every stage:
 
 ### 00 Scope / 项目定标
 
-Use `templates/project_intake.md`. Clarify review type, target journal level, topic boundaries, population, developmental stage, species boundary, exposure/task/process, outcomes, neuroscience methods, and expected contribution.
+Use `templates/project_intake.md`. Clarify run mode, review type, target journal level, topic boundaries, population, developmental stage, species boundary, exposure/task/process, outcomes, neuroscience methods, and expected contribution.
 
-For REM and emotional memory, explicitly separate:
+For REM and emotional memory, explicitly load `topic_packs/rem_emotional_memory/` and separate:
 
 - REM sleep, NREM sleep, total sleep time, sleep deprivation, nap studies, and sleep quality
 - emotional memory, fear conditioning, extinction, reconsolidation, affective reactivity, and general memory consolidation
@@ -139,24 +165,26 @@ For REM and emotional memory, explicitly separate:
 
 ### 01 Protocol / 规范与协议
 
-Use `templates/review_protocol.md`. Select the governing standard based on review type:
+Use `templates/review_protocol.md`. Select the governing standard based on review type and run mode:
 
-- systematic review or meta-analysis: PRISMA 2020 plus PRISMA-S for search reporting
-- scoping review: PRISMA-ScR plus PRISMA-S where search transparency matters
+- systematic review or meta-analysis: PRISMA 2020 plus PRISMA-S for search reporting; normally requires `strict`
+- scoping review: PRISMA-ScR plus PRISMA-S where search transparency matters; normally requires `strict` or explicit `standard` compromise
 - narrative/theoretical/mechanism review: use a transparent protocol adapted from PRISMA concepts without falsely calling the review systematic
-- Chinese core-style review: still freeze scope, search range, inclusion/exclusion, evidence-extraction fields, and citation-audit policy
+- Chinese core-style review: freeze scope, search range, inclusion/exclusion, evidence-extraction fields, source-audit policy, and manuscript format
 
-Do not claim preregistration, PROSPERO registration, dual screening, or exhaustive search unless evidence exists.
+Quality appraisal defaults to a custom psychology/cognitive-neuroscience/sleep-evidence framework plus optional formal tools. Use formal tools when study type and run mode require them: MMAT, JBI checklists, RoB 2, ROBINS-I, SYRCLE, or AMSTAR 2.
+
+Do not claim preregistration, PROSPERO registration, dual screening, exhaustive search, formal risk-of-bias assessment, or systematic-review status unless evidence exists.
 
 ### 02 Search / 检索
 
 Use `templates/search_strategy.md` and `templates/database_search_log.csv`. Build bilingual concept blocks and database-specific syntax. Do not paste one query everywhere. Record exact database, platform, query, filters, run date, result count, export path, and notes.
 
-Required sources unless access blocks them: PubMed, Web of Science, PsycINFO, Scopus, CNKI, Google Scholar, Semantic Scholar, Crossref, Zotero local library. When a source is not searched, log the reason.
+Required sources for `standard` and `strict` unless access blocks them: PubMed, Web of Science, PsycINFO, Scopus, CNKI, 万方, 维普, Google Scholar, Semantic Scholar, Crossref, Zotero local library. When a source is not searched, log the reason. For `lite`, at least two academic databases plus Zotero/library search are required unless the user only wants a scoping sketch.
 
 ### 03 Acquire / 获取与文献库
 
-Use `templates/library_acquisition_manifest.csv` and `templates/zotero_tags.md`. Verify title, authors, year, journal/source, DOI, PMID, CNKI identifier, Zotero item key, attachment status, and duplicate group. Full text unavailable is an access state, not an exclusion reason.
+Use `templates/library_acquisition_manifest.csv` and `templates/zotero_tags.md`. Verify title, authors, year, journal/source, DOI, PMID, CNKI/Wanfang/VIP identifier when available, Zotero item key, attachment status, and duplicate group. Full text unavailable is an access state, not an exclusion reason.
 
 Do not automate paywall bypass, CAPTCHA, institutional login, or unauthorized scraping. The user handles access decisions.
 
@@ -166,7 +194,7 @@ Use `templates/screening_table.csv` and `templates/prisma_flow_counts.csv`. Appl
 
 ### 05 Extract / 提取与质量评价
 
-Use `templates/literature_matrix.csv`, `templates/neural_mechanism_matrix.csv`, `templates/quality_appraisal.csv`, and `templates/reading_card.md`. Extract only claims that can be located in the full text. Store page, section, table, figure, result paragraph, or short quote fragment under `evidence_location`.
+Use `templates/literature_matrix.csv`, `templates/neural_mechanism_matrix.csv`, `templates/quality_appraisal.csv`, and `templates/reading_card.md`. Extract only claims that can be located in the full text or traceable record. Store page, section, table, figure, result paragraph, or short quote fragment under `evidence_location`.
 
 ### 06 Synthesize / 证据综合
 
@@ -174,18 +202,19 @@ Use `templates/prewriting_synthesis_plan.md`, `templates/claim_evidence_map.csv`
 
 ### 07 Prewrite / 脱稿前计划
 
-Use `templates/review_methods_plan.md`, `templates/review_outline.md`, and `templates/stage_handoff.md`. Before prose writing, freeze:
+Use `templates/review_methods_plan.md`, `templates/review_outline.md`, `templates/manuscript_format_spec.md`, and `templates/stage_handoff.md`. Before prose writing, freeze:
 
 - section-level argument path
 - which claims are allowed, tentative, prohibited, or background-only
 - planned figures/tables, including mechanisms and evidence maps
 - how review methods will be described
+- whether manuscript format is Chinese core-style, Q1 review-style, or dual-track
 - how REM/sleep evidence will be separated from general memory and emotion-regulation evidence
 - how source-alignment paragraph IDs will be assigned
 
 ### 08 Manuscript / 正文写作
 
-Use `templates/review_outline.md` and `templates/writing_style_rules.md`. Produce `review_draft.md` first, then export `review_draft.docx` when tooling is available. Every empirical or definitional claim must be traceable to a `claim_id` and source record.
+Use `templates/review_outline.md`, `templates/manuscript_format_spec.md`, and `templates/writing_style_rules.md`. Produce `review_draft.md` first, then export `review_draft.docx` when tooling is available. Every empirical, theoretical, methodological, or definitional judgment must be traceable to a `claim_id` and source record. Background transitions can cite broader reviews, but primary empirical claims should use primary sources when available.
 
 ### 09 Audit / 源文献对应核查
 
@@ -223,6 +252,7 @@ For each eligible study, extract fields when available:
 
 Before finishing, verify:
 
+- `state.json` records run mode, review type, target format, current stage, and gate status.
 - `review_scope.md` contains explicit boundaries and assumptions.
 - `review_protocol.md` freezes review type, RQ, search bounds, inclusion/exclusion, extraction fields, quality-appraisal plan, and deviation policy.
 - Every database query and filter is logged.
@@ -230,12 +260,13 @@ Before finishing, verify:
 - Screening exclusions have reasons.
 - Every included study has at least one source-location field before being used for a claim.
 - Each major claim appears in `claim_evidence_map.csv`.
-- Section logic and allowed/prohibited claims are frozen before drafting.
+- Section logic, manuscript format, and allowed/prohibited claims are frozen before drafting.
 - Each paragraph in `review_draft.md` has a stable ID such as `P001`.
-- `paragraph_source_alignment_matrix.csv` links every claim paragraph to source passages or marks it as unsupported.
+- `paragraph_source_alignment_matrix.csv` links every claim-bearing paragraph to source passages or marks it as unsupported.
 - `unsupported_or_overstated_claims.md` is empty or contains a revision plan.
-- Reference metadata are checked against DOI/PMID/Crossref/PubMed/CNKI/Zotero where available.
+- Reference metadata are checked against DOI/PMID/Crossref/PubMed/CNKI/万方/维普/Zotero where available.
+- `scripts/validate_run.py` passes where local execution is available, or its unrun status is logged with reason.
 
 ## Completion
 
-Return the run directory, completed stages, changed artifacts, unresolved evidence gaps, unsupported claims removed or revised, and the next action. Do not claim the review is submission-ready while any protocol, search, screening, extraction, synthesis, source-alignment, reference, or scope gate remains open.
+Return the run directory, run mode, completed stages, changed artifacts, unresolved evidence gaps, unsupported claims removed or revised, validation status, and the next action. Do not claim the review is submission-ready while any protocol, search, screening, extraction, synthesis, source-alignment, reference, or scope gate remains open.
