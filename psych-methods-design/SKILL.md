@@ -1,9 +1,9 @@
 ---
 name: psych-methods-design
-description: Convert a psychology research question, evidence synthesis, instruments, and observed data structure into a defensible study method and frozen statistical analysis plan, including psychometrics, missingness, longitudinal modeling, mediation, sex/gender comparison, diagnostics, sensitivity analyses, power, and reproducibility. Use before outcome analysis or when $psychology-research-pipeline delegates methods.
+description: Use this skill to translate psychology research questions, evidence synthesis, measures, and dataset structure into a frozen methods plan, analysis plan, estimands, model sequence, missing-data plan, and robustness strategy. 适用于方法设计和统计分析计划冻结；不要用于执行数据分析或改写结果。 Use this skill before outcome analysis or when $psychology-research-pipeline delegates methods. Do not use this skill to choose methods after seeing results or to justify post hoc model shopping.
 ---
 
-# Psychology Methods Design
+# Psychology Methods Design / 心理学方法设计
 
 Design for the estimand and observed data, not for a preferred significant result.
 
