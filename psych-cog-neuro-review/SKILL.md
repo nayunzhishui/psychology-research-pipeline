@@ -1,6 +1,6 @@
 ---
 name: psych-cog-neuro-review
-description: Use this skill to run an auditable Chinese-first psychology and cognitive neuroscience review pipeline, including run-mode selection, scope definition, reporting standards, protocol freeze, bilingual search, record acquisition, Zotero/library verification, screening, quality appraisal, evidence extraction, pre-writing synthesis, manuscript drafting, Word/CSV/BibTeX/RIS outputs, and paragraph-to-source alignment audit. 默认定位为混合型机制综述，可按需要升级为范围综述或系统综述；适用于 REM 与情绪记忆等认知神经科学方向综述。不要用于未检索、未筛选、无来源支持的自由写作。
+description: Use this skill to run an auditable Chinese-first psychology and cognitive neuroscience review pipeline, including run-mode selection, scope definition, reporting standards, protocol freeze, bilingual search, record acquisition, Zotero/library verification, Zotero Connector import, legal full-text handling, screening, quality appraisal, evidence extraction, pre-writing synthesis, manuscript drafting, Word/CSV/BibTeX/RIS outputs, and paragraph-to-source alignment audit. 默认定位为混合型机制综述，可按需要升级为范围综述或系统综述；适用于 REM 与情绪记忆等认知神经科学方向综述。不要用于未检索、未筛选、无来源支持的自由写作，也不要用于绕过付费墙、验证码、数据库限制或非授权全文获取。
 ---
 
 # Cognitive Neuroscience Psychology Review / 认知神经科学心理学综述
@@ -17,6 +17,7 @@ This skill mirrors the upstream psychology-research-pipeline logic before empiri
 - Upgrade path: when the user explicitly needs transparent mapping of a field, upgrade to `scoping review`; when the user explicitly freezes exhaustive search, dual screening, and risk-of-bias logic, upgrade to `systematic review`.
 - Default run mode: `standard`.
 - Default topic pack: none, but use `topic_packs/rem_emotional_memory/` whenever the topic involves REM sleep, emotional memory, fear conditioning, extinction, memory consolidation, reconsolidation, dream affect, PSG, or sleep-dependent affective processing.
+- Default library workflow: use the embedded `subskills/zotero-ingest/SKILL.md` during Stage 03 when the user asks Codex to populate or verify a Zotero collection.
 - Default output style: Chinese-core-journal review draft plus English Q1-review structural compatibility.
 
 ## Run modes / 运行模式
@@ -25,9 +26,9 @@ Read `templates/run_mode_policy.md` before starting. Choose one mode and record 
 
 | Mode | Use case | Required minimum | Typical output |
 |---|---|---|---|
-| `lite` | 快速综述、课程论文、早期选题、初步文献图谱 | 00, 02, 05, 06, 07, optional 08 | scope, search sketch, initial matrices, outline |
-| `standard` | 研究生综述、中文核心预备稿、普通机制综述 | 00–09 all stages, but single-reviewer screening allowed if disclosed | full auditable review run, Word draft, source alignment |
-| `strict` | 系统综述、范围综述、外文 Q1 review 预备稿、高风险引用核查 | 00–09 all stages, formal protocol, stricter search/screening/appraisal gates | PRISMA-style traceability, formal quality tools, complete audit |
+| `lite` | 快速综述、课程论文、早期选题、初步文献图谱 | 00, 02, 05, 06, 07, optional 08; Zotero import optional | scope, search sketch, initial matrices, outline |
+| `standard` | 研究生综述、中文核心预备稿、普通机制综述 | 00–09 all stages, single-reviewer screening allowed if disclosed; Zotero collection verification expected when available | full auditable review run, Word draft, source alignment |
+| `strict` | 系统综述、范围综述、外文 Q1 review 预备稿、高风险引用核查 | 00–09 all stages, formal protocol, stricter search/screening/appraisal gates; bounded Zotero/PDF acquisition manifest required | PRISMA-style traceability, formal quality tools, complete audit |
 
 Do not silently downgrade a user-requested `strict` run. If access or time makes `strict` impossible, mark blockers and continue only with an explicit logged downgrade.
 
@@ -38,6 +39,7 @@ Do not silently downgrade a user-requested `strict` run. If access or time makes
 - Read `templates/project_intake.md` for topic scoping.
 - Read `templates/review_protocol.md` before any database search or screening.
 - Read `templates/search_strategy.md` before database-specific query construction.
+- Read `references/zotero_tool_routing.md` and `subskills/zotero-ingest/SKILL.md` only during Stage 03 when Zotero import, PDF attachment, duplicate checking, or collection verification is needed.
 - For REM/emotional memory topics, read all files under `topic_packs/rem_emotional_memory/` before search and extraction.
 - Read `templates/manuscript_format_spec.md` before drafting Word/Markdown outputs.
 - Read `templates/writing_style_rules.md` before drafting prose.
@@ -60,10 +62,11 @@ Do not silently downgrade a user-requested `strict` run. If access or time makes
 - target language: Chinese, English, or bilingual
 - target style: 中文核心综述, 外文 Q1 review, thesis literature review, proposal review
 - database access plan: PubMed, Web of Science, PsycINFO, Scopus, CNKI, 万方, 维普, Google Scholar, Semantic Scholar, Crossref, Zotero local library
+- Zotero plan when acquisition is requested: target collection name/key, record cap, whether to import metadata only or verified PDFs, and user authorization for additive writes to the named collection
 - available source files: PDF, RIS, BibTeX, CSV, Word, Zotero export, notes
 - whether meta-analysis or quantitative evidence summary is planned; default is no formal meta-analysis unless user explicitly asks
 
-When inputs are incomplete, continue with documented assumptions and mark them in `00_scope/review_scope.md`; do not silently narrow the review.
+When inputs are incomplete, continue with documented assumptions and mark them in `00_scope/review_scope.md`; do not silently narrow the review. For Zotero acquisition, do not proceed without a named collection, record cap, full-text policy, and user authorization for additive import.
 
 ## Run structure
 
@@ -90,6 +93,7 @@ Create or update one run directory. Keep machine-readable files in CSV/Markdown 
 │   └── candidate_records.bib_or_ris_note.md
 ├── 03_library/
 │   ├── library_acquisition_manifest.csv
+│   ├── zotero_manifest.csv
 │   ├── zotero_collection_plan.md
 │   └── acquisition_report.md
 ├── 04_screening/
@@ -126,9 +130,9 @@ Create or update one run directory. Keep machine-readable files in CSV/Markdown 
 | Stage | Purpose | Required result |
 |---|---|---|
 | 00 Scope / 项目定标 | define run mode, review type, constructs, populations, mechanisms, boundaries, seed literature, and feasibility | `review_scope.md`, `concept_map.md` |
-| 01 Protocol / 规范与协议 | choose PRISMA/PRISMA-S/PRISMA-ScR or transparent narrative/mechanism-review standard; freeze RQ, inclusion/exclusion, databases, search bounds, extraction plan, AI-use policy | `reporting_plan.md`, `review_protocol.md` |
+| 01 Protocol / 规范与协议 | choose PRISMA/PRISMA-S/PRISMA-ScR or transparent narrative/mechanism-review standard; freeze RQ, inclusion/exclusion, databases, search bounds, extraction plan, AI-use policy, Zotero policy | `reporting_plan.md`, `review_protocol.md` |
 | 02 Search / 检索 | build bilingual concept blocks and database-specific queries; record exact dates/counts/filters | `search_strategy.md`, `database_search_log.csv`, `candidate_records.csv` |
-| 03 Acquire / 获取与文献库 | verify metadata, DOI/PMID/CNKI/Zotero keys, PDF availability, duplicates, attachments, and access states | `library_acquisition_manifest.csv`, `acquisition_report.md` |
+| 03 Acquire / 获取与文献库 | verify metadata, DOI/PMID/CNKI/Wanfang/VIP/Zotero keys, deduplicate records, use Zotero Connector/helper when authorized, validate legal PDFs, and record access states | `library_acquisition_manifest.csv`, `zotero_manifest.csv`, `acquisition_report.md` |
 | 04 Screen / 筛查 | title-abstract and full-text screening with explicit reasons; PRISMA-style flow counts when relevant | `screening_table.csv`, `prisma_flow_counts.csv` |
 | 05 Extract / 提取与质量评价 | extract study, sample, method, result, neural mechanism, and source-location fields; appraise quality with custom plus optional formal tools | `literature_matrix.csv`, `neural_mechanism_matrix.csv`, `quality_appraisal.csv` |
 | 06 Synthesize / 证据综合 | produce thematic synthesis, contradictions, null findings, gaps, and claim-evidence mapping before prose | `prewriting_synthesis_plan.md`, `claim_evidence_map.csv`, `evidence_gap_register.csv` |
@@ -154,7 +158,7 @@ For every stage:
 
 ### 00 Scope / 项目定标
 
-Use `templates/project_intake.md`. Clarify run mode, review type, target journal level, topic boundaries, population, developmental stage, species boundary, exposure/task/process, outcomes, neuroscience methods, and expected contribution.
+Use `templates/project_intake.md`. Clarify run mode, review type, target journal level, topic boundaries, population, developmental stage, species boundary, exposure/task/process, outcomes, neuroscience methods, expected contribution, and whether the run should populate a Zotero collection.
 
 For REM and emotional memory, explicitly load `topic_packs/rem_emotional_memory/` and separate:
 
@@ -170,7 +174,7 @@ Use `templates/review_protocol.md`. Select the governing standard based on revie
 - systematic review or meta-analysis: PRISMA 2020 plus PRISMA-S for search reporting; normally requires `strict`
 - scoping review: PRISMA-ScR plus PRISMA-S where search transparency matters; normally requires `strict` or explicit `standard` compromise
 - narrative/theoretical/mechanism review: use a transparent protocol adapted from PRISMA concepts without falsely calling the review systematic
-- Chinese core-style review: freeze scope, search range, inclusion/exclusion, evidence-extraction fields, source-audit policy, and manuscript format
+- Chinese core-style review: freeze scope, search range, inclusion/exclusion, evidence-extraction fields, source-audit policy, manuscript format, and Zotero/library handling policy
 
 Quality appraisal defaults to a custom psychology/cognitive-neuroscience/sleep-evidence framework plus optional formal tools. Use formal tools when study type and run mode require them: MMAT, JBI checklists, RoB 2, ROBINS-I, SYRCLE, or AMSTAR 2.
 
@@ -184,9 +188,22 @@ Required sources for `standard` and `strict` unless access blocks them: PubMed, 
 
 ### 03 Acquire / 获取与文献库
 
-Use `templates/library_acquisition_manifest.csv` and `templates/zotero_tags.md`. Verify title, authors, year, journal/source, DOI, PMID, CNKI/Wanfang/VIP identifier when available, Zotero item key, attachment status, and duplicate group. Full text unavailable is an access state, not an exclusion reason.
+Use `references/zotero_tool_routing.md`, `subskills/zotero-ingest/SKILL.md`, `templates/zotero_manifest.csv`, `templates/library_acquisition_manifest.csv`, `templates/zotero_collection_plan.md`, and `templates/zotero_tags.md`.
 
-Do not automate paywall bypass, CAPTCHA, institutional login, or unauthorized scraping. The user handles access decisions.
+This stage must reproduce the main repository's Zotero ingest behavior when Zotero import is requested:
+
+1. Require candidate IDs, target Zotero collection, record cap, full-text policy, and standing additive write authorization.
+2. Run the Zotero helper `status --json` where available; resolve the exact collection key/name and record it in `zotero_collection_plan.md`.
+3. Search Zotero by DOI, PMID, then normalized title + first author + year before importing. Never delete, merge, rename, move, or overwrite existing Zotero records.
+4. If a matching parent item and readable PDF already exist, mark `duplicate-skipped` / `duplicate_skipped` and do not re-import.
+5. If metadata exists without the requested PDF, acquire only the missing authorized attachment.
+6. Use the user's existing logged-in browser session only for verified article pages where Zotero Connector or institutional access is needed. The user handles login, MFA, CAPTCHA, payment, and access decisions.
+7. Prefer Zotero Connector into the exact collection. Fallback to RIS/BibTeX import, then attach the verified PDF to the parent item with the installed Zotero/Computer Use workflow when needed.
+8. Validate every PDF before import or before marking it complete: expected `.pdf` content, nonzero plausible size, `%PDF-` signature, no HTML login page, readable first page, page count, and title/author/DOI agreement.
+9. Write `03_library/zotero_manifest.csv` using the main-pipeline columns and sync the richer `03_library/library_acquisition_manifest.csv` for later screening and extraction.
+10. Record exact exceptions in `03_library/acquisition_report.md` using statuses such as `complete`, `metadata-only`, `duplicate-skipped`, `access-blocked`, `failed-validation`, `manual_needed`, or `user_provided`.
+
+Do not automate paywall bypass, CAPTCHA, institutional login, publisher account login, cookie extraction, browser profile reuse, unauthorized scraping, high-frequency unattended downloading, or shadow-library access. The user handles access decisions. Do not commit PDFs, Zotero databases, downloaded full text, browser artifacts, API keys, tokens, cookies, or credentials to GitHub.
 
 ### 04 Screen / 筛查
 
@@ -248,15 +265,26 @@ For each eligible study, extract fields when available:
 - Avoid empty endings such as “具有重要理论和实践意义” unless the paragraph states the exact theoretical or methodological implication.
 - Prefer paragraph-level argument: claim → evidence pattern → limitation/contrast → implication.
 
+## Zotero and full-text safety rules
+
+- Zotero operations are additive only: create or attach; never delete, merge, rename, move, or overwrite existing records.
+- Do not read, save, request, or expose campus-account, database-account, publisher-account, Zotero-account, or browser credentials.
+- Do not extract, copy, save, export, or reuse cookies, session storage, local storage, browser profiles, saved passwords, tokens, or authentication artifacts.
+- Do not use unauthorized full-text sources, shadow libraries, piracy mirrors, PDF bots, leaked credentials, or non-authorized repository copies.
+- Stop the item and record `manual_needed` when CAPTCHA, secondary authentication, abnormal-download warnings, account-risk warnings, license ambiguity, payment prompts, or access uncertainty appears.
+- Never claim full text exists based only on a landing page, abstract page, metadata record, or title match.
+
 ## Quality gates
 
 Before finishing, verify:
 
 - `state.json` records run mode, review type, target format, current stage, and gate status.
 - `review_scope.md` contains explicit boundaries and assumptions.
-- `review_protocol.md` freezes review type, RQ, search bounds, inclusion/exclusion, extraction fields, quality-appraisal plan, and deviation policy.
+- `review_protocol.md` freezes review type, RQ, search bounds, inclusion/exclusion, extraction fields, quality-appraisal plan, Zotero/library plan, and deviation policy.
 - Every database query and filter is logged.
-- Every acquired record has metadata status, attachment status, and deduplication status.
+- Every acquired record has metadata status, Zotero status, attachment status, full-text status, validation status, and deduplication status.
+- `zotero_manifest.csv` and `library_acquisition_manifest.csv` use the same `candidate_id` values for retained library records.
+- No PDF, Zotero database, browser artifact, token, cookie, credential, or institutional-access artifact is committed to GitHub.
 - Screening exclusions have reasons.
 - Every included study has at least one source-location field before being used for a claim.
 - Each major claim appears in `claim_evidence_map.csv`.
@@ -269,4 +297,4 @@ Before finishing, verify:
 
 ## Completion
 
-Return the run directory, run mode, completed stages, changed artifacts, unresolved evidence gaps, unsupported claims removed or revised, validation status, and the next action. Do not claim the review is submission-ready while any protocol, search, screening, extraction, synthesis, source-alignment, reference, or scope gate remains open.
+Return the run directory, run mode, completed stages, Zotero collection status, changed artifacts, unresolved evidence gaps, unsupported claims removed or revised, validation status, and the next action. Do not claim the review is submission-ready while any protocol, search, acquisition, Zotero, screening, extraction, synthesis, source-alignment, reference, or scope gate remains open.
