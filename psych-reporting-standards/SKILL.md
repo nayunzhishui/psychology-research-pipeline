@@ -1,9 +1,9 @@
 ---
 name: psych-reporting-standards
-description: Select and operationalize current reporting, ethics, open-science, measurement, statistical, and sex/gender standards for an empirical psychology study. Use when creating a protocol, reporting checklist, preregistration frame, author-guideline plan, or when $psychology-research-pipeline delegates its standards stage.
+description: Use this skill to select and operationalize psychology reporting standards, ethics requirements, transparency rules, preregistration needs, journal requirements, and empirical manuscript reporting checklists. 适用于投稿规范、伦理披露和报告标准确认；不要用于实际数据分析或自由写作。 Use this skill when creating a protocol, reporting checklist, preregistration frame, author-guideline plan, or when $psychology-research-pipeline delegates its standards stage. Do not use this skill to invent ethics approval, journal policy, registration, or data-sharing commitments.
 ---
 
-# Psychology Reporting Standards
+# Psychology Reporting Standards / 心理学报告规范
 
 Turn standards into project-specific requirements, not a generic list.
 
