@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Validate a psych-cog-neuro-review run directory.
 
-This script checks structure, key CSV headers, and lightweight ID continuity.
-It does not judge scholarly correctness.
+This script checks structure, key CSV headers, Zotero acquisition artifacts,
+and lightweight ID continuity. It does not judge scholarly correctness.
 """
 
 from __future__ import annotations
@@ -39,6 +39,9 @@ REQUIRED_FILES_BY_MODE = {
         "02_search/database_search_log.csv",
         "02_search/candidate_records.csv",
         "03_library/library_acquisition_manifest.csv",
+        "03_library/zotero_manifest.csv",
+        "03_library/zotero_collection_plan.md",
+        "03_library/acquisition_report.md",
         "04_screening/screening_table.csv",
         "05_extraction/literature_matrix.csv",
         "05_extraction/neural_mechanism_matrix.csv",
@@ -56,6 +59,9 @@ REQUIRED_FILES_BY_MODE = {
         "02_search/database_search_log.csv",
         "02_search/candidate_records.csv",
         "03_library/library_acquisition_manifest.csv",
+        "03_library/zotero_manifest.csv",
+        "03_library/zotero_collection_plan.md",
+        "03_library/acquisition_report.md",
         "04_screening/screening_table.csv",
         "04_screening/prisma_flow_counts.csv",
         "05_extraction/literature_matrix.csv",
@@ -101,11 +107,26 @@ CSV_HEADERS = {
         "dedup_status",
         "record_status",
     ],
+    "03_library/zotero_manifest.csv": [
+        "candidate_id",
+        "zotero_item_key",
+        "title",
+        "year",
+        "doi",
+        "collection",
+        "attachment_key",
+        "attachment_status",
+        "validation_status",
+        "source_url",
+        "notes",
+    ],
     "03_library/library_acquisition_manifest.csv": [
         "candidate_id",
         "study_id",
         "zotero_item_key",
         "bibtex_key",
+        "parent_item_key",
+        "attachment_key",
         "title",
         "authors",
         "year",
@@ -116,12 +137,15 @@ CSV_HEADERS = {
         "vip_id",
         "source",
         "collection",
+        "collection_key",
         "attachment_status",
         "full_text_status",
         "validation_status",
+        "acquisition_status",
         "dedup_group",
         "source_url",
         "local_path",
+        "temporary_file_state",
         "notes",
     ],
     "05_extraction/quality_appraisal.csv": [
@@ -172,6 +196,16 @@ CSV_HEADERS = {
     ],
 }
 
+FORBIDDEN_PATH_HINTS = [
+    "zotero.sqlite",
+    "storage/",
+    "downloads/",
+    ".pdf",
+    "cookie",
+    "token",
+    "password",
+]
+
 
 def read_mode(root: Path) -> str:
     state_path = root / "state.json"
@@ -209,7 +243,19 @@ def collect_ids(path: Path, column: str) -> set[str]:
         reader = csv.DictReader(f)
         if column not in (reader.fieldnames or []):
             return set()
-        return {str(row.get(column, "")).strip() for row in reader if str(row.get(column, "")).strip()}
+        return {
+            str(row.get(column, "")).strip()
+            for row in reader
+            if str(row.get(column, "")).strip()
+            and not str(row.get(column, "")).strip().startswith("__")
+        }
+
+
+def read_rows(path: Path) -> list[dict[str, str]]:
+    if not path.exists():
+        return []
+    with path.open("r", encoding="utf-8-sig", newline="") as f:
+        return [dict(row) for row in csv.DictReader(f)]
 
 
 def main() -> int:
@@ -242,10 +288,27 @@ def main() -> int:
 
     candidate_ids = collect_ids(root / "02_search/candidate_records.csv", "candidate_id")
     library_candidate_ids = collect_ids(root / "03_library/library_acquisition_manifest.csv", "candidate_id")
+    zotero_candidate_ids = collect_ids(root / "03_library/zotero_manifest.csv", "candidate_id")
+
     if candidate_ids and library_candidate_ids:
         orphan_library = library_candidate_ids - candidate_ids
         if orphan_library:
             warnings.append(f"library records not found in candidate_records: {len(orphan_library)}")
+
+    if zotero_candidate_ids and library_candidate_ids:
+        orphan_zotero = zotero_candidate_ids - library_candidate_ids
+        if orphan_zotero:
+            warnings.append(f"zotero_manifest records not found in library_acquisition_manifest: {len(orphan_zotero)}")
+
+    for row in read_rows(root / "03_library/library_acquisition_manifest.csv"):
+        local_path = str(row.get("local_path", "")).strip().lower()
+        temporary_state = str(row.get("temporary_file_state", "")).strip().lower()
+        if local_path and any(hint in local_path for hint in FORBIDDEN_PATH_HINTS):
+            warnings.append("library manifest contains local/PDF/Zotero path hints; confirm these are not committed artifacts")
+            break
+        if temporary_state in {"committed", "uploaded", "git"}:
+            errors.append("temporary_file_state suggests a temporary/full-text artifact was committed")
+            break
 
     claim_ids = collect_ids(root / "06_synthesis/claim_evidence_map.csv", "claim_id")
     audit_claim_ids = collect_ids(root / "09_audit/paragraph_source_alignment_matrix.csv", "claim_id")
@@ -259,12 +322,14 @@ def main() -> int:
         print("Warnings:")
         for warning in warnings:
             print(f"- {warning}")
+
     if errors:
-        print("Errors:")
+        print("Errors:", file=sys.stderr)
         for error in errors:
-            print(f"- {error}")
+            print(f"- {error}", file=sys.stderr)
         return 1
-    print("Validation passed: structure and key headers are coherent.")
+
+    print("Validation passed.")
     return 0
 
 
