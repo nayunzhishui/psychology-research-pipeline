@@ -1,14 +1,15 @@
 # 综述正文大纲模板 / Review Outline
 
-> 使用前先确定目标风格：中文核心综述 / 外文 Q1 review 预备稿。每个正文段落建议加稳定编号，如 `P001`，方便后续生成段落—来源对应矩阵。
+> 使用前先确定目标风格：中文核心综述 / 外文 Q1 review 预备稿 / 双轨输出。每个正文段落建议加稳定编号，如 `P001`，方便后续生成段落—来源对应矩阵。
 
-## 题目
+## A. 中文核心综述轨道
 
-中文题目：
+### 题目
 
-英文题目：
+- 中文题目：
+- 英文题目：
 
-## 摘要
+### 摘要
 
 - 研究背景：
 - 综述目的：
@@ -16,91 +17,50 @@
 - 主要结论：
 - 理论与方法启示：
 
-## 关键词
+### 关键词
 
 REM sleep；emotional memory；memory consolidation；affective neuroscience；EEG/ERP；fMRI；心理学综述
 
-## 1. 引言
+### 1. 引言
 
-### 1.1 问题提出
+- 问题提出
+- 研究意义
+- 现有研究缺口
+- 本文综述范围与结构
 
-- 研究现象是什么？
-- 为什么该问题在心理学和认知神经科学中重要？
-- 现有综述或研究还没有解决什么？
-
-### 1.2 综述范围与逻辑
-
-- 本文纳入哪些研究类型？
-- 不纳入哪些相邻主题？
-- 本文的组织逻辑是什么？
-
-## 2. 核心概念与理论框架
-
-### 2.1 核心概念界定
+### 2. 核心概念与理论框架
 
 - REM sleep / 快速眼动睡眠
 - emotional memory / 情绪记忆
 - memory consolidation / 记忆巩固
 - fear extinction / 恐惧消退
-
-### 2.2 主要理论模型
-
 - 睡眠依赖性记忆巩固模型
-- 情绪记忆增强效应
 - 杏仁核—海马—前额叶网络模型
-- 情绪调节与记忆再加工模型
 
-## 3. 行为研究证据
-
-### 3.1 REM 与情绪记忆表现
+### 3. 行为研究证据
 
 - 记忆准确率、反应时、再认/回忆、d′、bias
 - 正性、负性、中性材料差异
+- 睡眠操控和任务差异
+- 行为证据中的一致结果与分歧结果
 
-### 3.2 REM 与恐惧记忆、消退和再巩固
+### 4. 神经机制证据
 
-- 恐惧条件反射
-- 消退保持
-- 创伤相关记忆和临床风险
+- PSG 与 REM 指标
+- EEG/ERP 指标
+- fMRI 与脑网络证据
+- 行为—脑电—影像证据整合
+- 直接证据、间接证据和推断性解释的区分
 
-### 3.3 行为证据的分歧
-
-- 样本差异
-- 任务差异
-- 睡眠操控差异
-- 统计功效和结果稳定性
-
-## 4. 神经机制证据
-
-### 4.1 EEG/ERP 与睡眠生理证据
-
-- REM density、REM duration、REM latency
-- theta、alpha、sleep architecture
-- P300、LPP、ERN 等任务相关指标
-
-### 4.2 fMRI 与脑网络证据
-
-- amygdala
-- hippocampus
-- vmPFC/dlPFC/ACC/insula
-- DMN、salience network、frontoparietal network
-- functional connectivity
-
-### 4.3 跨方法整合
-
-- 行为—脑电—影像证据是否一致？
-- 哪些机制是直接证据，哪些只是间接推断？
-
-## 5. 影响因素与边界条件
+### 5. 影响因素与边界条件
 
 - 年龄与发展阶段
-- 性别/性别比例
-- 临床状态：焦虑、抑郁、PTSD、睡眠障碍
-- 材料类型：图片、词语、面孔、创伤线索
-- 睡眠条件：整夜睡眠、小睡、睡眠剥夺、实验室 PSG
+- 临床状态与睡眠状态
+- 材料类型与任务范式
+- 整夜睡眠、小睡、睡眠剥夺和实验室测量差异
 - 文化与语言因素
 
-## 6. 现有研究的不足
+### 6. 现有研究不足
 
 - 概念边界不清
 - 任务范式异质性
@@ -109,7 +69,7 @@ REM sleep；emotional memory；memory consolidation；affective neuroscience；E
 - 神经机制解释过度
 - 中英文研究整合不足
 
-## 7. 未来研究方向
+### 7. 未来研究方向
 
 - 更清晰的纵向和实验设计
 - 多模态指标整合
@@ -117,8 +77,89 @@ REM sleep；emotional memory；memory consolidation；affective neuroscience；E
 - 预注册、开放数据与可重复性
 - 中文语境和本土样本研究
 
-## 8. 结论
+### 8. 结论
 
 - 用 2–4 段概括核心证据。
 - 明确哪些结论较稳健，哪些仍是推断。
 - 避免空泛结尾，必须回到具体理论或方法问题。
+
+## B. 外文 Q1 review 预备稿轨道
+
+### Title
+
+### Abstract
+
+- Background
+- Scope
+- Key findings
+- Integrative framework
+- Open questions
+
+### Keywords
+
+REM sleep; emotional memory; memory consolidation; affective neuroscience; polysomnography; EEG; fMRI
+
+### 1. Introduction
+
+- Field-level problem
+- Conceptual gap
+- Contribution statement
+
+### 2. Scope and Review Approach
+
+- Databases and evidence sources
+- Inclusion and exclusion logic
+- Review type statement
+- Quality appraisal approach
+
+### 3. Conceptual and Theoretical Background
+
+- REM sleep and sleep architecture
+- Emotional memory and memory consolidation
+- Affective neuroscience framework
+
+### 4. Behavioral Evidence
+
+- Recognition and recall
+- Valence-specific memory
+- Task and timing differences
+
+### 5. Neural and Physiological Mechanisms
+
+- PSG and REM physiology
+- EEG/ERP evidence
+- fMRI and brain-network evidence
+- Cross-method convergence and divergence
+
+### 6. Moderators and Boundary Conditions
+
+- Developmental stage
+- Clinical status
+- Task and material characteristics
+- Nap, overnight sleep, and sleep-deprivation designs
+
+### 7. Methodological Limitations and Open Questions
+
+- Task heterogeneity
+- REM measurement inconsistency
+- Small-sample neuroimaging limitations
+- Reverse inference and causal overstatement
+
+### 8. Integrative Framework
+
+- Direct evidence
+- Indirect evidence
+- Tentative mechanism
+- Figure/table plan
+
+### 9. Future Directions
+
+- Pre-registration and open materials
+- Multi-modal designs
+- Developmental and clinical samples
+- Cross-cultural and Chinese-language evidence
+
+### 10. Conclusion
+
+- Calibrated conclusions only
+- Clear boundary between evidence and inference
