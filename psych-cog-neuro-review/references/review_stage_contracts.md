@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This file adapts the psychology-research-pipeline stage logic to a literature-review workflow. It covers all steps before review drafting and audit, especially the steps equivalent to empirical-project work before data analysis and empirical manuscript writing.
+This file adapts the psychology-research-pipeline stage logic to a literature-review workflow. It covers all steps before review drafting and audit, especially the steps equivalent to empirical-project work before data analysis and empirical manuscript writing. Stage 03 also mirrors the repository-level Zotero ingest workflow: legal metadata/PDF acquisition, Zotero collection verification, duplicate checking, and manifest-based reporting.
 
 ## Run layout
 
@@ -24,7 +24,7 @@ logs/decisions.md
 09_audit/
 ```
 
-Artifacts are UTF-8. CSV files use one header row and RFC 4180 quoting. Use `unknown` rather than an invented value. Dates use ISO 8601.
+Artifacts are UTF-8. CSV files use one header row and RFC 4180 quoting. Use `unknown` rather than an invented value. Dates use ISO 8601. Never commit PDFs, Zotero databases, browser artifacts, credentials, cookies, or tokens.
 
 ## Run mode contract
 
@@ -32,9 +32,9 @@ The run must declare one mode in `state.json` and `00_scope/review_scope.md`.
 
 | Mode | Gate strength | Minimum expectation |
 |---|---|---|
-| `lite` | exploratory | transparent assumptions, at least two academic sources when searching, no claim of exhaustiveness |
-| `standard` | default | complete 00–09 workflow, reproducible search log, screening reasons, extraction with source locations, paragraph-source audit |
-| `strict` | publication-grade traceability | formal protocol, database-specific search, stronger screening/appraisal, PRISMA-style counts, formal quality tools where applicable |
+| `lite` | exploratory | transparent assumptions, at least two academic sources when searching, no claim of exhaustiveness; Zotero import optional |
+| `standard` | default | complete 00–09 workflow, reproducible search log, screening reasons, Zotero/library status where available, extraction with source locations, paragraph-source audit |
+| `strict` | publication-grade traceability | formal protocol, database-specific search, stronger screening/appraisal, bounded Zotero/PDF acquisition manifest, PRISMA-style counts, formal quality tools where applicable |
 
 A run may move from `lite` to `standard` or from `standard` to `strict`. Downgrades require a decision log entry and must be visible in the final handoff.
 
@@ -44,13 +44,13 @@ A run may move from `lite` to `standard` or from `standard` to `strict`. Downgra
 
 Required: `workspace_inventory.md`, `review_scope.md`, `concept_map.md`.
 
-Pass when the run mode, review type, topic boundary, population/species boundary, developmental/clinical boundary, core constructs, neuroscience methods, seed papers, source availability, and excluded claims are explicit. For REM and emotional memory, REM sleep, NREM sleep, sleep deprivation, sleep quality, emotional memory, fear extinction, encoding, consolidation, retrieval, and reconsolidation must not be collapsed into one vague construct.
+Pass when the run mode, review type, topic boundary, population/species boundary, developmental/clinical boundary, core constructs, neuroscience methods, seed papers, source availability, Zotero acquisition need, and excluded claims are explicit. For REM and emotional memory, REM sleep, NREM sleep, sleep deprivation, sleep quality, emotional memory, fear extinction, encoding, consolidation, retrieval, and reconsolidation must not be collapsed into one vague construct.
 
 ### 01 Protocol
 
 Required: `reporting_plan.md`, `review_protocol.md`, `review_stage_gates.md`.
 
-Pass when review type, reporting standard, databases, languages, year range, inclusion/exclusion criteria, full-text handling, extraction fields, quality-appraisal plan, AI-use policy, deviation policy, target output style, and run-mode-specific gates are frozen. Do not claim systematic/scoping status unless the protocol supports it.
+Pass when review type, reporting standard, databases, languages, year range, inclusion/exclusion criteria, full-text handling, Zotero/library policy, extraction fields, quality-appraisal plan, AI-use policy, deviation policy, target output style, and run-mode-specific gates are frozen. Do not claim systematic/scoping status unless the protocol supports it.
 
 ### 02 Search
 
@@ -58,19 +58,23 @@ Required: `search_strategy.md`, `database_search_log.csv`, `candidate_records.cs
 
 `database_search_log.csv` minimum columns: `search_id,database,platform,query,filters,run_at,result_count,export_file,notes`.
 
-`candidate_records.csv` minimum columns: `candidate_id,title,authors,year,doi,pmid,cnki_id,source,abstract,landing_url,database,search_id,dedup_status,record_status`.
+`candidate_records.csv` minimum columns: `candidate_id,title,authors,year,doi,pmid,cnki_id,wanfang_id,vip_id,source,abstract,landing_url,database,search_id,dedup_status,record_status`.
 
 Pass when bilingual concept blocks exist; database-specific queries are reproducible; exact counts, dates, and filters are logged; citation chasing and Zotero/library searches are separately logged; no convenience source is described as exhaustive. For `standard` and `strict`, English sources normally include PubMed, Web of Science, PsycINFO, Scopus, Google Scholar, Semantic Scholar, Crossref, Zotero; Chinese sources normally include CNKI, 万方, 维普. Unsearched sources require a reason.
 
 ### 03 Acquire
 
-Required: `library_acquisition_manifest.csv`, `zotero_collection_plan.md`, `acquisition_report.md`.
+Required: `library_acquisition_manifest.csv`, `zotero_manifest.csv`, `zotero_collection_plan.md`, `acquisition_report.md`.
 
-Manifest minimum columns: `candidate_id,study_id,zotero_item_key,bibtex_key,title,year,doi,pmid,cnki_id,wanfang_id,vip_id,collection,attachment_status,full_text_status,validation_status,dedup_group,source_url,notes`.
+`zotero_manifest.csv` minimum columns: `candidate_id,zotero_item_key,title,year,doi,collection,attachment_key,attachment_status,validation_status,source_url,notes`.
 
-Allowed attachment/full-text status: `readable_pdf`, `metadata_only`, `abstract_only`, `access_blocked`, `duplicate_skipped`, `failed_validation`, `user_provided`.
+`library_acquisition_manifest.csv` minimum columns: `candidate_id,study_id,zotero_item_key,bibtex_key,parent_item_key,attachment_key,title,authors,year,doi,pmid,cnki_id,wanfang_id,vip_id,source,collection,collection_key,attachment_status,full_text_status,validation_status,acquisition_status,dedup_group,source_url,local_path,temporary_file_state,notes`.
 
-Pass when every retained candidate has a metadata and access status; duplicates are grouped rather than deleted; full-text availability is not confused with scientific eligibility; temporary or failed records remain traceable.
+Allowed Zotero acquisition statuses: `complete`, `metadata-only`, `duplicate-skipped`, `access-blocked`, `failed-validation`, `manual_needed`, `user_provided`.
+
+Allowed normalized attachment/full-text statuses: `readable_pdf`, `metadata_only`, `abstract_only`, `access_blocked`, `duplicate_skipped`, `failed_validation`, `manual_needed`, `user_provided`.
+
+Pass when every retained candidate has metadata and access status; the exact Zotero collection key/name is verified when Zotero is used; duplicates are grouped rather than deleted; matching is attempted by DOI, PMID, then normalized title + first author + year; readable PDF claims are validated; full-text availability is not confused with scientific eligibility; temporary or failed records remain traceable. Fail the gate if any import relies on paywall bypass, CAPTCHA bypass, credential/cookie extraction, shadow-library access, or unattended high-frequency downloading.
 
 ### 04 Screen
 
@@ -116,11 +120,11 @@ Pass when every claim-bearing paragraph is mapped to source passages or marked u
 
 - `review_run_id`: immutable per run.
 - `search_id`: one database query or citation-chasing operation.
-- `candidate_id`: assigned at retrieval and retained through library, screening, extraction, citation, and audit.
+- `candidate_id`: assigned at retrieval and retained through library, Zotero, screening, extraction, citation, and audit.
 - `study_id`: groups multiple reports from the same sample/study.
 - `claim_id`: connects synthesis, manuscript, and paragraph-source audit.
 - `paragraph_id`: stable manuscript paragraph ID, e.g., `P001`.
-- `zotero_item_key` and `bibtex_key` are different; store both when used.
+- `zotero_item_key`, `parent_item_key`, `attachment_key`, and `bibtex_key` are different; store them separately when used.
 
 ## Validation contract
 
