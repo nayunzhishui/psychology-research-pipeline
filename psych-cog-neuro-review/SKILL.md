@@ -1,81 +1,88 @@
 ---
 name: psych-cog-neuro-review
-description: Use this standalone Chinese-first skill for psychology and cognitive-neuroscience literature reviews involving mechanisms, experimental paradigms, behavioral-neural integration, EEG/ERP, fMRI, PSG, sleep, emotion, memory, cognitive control, threat/reward processing, and related methods. It supports broad-direction exploration, focused protocol freeze, bilingual search, Chrome/Zotero Connector ingestion, folder fallback, screening, 1–4 relevance rating, cognitive-neuroscience evidence extraction, quality appraisal, CSV/Excel/Markdown matrices, HTML reference star map, APA 7 manuscript drafting, source alignment, and simulated Chinese/English journal review. Do not use it to fabricate sources, bypass access restrictions, save credentials, automate unauthorized downloads, or write unsupported neural-mechanism claims.
+description: Use this standalone Chinese-first cognitive-neuroscience psychology workflow for review and empirical/experimental projects involving mechanisms, experimental paradigms, behavioral-neural integration, EEG/ERP, fMRI, PSG, eye-tracking, psychophysiology, sleep, emotion, memory, cognitive control, threat/reward processing, and related methods. It supports broad-direction exploration, focused protocol freeze, bilingual evidence search, Chrome/Zotero Connector ingestion, folder fallback, screening, 1–4 relevance rating, cognitive-neuroscience evidence extraction, neural/physiological mechanism matrices, experimental design, task/protocol planning, preprocessing/analysis planning, APA 7 writing, source alignment, and simulated Chinese/English journal review. 这是“认知神经科学工作流”，不是普通综述 skill 的路由；不要用于伪造神经机制、伪造数据、绕过权限、保存凭据、无人值守批量下载或真实投稿提交。
 ---
 
-# Cognitive Neuroscience Psychology Review / 认知神经科学心理学综述
+# Cognitive Neuroscience Psychology Workflow / 认知神经科学工作流
 
-本 skill 是一个**独立的认知神经科学/脑机制综述增强工作流**，不是普通综述 skill 的路由。它适用于心理学与认知神经科学交叉主题，尤其是包含实验范式、生理/神经指标、行为—神经机制整合、发展或临床神经机制的综述。
+本 skill 是三个主工作流之一，定位为**认知神经科学、脑机制、实验范式和行为—神经/生理整合研究的专用工作流**。它可以服务两类任务：
 
-默认语言为中文，必要英文保留于实验范式、脑区、神经网络、统计指标、数据库检索式、题录、APA 引文和参考文献。
+1. 认知神经科学综述：机制综述、理论综述、方法学综述、测量/范式综述、范围综述或系统综述预备。
+2. 认知神经科学实证/实验项目：实验范式设计、神经/生理指标选择、数据预处理计划、统计分析计划和论文写作。
+
+它不是普通综述 skill 的路由，也不是一般心理学实证论文 skill 的替代。若任务是普通心理学综述，使用 `psych-literature-review-workflow`；若任务是普通心理学实证论文，使用 `psychology-research-pipeline`；若任务涉及 EEG/ERP、fMRI、PSG、眼动、生理指标、实验任务或脑机制整合，使用本 skill 或由其他主 skill 调用本 skill 的专用模块。
+
+默认语言为中文，必要英文保留于实验范式、脑区、神经网络、神经/生理指标、预处理术语、统计模型、数据库检索式、题录、APA 引文和参考文献。
 
 ## 1. 适用场景
 
-使用本 skill，当综述主题涉及以下至少一类内容：
+使用本 skill，当主题涉及以下至少一类内容：
 
-- EEG/ERP、fMRI、PSG、眼动、皮电、心率变异性或其他生理/神经指标。
-- 认知控制、情绪加工、记忆、注意、威胁/奖赏加工、睡眠与情绪、发展认知神经科学。
-- 实验范式：Go/No-Go、n-back、IAT/GNAT、情绪图片记忆、恐惧条件化、消退、再巩固、睡眠实验、nap protocol 等。
-- 需要把行为结果、神经指标、理论机制和心理学变量整合进同一综述。
+- EEG/ERP、fMRI、PSG、眼动、皮电、心率变异性、呼吸、内分泌、神经影像或其他神经/生理指标。
+- 认知控制、情绪加工、记忆、注意、威胁/奖赏加工、睡眠与情绪、发展认知神经科学、临床认知神经机制。
+- 实验范式：Go/No-Go、Stop-signal、n-back、Stroop、Flanker、IAT/GNAT、情绪图片记忆、恐惧条件化、消退、再巩固、睡眠实验、nap protocol 等。
+- 需要整合行为结果、主观量表、神经/生理指标、理论机制和心理学变量。
+- 需要设计或审查认知神经科学实验，而不仅是阅读文献。
 
 不要使用本 skill，当任务只是：
 
 - 普通心理学综述，不涉及机制、实验或神经/生理指标。
-- 仅需要解释单个概念、润色单段文字或整理普通参考文献。
-- 用户要求伪造文献、伪造 DOI、伪造页码、伪造神经机制证据或伪造审稿意见。
+- 普通问卷实证论文，不涉及认知神经科学专用方法。
+- 临时解释概念、润色单段文字或整理普通参考文献。
+- 用户要求伪造文献、伪造 DOI、伪造页码、伪造数据、伪造脑区结果、伪造 ERP 成分、伪造 fMRI 激活、伪造 PSG 分期或伪造审稿意见。
 - 用户要求绕过数据库权限、验证码、MFA、付费墙、下载限制、出版社条款或使用盗版 PDF 来源。
 - 用户要求真实投稿、支付版面费、联系编辑或执行真实投稿动作。
 
-## 2. 默认定位
+## 2. 与另外两个主 skill 的边界
 
-- 默认综述类型：`mixed mechanism review` / 混合型机制综述。
-- 默认运行模式：`standard`。
-- 默认输出风格：中文核心期刊综述草稿 + 英文 Q1 review 结构兼容。
-- 默认 topic pack：无。只有当主题涉及 REM sleep、emotional memory、fear conditioning、extinction、memory consolidation、reconsolidation、dream affect、PSG 或 sleep-dependent affective processing 时，才加载 `topic_packs/rem_emotional_memory/`。
-- Zotero 默认使用 Chrome + Zotero Connector；失败时使用文件夹备选方案，由用户手动导入。
+当前三个主 skill 为：
 
-如果用户明确要求系统综述、范围综述或元分析预备综述，需要升级协议、检索日志、纳排记录和质量评价强度；不能仅因主题较窄就自动声称系统综述。
+1. `psychology-research-pipeline`：心理学实证论文工作流。
+2. `psych-cog-neuro-review`：认知神经科学工作流。
+3. `psych-literature-review-workflow`：新的通用综述工作流。
 
-## 3. 运行模式
+本 skill 与其他 skill 的协作规则：
 
-读取或参考 `templates/run_mode_policy.md`。选择一个模式并写入 `state.json`、`00_exploration/review_scope.md` 或 `01_protocol/review_protocol.md`。
+- 当 `psychology-research-pipeline` 的实证项目包含 EEG/ERP、fMRI、PSG、眼动、生理指标或实验范式时，本 skill 提供范式、指标、预处理、神经机制和报告规范模块。
+- 当 `psych-literature-review-workflow` 的综述主题明显涉及脑机制、实验范式或神经/生理证据时，本 skill 提供机制矩阵、范式分类、神经指标评价和机制写作模块。
+- 若用户要求完整的认知神经科学项目，本 skill 可独立总控。
+- `psych-review-workflow` 仅为旧版辅助材料，不作为主 skill。
 
-| Mode | Use case | Required minimum | Typical output |
+## 3. 默认定位与运行模式
+
+默认定位：**mixed cognitive-neuroscience workflow / 混合型认知神经科学工作流**。
+
+首次运行时选择一个模式，并写入 `state.json` 和 `logs/decisions.md`。
+
+| 模式 | 适用任务 | 最低要求 | 典型输出 |
 |---|---|---|---|
-| `lite` | 快速机制综述、课程论文、早期选题、初步文献图谱 | 00、01 简化版、02 检索草图、04 初筛、05 抽样矩阵、06 初步综合 | scope, seed papers, initial matrix, outline |
-| `standard` | 研究生综述、中文核心预备稿、普通机制综述 | 00–11 全流程；单人筛查可接受但需说明；Zotero collection verification expected when available | full auditable review run, matrix, star map, Word draft, source alignment |
-| `strict` | 系统综述、范围综述、外文 Q1 review 预备稿、高风险引用核查 | 正式协议、完整检索日志、严格筛查、质量评价、Zotero/PDF acquisition manifest、完整对齐 | PRISMA-style traceability, formal quality tools, complete audit |
+| `lite` | 课程综述、早期选题、实验范式初步设计 | 方向探索、seed papers、初步机制图、方法草案 | scoping brief, seed matrix, paradigm sketch |
+| `standard` | 研究生综述、实验设计、中文/英文论文预备 | 00–11 全流程；单人筛查可接受但需声明 | evidence matrix, mechanism model, methods plan, draft |
+| `strict` | 系统综述/范围综述、注册报告、投稿级实验项目、高风险引用核查 | 正式协议、完整检索日志、严格筛查、质量评价、预处理/分析计划、完整对齐 | auditable review or empirical package |
 
-不要静默降低用户要求的模式。若 access、时间或工具限制导致 `strict` 不可完成，记录 blocker，并在用户确认或明确说明假设后降级。
+不要静默降低用户要求的模式。若 access、时间、数据或工具限制导致 `strict` 不可完成，记录 blocker，并在用户确认或明确说明假设后降级。
 
-## 4. 语言与写作政策
-
-- 工作流说明、检索记录、阅读矩阵、证据综合、写作建议、审稿意见优先使用中文。
-- 文献题名、量表名、实验范式、脑区、神经网络、统计指标、数据库字段保留英文原文。
-- 首次出现的重要术语使用“中文解释 + English term”，例如“事件相关电位（event-related potentials, ERP）”。
-- 正文默认先产出中文综述草稿；如用户指定，可追加英文 Q1 review preparatory draft。
-- 避免机械翻译神经科学术语；优先使用本领域通行表达。
-
-## 5. 启动时的需求沟通
+## 4. 启动时的需求沟通
 
 首次运行时先询问，除非用户已经给出答案。用户未完全回答时，可用默认值继续，但必须记录为 `assumption`。
 
 必要问题：
 
-1. 当前是宽研究方向，还是已经聚焦后的综述主题？
-2. 综述类型：混合型机制综述、叙述综述、理论综述、范围综述、系统综述、测量综述、元分析预备综述。
-3. 运行模式：`lite`、`standard`、`strict`，默认 `standard`。
-4. 目标用途：课程作业、开题、学位论文综述、中文核心期刊、英文 Q1 review、投稿预备稿。
-5. 核心边界：构念、人群、年龄段、临床/非临床、human/animal/computational、实验范式、神经/生理指标。
-6. 是否纳入 REM/sleep 证据，是否加载 REM/emotional memory topic pack。
-7. 文献获取方式：是否允许 Chrome + Zotero Connector；Zotero 目标 collection 名称；失败时是否下载到文件夹由用户手动导入。
-8. 输出格式：Markdown、DOCX、CSV、Excel、HTML、BibTeX/RIS、APA 参考文献、模拟审稿报告。
+1. 当前任务是综述、实验设计、实证论文，还是已有数据分析？
+2. 当前是宽方向，还是已经聚焦后的主题/题目？
+3. 目标用途：课程作业、开题、学位论文、中文期刊、英文期刊、注册报告、投稿预备。
+4. 核心边界：构念、人群、年龄段、临床/非临床、human/animal/computational、实验范式、神经/生理指标。
+5. 是否已有实验材料、量表、刺激、程序、E-Prime/PsychoPy 任务、EEG/fMRI/PSG/眼动数据或分析输出。
+6. 运行模式：`lite`、`standard`、`strict`，默认 `standard`。
+7. 是否纳入 REM/sleep 证据，是否加载 REM/emotional memory topic pack。
+8. 文献获取方式：是否允许 Chrome + Zotero Connector；Zotero 目标 collection；失败时是否下载到文件夹由用户手动导入。
+9. 输出格式：Markdown、DOCX、CSV、Excel、HTML、BibTeX/RIS、APA 参考文献、模拟审稿报告。
 
 用户已明确回答时，不要重复询问。
 
-## 6. 默认数据库范围
+## 5. 默认数据库范围
 
-默认数据库与通用综述 workflow 保持一致：
+默认数据库与三个主 workflow 保持一致：
 
 - PubMed
 - PsycINFO
@@ -86,14 +93,12 @@ description: Use this standalone Chinese-first skill for psychology and cognitiv
 - 期刊官网
 - Zotero 本地库
 
-不要默认加入 Scopus、APA PsycNet、Semantic Scholar、OpenAlex、SinoMed、万方或维普。若用户明确要求或某一认知神经科学主题确有必要，可作为附加数据库，并在协议中记录理由、检索式、结果数和局限。
+不要默认加入 Scopus、APA PsycNet、Semantic Scholar、OpenAlex、SinoMed、万方或维普。若用户明确要求，或某一认知神经科学主题确有必要，可作为附加数据库，并在协议中记录理由、检索式、结果数和局限。
 
-## 7. 运行目录
-
-默认建立一个运行目录：
+## 6. 默认运行目录
 
 ```text
-review_runs/<YYYYMMDD>_<short_topic>_cog_neuro/
+cog_neuro_runs/<YYYYMMDD>_<short_topic>/
 ├── state.json
 ├── manifest.json
 ├── logs/
@@ -106,48 +111,47 @@ review_runs/<YYYYMMDD>_<short_topic>_cog_neuro/
 │   ├── 03_题录导出/
 │   ├── 04_阅读矩阵/
 │   ├── 05_星图/
-│   └── 06_综述正文/
-├── 00_exploration/
+│   └── 06_正文与方法/
+├── 00_scope/
 ├── 01_protocol/
 ├── 02_search/
 ├── 03_library/
 ├── 04_screening/
-├── 05_matrix/
-│   └── reading_cards/
-├── 06_synthesis/
-├── 07_star_map/
-├── 08_outline/
+├── 05_evidence_matrix/
+├── 06_mechanism_model/
+├── 07_design_or_synthesis/
+├── 08_analysis_plan/
 ├── 09_manuscript/
-├── 10_alignment/
+├── 10_alignment_audit/
 └── 11_submission_review/
 ```
 
 不要覆盖旧文件。修订版使用 `_v2`、`_v3`，并在日志中说明修订原因。
 
-## 8. 阶段总览
+## 7. 阶段总览
 
 | 阶段 | 名称 | 目标 | 主要产物 |
 |---|---|---|---|
-| 00 | 宽方向探索 | 从认知神经科学方向中识别可写综述方向 | `scoping_brief.md`, `seed_reviews.csv`, `seed_methods.csv`, `focus_options.md`, `导师汇报版简表.md` |
-| 01 | 聚焦与协议冻结 | 把聚焦主题转为机制综述协议 | `review_protocol.md`, `concept_map.md`, `mechanism_scope.md`, `inclusion_exclusion.md` |
-| 02 | 正式检索 | 建立双语概念块和数据库检索日志 | `queries.md`, `database_search_log.csv`, `candidate_records.csv` |
+| 00 | 方向与任务定标 | 判断是综述、实验设计还是实证论文；确定边界 | `scope_brief.md`, `task_type.md`, `导师汇报版简表.md` |
+| 01 | 协议冻结 | 冻结综述/实验/实证项目协议 | `protocol.md`, `concept_map.md`, `mechanism_scope.md`, `inclusion_exclusion.md` |
+| 02 | 证据检索 | 双语检索理论、综述、方法和实证证据 | `queries.md`, `database_search_log.csv`, `candidate_records.csv` |
 | 03 | Zotero/全文获取 | 合法入库、去重、PDF 核验 | `zotero_manifest.csv`, `pdf_manifest.csv`, `acquisition_report.md` |
 | 04 | 分类与筛查 | 分类文献并给出 1–4 级相关性 | `classification.csv`, `screening_table.csv`, `relevance_ratings.csv` |
-| 05 | 矩阵与质量评价 | 提取普通文献矩阵和神经机制矩阵 | `literature_matrix.csv/xlsx/md`, `neural_mechanism_matrix.csv/xlsx/md`, `quality_appraisal.csv` |
-| 06 | 证据综合 | 形成机制链、矛盾、空白和 claim-evidence map | `claim_evidence_map.csv`, `mechanism_synthesis.md`, `evidence_gap_register.csv` |
-| 07 | HTML 文献星图 | 基于激活扩散模型建立文献—构念—机制网络 | `reference_star_map.html`, `star_map_data.json`, `weighting_notes.md` |
-| 08 | 写作架构 | 冻结章节、论证路径、图表和允许主张 | `section_argument_plan.md`, `review_outline.md`, `citation_plan.csv` |
-| 09 | 正文写作 | 写作 APA 7 兼容的中文综述稿 | `review_draft.md`, `review_draft.docx`, `references.bib`, `apa_references.md` |
-| 10 | 来源对齐 | 段落/句子—原文来源核查 | `source_alignment_table.csv/xlsx`, `claim_audit.md`, `unsupported_or_overstated_claims.md` |
+| 05 | 证据矩阵 | 提取普通矩阵和神经/生理机制矩阵 | `literature_matrix.csv/xlsx/md`, `neural_mechanism_matrix.csv/xlsx/md`, `quality_appraisal.csv` |
+| 06 | 机制模型 | 整合行为—神经—心理变量机制链 | `mechanism_model.md`, `claim_evidence_map.csv`, `contradiction_gap_register.csv` |
+| 07 | 设计或综合 | 综述则生成章节架构；实证则生成实验/方法设计 | `review_outline.md` 或 `experimental_design_plan.md` |
+| 08 | 预处理与分析计划 | 为 EEG/fMRI/PSG/眼动/行为数据制定分析计划 | `preprocessing_plan.md`, `statistical_analysis_plan.md`, `reporting_plan.md` |
+| 09 | 正文写作 | 写作综述或实证论文草稿 | `manuscript.md`, `manuscript.docx`, `references.bib`, `apa_references.md` |
+| 10 | 来源与方法审计 | 核查主张、引用、数字、方法和神经机制证据 | `source_alignment_table.csv/xlsx`, `method_audit.md`, `claim_audit.md` |
 | 11 | 模拟投稿审稿 | 模拟中文/英文期刊投稿前审查 | `journal_fit_memo.md`, `simulated_reviews.md`, `revision_matrix.csv` |
 
-不要随意重排阶段。若某一阶段失败，在同阶段修复；只有记录原因和影响范围后，才回到前一阶段。
+若任务只是综述，可以跳过实验材料制作和数据分析执行，但不能跳过证据矩阵、机制模型、来源对齐和模拟审稿。若任务是实证/实验项目，不能只写综述而忽略设计、预处理、分析和报告规范。
 
-## 9. 阶段 00：宽方向探索
+## 8. 阶段 00：方向与任务定标
 
 用户只给出宽方向时，先做探索式检索，不进入正式全文下载。
 
-目标：找出核心概念、研究流派、实验范式、常用测量、神经/生理指标、主要争议、代表性综述、代表性方法文章和近年前沿趋势，并向用户提供 2–5 个可聚焦方向。
+目标：找出核心概念、研究流派、实验范式、常用测量、神经/生理指标、主要争议、代表性综述、代表性方法文章和近年前沿趋势，并向用户提供 2–5 个可聚焦方向或实验问题。
 
 优先搜集：
 
@@ -156,358 +160,221 @@ review_runs/<YYYYMMDD>_<short_topic>_cog_neuro/
 - 方法学文章：实验范式、EEG/ERP、fMRI、PSG、眼动、心理测量、统计方法。
 - 近 3 年高相关实证研究，用于判断前沿趋势。
 
-每个候选方向必须包括：中文题目、英文题目、核心研究问题、机制链雏形、适合综述类型、文献基础、数据/方法风险、可能章节结构、与用户方向贴合度、是否建议继续。
-
 输出导师汇报版简表：
 
 ```csv
-候选方向,核心问题,机制链,文献基础,方法基础,创新点,风险,推荐等级,下一步建议
+候选方向,核心问题,关键范式/指标,文献基础,创新点,风险,推荐等级,下一步建议
 ```
 
-聚焦方向确认前，不进入正式大范围下载或 Zotero 批量入库。
+## 9. 阶段 01：协议冻结
 
-## 10. 阶段 01：聚焦与协议冻结
-
-聚焦后的综述方向必须转化为可执行协议。协议至少包括：
+协议至少包括：
 
 - 暂定题目，中英文各一版。
-- 综述类型及理由。
-- 研究问题，可使用 PCC、PEO、PICO、SPIDER 或自定义机制综述框架。
-- 核心构念、相邻构念、英文缩写、中文译名、量表名、实验范式。
-- 机制边界：认知过程、情绪过程、发展阶段、临床状态、脑区/网络、时间窗口。
-- 纳入标准：人群、年龄、样本、研究设计、语言、年份、全文状态、文献类型。
-- 排除标准：无关人群、非心理学主题、纯评论、无法定位证据、重复报告、神经指标不可解释等。
-- 数据库范围、检索式策略和引文追踪计划。
-- Zotero collection 名称和文件夹备选方案。
-- 质量评价工具选择。
-- 停止规则、修订规则和 AI 使用边界。
+- 任务类型：综述、实验设计、实证论文、已有数据分析。
+- 研究问题与假设。
+- 核心构念、理论模型、同义词、量表名、实验范式、神经/生理指标。
+- 人群、年龄、临床/非临床、human/animal/computational 边界。
+- 纳入/排除标准。
+- 检索数据库与补充检索。
+- Zotero collection 和文件夹备选方案。
+- 如果是实证/实验项目：样本方案、任务流程、刺激材料、记录设备、预处理、统计分析计划。
+- 质量评价工具、停止规则、修订规则。
 
-协议冻结后才能进入正式检索。后续若修改范围，必须记录 amendment：修改内容、原因、影响哪些阶段。
+协议冻结后才能进入正式检索或正式实验设计。后续若修改范围，必须记录 amendment。
 
-## 11. 阶段 02：正式检索
+## 10. 阶段 02：证据检索
 
-构建双语概念块和数据库特异检索式，不要把一个检索式复制到所有平台。
+正式检索目标是覆盖主题领域，而不是只拿几篇好写的文章。
 
-检索日志必须记录：数据库、平台、日期、检索式、过滤器、结果数、导出文件、备注。
+执行步骤：
 
-检索应包含：
+1. 为每个核心概念建立英文、中文、缩写、量表名、任务名、脑区、神经网络、ERP 成分、fMRI contrast、PSG 指标等检索词。
+2. 生成宽检索式和窄检索式。不同数据库使用不同语法。
+3. 每个数据库记录：平台、日期、检索式、过滤器、结果数、导出文件、备注。
+4. 导出题录并统一字段：DOI、PMID、title、authors、year、journal、abstract、keywords、URL、database、query_id。
+5. 去重顺序：DOI → PMID → 标准化标题 + 第一作者 + 年份。保留 provenance。
+6. 对核心 seed papers 做 backward citation chasing 和 forward citation chasing。
+7. 使用新增价值停止规则：连续一轮新增文献不再增加新理论、新范式、新指标、新人群、新方法、新关键发现、新争议或新高质量证据。
 
-- 核心心理学构念和同义词。
-- 实验范式和任务名称。
-- 神经/生理指标，如 EEG、ERP、fMRI、PSG、eye tracking、HRV 等。
-- 关键脑区、网络或时间成分，如 amygdala、hippocampus、vmPFC、ACC、LPP、P3、theta 等。
-- 目标人群和年龄阶段。
-- 测量工具、量表名、临床术语。
+严禁把 Google Scholar、ResearchGate 或任意网页结果说成“完整检索”。
 
-用新增价值停止规则判断是否继续：新增文献不再提供新的机制链、任务范式、神经指标、样本类型、测量工具、关键发现、矛盾证据或高质量综述时，可以停止并记录为“综述写作价值饱和”。
-
-## 12. 阶段 03：Chrome + Zotero / 文件夹备选获取
+## 11. 阶段 03：Chrome + Zotero / 文件夹备选
 
 优先方案：Codex 使用 Chrome 中用户已登录的合法学术访问环境，调用 Zotero Connector 将文献导入本地 Zotero 的指定 collection。
 
 边界：
 
-- 用户本人处理校园 VPN、统一认证、MFA、验证码、付费确认、数据库授权。
+- 用户本人处理校园 VPN、统一认证、MFA、验证码、付费确认和数据库授权。
 - 不读取、不保存、不记录账号、密码、验证码、cookie、token、密钥或浏览器身份凭据。
 - 不绕过付费墙、下载限制、机器人检测、数据库条款或出版社限制。
 - 不使用盗版论文站、影子图书馆、PDF bot 或泄露账号。
 - 不无人值守高速批量下载。按批次处理，并在异常警告时停止。
-- Zotero 操作只做添加或附件补全；不删除、合并、重命名、移动或覆盖既有记录。
-- 不把 PDF、Zotero 数据库、浏览器材料、token、cookie 或账号信息提交到 GitHub。
+- 不把 PDF、Zotero 数据库、浏览器材料、数据文件或账号信息提交到 GitHub。
 
-每篇文献必须验证：题名、作者、年份、DOI/PMID、Zotero parent item、附件 key、PDF 可读性、首页题名匹配、页数合理、是否误下载登录页或 HTML。
+每篇文献必须验证：题名、作者、年份、DOI/PMID、Zotero parent item、附件 key、PDF 是否可读、首页题名是否匹配、页数是否合理。
 
-备选方案：当 Zotero Connector 不可用或用户希望手动导入时，将合法获取的 PDF、RIS/BibTeX、导入清单保存到用户指定文件夹，由用户手动导入 Zotero。
-
-## 13. 阶段 04：分类、筛查与 1–4 级相关性
+## 12. 阶段 04：分类、初筛与 1–4 级相关性
 
 先分类，再决定阅读深度。
 
-### 文献类型分类
-
-至少使用以下类型，可多标签：
+文献类型至少包括：
 
 - `review_systematic`：系统综述/元分析。
 - `review_scoping`：范围综述。
 - `review_narrative`：叙述综述/理论综述。
 - `theory_conceptual`：理论、概念、模型文章。
-- `methods_measurement`：方法学、量表、测量、心理计量文章。
+- `methods_paradigm`：实验范式、任务设计、刺激材料文章。
+- `methods_neurophysiology`：EEG/ERP、fMRI、PSG、眼动、生理记录或预处理文章。
+- `methods_measurement`：量表、心理测量、问卷验证。
 - `empirical_behavioral`：行为实证研究。
-- `empirical_eeg_erp`：EEG/ERP 研究。
-- `empirical_fmri`：fMRI/脑成像研究。
-- `empirical_sleep_psg`：睡眠/PSG 研究。
-- `empirical_eye_tracking_psychophysiology`：眼动/心理生理研究。
+- `empirical_neural`：神经/生理实证研究。
 - `intervention_trial`：干预、随机对照、临床试验。
-- `animal_computational`：动物或计算模型。
 - `qualitative_mixed`：质性或混合方法。
 - `commentary_guideline`：评论、共识、指南、立场文件。
 
-### 相关性等级
-
-相关性等级表示“对当前机制综述主题的使用价值”，不是学术质量。
+相关性等级是“对当前主题的使用价值”，不是学术质量。
 
 | 等级 | 名称 | 判定标准 | 阅读处理 |
 |---|---|---|---|
-| 4 | 核心机制文献 | 同时匹配核心构念/人群/机制或关键方法；能直接支撑综述主线、机制图或关键章节 | 全文精读，进入矩阵和星图核心层 |
-| 3 | 重要相关文献 | 直接支持概念、测量、范式、机制链、人群差异或争议之一；与主题略有间接 | 全文重点读，进入矩阵 |
-| 2 | 背景/方法参考 | 与大领域相关，但构念、人群、机制或指标距离较远；可用于背景或方法说明 | 摘要 + 关键段落阅读，必要时保留 |
-| 1 | 弱相关/排除 | 与主题不符、无法定位证据、重复、非学术来源、仅标题相似、无可用摘要或全文 | 记录原因，通常不进入正文引用 |
+| 4 | 核心文献 | 直接对应核心构念、目标人群/任务、关键神经/生理指标、理论机制或主要结果 | 全文精读，进入矩阵和星图核心层 |
+| 3 | 重要相关 | 支持一个核心板块，如概念、范式、机制、测量、方法或证据链 | 阅读摘要、方法、结果、讨论；必要时全文精读 |
+| 2 | 背景相关 | 与主题有交集，但人群、指标、任务或理论边界不完全匹配 | 摘要和关键段落阅读 |
+| 1 | 边缘相关 | 只提供一般背景、相邻概念或排除理由 | 记录后通常不纳入正文核心引用 |
 
-等级判断必须给出理由，至少包括：主题贴合、人群贴合、机制贴合、方法/指标贴合、证据用途、局限。
+辅助评分：方法质量、样本适配度、理论贡献、神经/生理指标适配度、范式适配度、证据强度、引用价值、与其他文献连接度。
 
-同时给出辅助评分：
+## 13. 阶段 05：认知神经科学证据矩阵
 
-```csv
-paper_id,relevance_level,method_quality,sample_fit,mechanism_contribution,evidence_strength,citation_value,network_connectivity,review_role,decision,reason
-```
+输出 CSV、Excel、Markdown 三种格式。
 
-各辅助评分使用 1–4 分，不能用一个总分替代具体判断。
-
-## 14. 阶段 05：提取、矩阵与质量评价
-
-对 3–4 级文献进行结构化精读。2 级文献只在其确有背景或方法价值时提取。1 级文献不作为正文证据。
-
-输出 CSV、Excel、Markdown 三种矩阵：
-
-```text
-05_matrix/literature_matrix.csv
-05_matrix/literature_matrix.xlsx
-05_matrix/literature_matrix.md
-05_matrix/neural_mechanism_matrix.csv
-05_matrix/neural_mechanism_matrix.xlsx
-05_matrix/neural_mechanism_matrix.md
-05_matrix/quality_appraisal.csv
-```
-
-### 通用文献矩阵字段
+普通阅读矩阵字段：
 
 ```csv
-paper_id,study_id,zotero_key,bibtex_key,citation_apa,year,document_type,relevance_level,relevance_reason,method_quality,sample_fit,mechanism_contribution,evidence_strength,citation_value,network_connectivity,quality_domains,quality_concerns,review_role,constructs,population,age_range,country_or_region,sample_size,design,measures,methods_or_analysis,key_findings,effect_or_result_summary,limitations,contradictions,relation_to_topic,usable_for_sections,evidence_location,short_quote,claim_id,notes
+stable_id,文献类型,相关性等级,方法质量,样本适配度,理论贡献,证据强度,引用价值,核心构念,人群/样本,研究设计,主要发现,局限,可引用位置,适合写入章节,是否需要复核
 ```
 
-### 认知神经科学机制矩阵字段
+神经/生理机制矩阵字段：
 
 ```csv
-paper_id,paradigm_or_task,stimuli,control_condition,cognitive_process,emotion_process,encoding_consolidation_retrieval_phase,neural_method,neural_indicator,brain_region_or_network,time_window,preprocessing,statistical_threshold,multiple_comparison_correction,behavioral_outcome,neural_outcome,brain_behavior_link,mechanism_claim,causal_status,replicability_concern,evidence_location,claim_id
+stable_id,范式/任务,刺激材料,行为指标,神经/生理指标,脑区/网络,ERP成分/频段,fMRI contrast,PSG/睡眠指标,眼动/自主神经指标,采集设备,预处理流程,统计模型,关键结果,机制解释,替代解释,局限,可支持主张,页码/图表位置,是否需要复核
 ```
 
-`evidence_location` 必须尽量精确到页码、章节、段落、结果段、表格或图号。`short_quote` 只保留必要短引文；优先中文转述，不得大量复制原文。
+不要把“某脑区激活”直接写成确定机制。必须区分观察结果、统计关联、机制解释和作者推论。
 
-### 质量评价原则
+## 14. 阶段 06：机制模型与 HTML 星图
 
-按研究设计选择工具，不使用单一总分替代判断：
+机制模型至少包括：
 
-- 系统综述/元分析：PRISMA 报告完整性、AMSTAR 2/JBI 相关条目。
-- 范围综述：PRISMA-ScR/JBI 范围综述方法。
-- 叙述/机制综述：SANRA 思路 + 机制链透明度。
-- 观察性研究：STROBE/JBI，关注样本、测量、混杂、缺失、统计模型和外推性。
-- 量表/测量研究：COSMIN 思路，关注结构效度、信度、测量不变性、跨文化适配。
-- 随机或干预研究：CONSORT/CONSORT-SPI。
-- EEG/ERP：任务效度、试次数、伪迹处理、基线、成分窗口、ROI、统计阈值、多重比较、可重复性。
-- fMRI：预处理、运动控制、ROI/whole-brain、阈值、cluster correction、功能连接、样本量、报告完整性。
-- PSG/睡眠：睡眠分期、REM/NREM 指标、睡眠剥夺或 nap 方案、混杂睡眠变量、实验时序。
-- 动物/计算模型：species/model boundary、可迁移性、模型假设和人类推断边界。
+- 核心心理构念。
+- 行为指标。
+- 神经/生理指标。
+- 理论机制。
+- 人群与情境边界。
+- 证据强度。
+- 矛盾结果和替代解释。
 
-## 15. 阶段 06：证据综合
+HTML 文献星图基于激活扩散模型：
 
-综合不是逐篇罗列，而是建立“构念—方法—机制—证据—限制”的结构。
+- 节点：文献、理论、构念、范式、任务、脑区/网络、神经/生理指标、核心发现。
+- 边：引用关系、共同变量、共同范式、共同指标、机制链条、结果一致/冲突。
+- 权重：主题贴合度 × 方法质量 × 证据强度 × 神经/生理指标适配度 × 连接度 × 新近性/经典性。
+- 输出：`reference_star_map.html`、`star_map_data.json`、`weighting_notes.md`。
 
-输出至少包括：
+星图用于辅助理解，不得替代全文阅读和方法质量评价。
 
-- `claim_evidence_map.csv`：每个核心主张对应哪些文献、证据强度、反证、可写位置。
-- `mechanism_synthesis.md`：机制链、时间过程、脑区/网络、行为指标与理论解释。
-- `contradictions.md`：不同研究结论冲突、原因假设、方法差异。
-- `evidence_gap_register.csv`：概念缺口、测量缺口、样本缺口、设计缺口、机制缺口、实践缺口。
-- `methods_lessons.md`：可复用的实验设计、量表、统计方法、神经指标。
+## 15. 阶段 07：综述架构或实验设计
 
-标记证据状态：`convergent`、`mixed`、`limited`、`indirect`、`contradictory`、`absent`。`absent` 不得写成已知结论。
+如果任务是综述，默认板块：
 
-## 16. 阶段 07：HTML 文献星图
+1. 引言与问题提出。
+2. 概念界定与理论边界。
+3. 核心实验范式与测量方法。
+4. 行为证据。
+5. 神经/生理证据。
+6. 行为—神经机制整合。
+7. 矛盾结果、方法学问题与替代解释。
+8. 整合模型。
+9. 未来研究方向。
+10. 结论。
 
-生成单文件 HTML：
+如果任务是实验/实证项目，方法设计至少包括：
 
-```text
-07_star_map/reference_star_map.html
-```
+- 研究问题与假设。
+- 被试、人群、纳入/排除标准、样本量依据。
+- 任务范式、刺激材料、试次数、block、随机化、反应窗口。
+- 神经/生理采集设备、采样率、通道/ROI、事件标记、同步方案。
+- 问卷、行为指标、神经/生理指标、主要/次要结局。
+- 伦理、安全、疲劳、诱发负性情绪、退出机制。
+- 预注册/开放科学计划。
 
-节点类型：
+## 16. 阶段 08：预处理与分析计划
 
-- `topic_seed`：用户聚焦后的主题核心。
-- `construct`：核心构念、相关构念、理论模型。
-- `mechanism`：机制链、过程阶段、脑区/网络。
-- `method`：测量工具、统计模型、实验范式、神经/生理指标。
-- `paper_core`：4 级核心机制文献。
-- `paper_important`：3 级重要文献。
-- `paper_background`：2 级背景文献。
-- `gap`：证据缺口。
-- `controversy`：争议或矛盾证据。
+根据方法类型制定分析计划：
 
-边类型：`defines`、`measures`、`tests`、`localizes`、`supports`、`contradicts`、`method_for`、`brain_behavior_links`、`cites_or_extends`。
+- EEG/ERP：滤波、重参考、坏道、ICA/伪迹处理、epoch、baseline、成分窗口、ROI/电极群、multiple comparisons。
+- fMRI：slice timing、motion correction、normalization、smoothing、first-level/second-level、ROI/whole-brain、multiple comparisons。
+- PSG/sleep：睡眠分期、REM/NREM 指标、arousal、睡眠结构、nap protocol、评分一致性。
+- 眼动：注视、扫视、兴趣区、瞳孔、眨眼/丢失数据处理。
+- 行为数据：正确率、反应时、d′、c、D-score、混合模型、重复测量 ANOVA、Bayesian/robust analysis。
+- 问卷数据：反向计分、信度、CFA/ESEM、相关、回归、中介/调节、SEM。
 
-默认权重：
+任何探索性分析必须标注 exploratory。不要在看到结果后倒推假设。
 
-```text
-paper_weight =
-  0.25 * relevance_score +
-  0.20 * quality_score +
-  0.20 * mechanism_specificity +
-  0.15 * citation_network_role +
-  0.10 * recency_or_update_value +
-  0.10 * writing_utility
-```
+## 17. 阶段 09：写作规范
 
-以 `topic_seed` 为初始激活点，沿边向理论、测量、机制、神经指标和实证文献扩散。激活随路径长度衰减；支持边、方法边和 brain-behavior link 增加相邻节点激活；矛盾边不删除节点，而是标记为争议节点并提高审稿风险提示；多条独立路径到达同一文献时，提高可见度。不要把扩散结果解释为因果关系。
+默认 APA 第 7 版兼容。根据任务类型写作：
 
-HTML 应包含：搜索框、节点图例、筛选等级、方法/指标筛选、点击节点显示 APA 引文/摘要/证据位置/可用于哪个章节、导出 JSON 的提示。
+- 综述稿：引言、理论/机制、方法证据、实证证据、整合模型、局限、未来方向、结论。
+- 实证稿：引言、方法、结果、讨论、参考文献、表图、补充材料。
 
-## 17. 阶段 08：写作架构
+每个事实性、定义性、理论性、方法性、结果性或机制性主张，写作时就绑定来源或分析产物。不要写完后硬补引用。
 
-写作前先冻结章节—证据计划。
+## 18. 阶段 10：来源、方法与机制审计
 
-默认结构，可按主题调整：
-
-1. 标题、摘要、关键词。
-2. 引言：问题背景 → 机制争议 → 现有综述不足 → 本综述目的。
-3. 概念界定与理论基础：核心概念、相邻概念、理论模型、发展脉络。
-4. 测量与实验范式：量表、任务、刺激、控制条件、信效度、范式争议。
-5. 行为证据：反应时、正确率、d′、偏向、记忆成绩、评分指标等。
-6. 神经/生理证据：EEG/ERP、fMRI、PSG、眼动或其他指标。
-7. 行为—神经机制整合：脑区/网络、时间过程、任务阶段、理论解释。
-8. 人群差异与发展/临床边界：年龄、临床状态、文化、药物、样本限制。
-9. 方法学评价与不一致结果：样本量、统计阈值、多重比较、任务效度、可重复性。
-10. 整合模型与未来方向：具体到可检验机制、实验设计、指标和样本建议。
-11. 结论：保守总结，不夸大神经机制或实践意义。
-
-写作前必须生成 `citation_plan.csv`，明确每个章节允许使用哪些 `claim_id`。
-
-## 18. 阶段 09：APA 风格正文写作
-
-写作规则：
-
-- 使用 APA 第 7 版作者—年份引文格式。
-- 每个事实性、定义性、理论性、方法性、神经机制性或结论性主张必须连接 `claim_id`。
-- 不写没有证据的“研究表明”。
-- 不把横断相关或相关性神经影像写成因果。
-- 不把脑区激活写成“证明机制”。应写为 convergent、indirect、limited 或 mixed evidence。
-- 不把成人样本结论直接外推到青少年、儿童、老年人或临床群体。
-- 不把动物或计算模型结果直接写成人类心理机制。
-- 不把一种任务或量表测到的指标当成整个理论构念。
-- 引文密集段落要合并成论证，不要一篇一段。
-- 对争议、空白和方法限制的表述应明确，不用过度确定语气。
-
-产物：
-
-```text
-09_manuscript/review_draft.md
-09_manuscript/review_draft.docx
-09_manuscript/references.bib
-09_manuscript/apa_references.md
-09_manuscript/tables/
-09_manuscript/figures/
-```
-
-## 19. 阶段 10：原文—参考文献一一对齐
-
-对齐分两步：写作中实时对齐，写完后全稿审计。
-
-写作中，每段写作前读取 `citation_plan.csv`，每写一个主张就标注 `claim_id`，对应矩阵中的 `paper_id` 和 `evidence_location`。
-
-写完后生成：
-
-```text
-10_alignment/source_alignment_table.csv
-10_alignment/source_alignment_table.xlsx
-10_alignment/claim_audit.md
-10_alignment/unsupported_or_overstated_claims.md
-```
-
-推荐字段：
+必须输出：
 
 ```csv
-alignment_id,manuscript_section,manuscript_page,manuscript_paragraph,manuscript_sentence,claim_text,claim_type,citation_in_text,paper_id,zotero_key,bibtex_key,source_title,source_page,source_section,source_paragraph_or_table,source_evidence_summary,short_quote,evidence_role,alignment_status,risk_note,fix_needed
+正文页码,正文段落,正文原句,支撑文献/分析产物,来源页码/图表/段落,原文证据短摘录,证据类型,支持强度,是否存在过度推论,是否需要复核
 ```
 
-要求：
+同时核查：
 
-- `manuscript_page` 在 Markdown 阶段可先用章节和段落号；导出 DOCX/PDF 后再补页码。
-- `source_page` 优先用 PDF 页码；若电子文献无页码，使用章节、段落、表图编号。
-- `claim_type` 可为：定义、理论、方法、测量、实验结果、神经结果、脑—行为关系、争议、研究缺口、推论。
-- `alignment_status` 可为：`verified`、`needs_page`、`weak_support`、`overstated`、`missing_source`、`citation_not_used`。
-- 任何 `missing_source` 或 `overstated` 必须修改正文或删除主张。
-- 参考文献表只保留正文实际引用文献；正文引用必须全部出现在参考文献表。
+- 神经机制主张是否超出原文证据。
+- 行为结果、神经指标、统计结果是否一致。
+- 方法部分是否足以复现。
+- 预处理和分析计划是否与报告结果一致。
+- APA 引文和参考文献是否一致。
 
-## 20. 阶段 11：模拟投稿与意见审核
+## 19. 阶段 11：模拟投稿审稿
 
-模拟投稿不是实际投稿。若涉及目标期刊 scope、article type、word limit、reference style、open science、AI policy、fees 或伦理要求，必须核查期刊当前官方说明，不得只凭记忆。
+默认模拟两套审查：中文心理学/认知神经科学相关期刊，以及英文心理学/认知神经科学期刊。期刊 scope、格式、版面费、开放获取、AI policy 和投稿要求必须联网核查，不能依赖旧知识。
 
-步骤：
+审稿模块包括：
 
-1. 根据主题、文章类型、语言、方法和篇幅筛选 2–3 个可能期刊。
-2. 分别模拟中文心理学/神经科学相关期刊和 SSCI/英文心理学或认知神经科学期刊审稿路径，除非用户只指定一种。
-3. 写 `journal_fit_memo.md`：推荐目标、理由、风险、格式差距。
-4. 进行模拟编辑初筛：范围、创新性、综述类型匹配、方法透明度、引用完整性、伦理和学术诚信。
-5. 分角色模拟审稿：理论/领域专家、认知神经科学方法专家、心理测量/统计专家、写作与 APA 格式审稿、反方审稿人。
-6. 输出模拟决定：`minor revision`、`major revision`、`reject and resubmit` 或 `not ready`。不要轻易给 `accept`。
-7. 生成 `revision_matrix.csv`：意见、严重度、证据、修改位置、操作、状态。
-8. 按证据完成修改，并再次运行引用、格式、方法、逻辑、神经机制过度推论审计。
+- 编辑初筛。
+- 理论贡献审稿。
+- 方法学/范式审稿。
+- 神经/生理指标审稿。
+- 统计与可复现性审稿。
+- APA 格式审稿。
+- 引文准确性审稿。
+- 修改意见清单。
+- 作者回复模板。
 
-## 21. 认知神经科学提取要求
+模拟反馈必须标注为模拟，不得冒充真实期刊意见。
 
-每篇纳入研究在可获得时提取：
+## 20. 安全边界
 
-- experimental paradigm/task: fear conditioning, extinction, emotional picture memory, word-pair memory, facial emotion task, Go/No-Go, n-back, IAT/GNAT, sleep lab protocol, nap protocol
-- sample: age, sex/gender, clinical status, medication, sleep quality, trauma/depression/anxiety status, culture/language
-- REM/sleep variables: REM duration, REM latency, REM density, awakenings, polysomnography, sleep deprivation, nap/night sleep, dream report
-- cognitive process: encoding, consolidation, reconsolidation, extinction, retrieval, attentional bias, affective evaluation, regulation
-- behavioral indicators: accuracy, reaction time, hit/false alarm, d′, bias, recall/recognition, valence/arousal ratings
-- EEG/ERP indicators: P1, N1, N2, P3, LPP, ERN, FRN, N400, theta, alpha, beta, gamma, sleep spindles, slow oscillations, REM theta
-- fMRI/brain indicators: amygdala, hippocampus, vmPFC, dlPFC, ACC, insula, striatum, DMN, salience network, frontoparietal network, functional connectivity
-- statistical claims: effect size, confidence interval, correction method, model type, preregistration, robustness, null findings
+- 不伪造文献、DOI、页码、PDF、数据、ERP 成分、脑区激活、fMRI contrast、PSG 指标、眼动指标、统计结果或审稿意见。
+- 不绕过数据库权限、验证码、MFA、付费墙、下载限制或出版社条款。
+- 不保存账号、密码、验证码、cookie、token、密钥或浏览器身份凭据。
+- 不使用盗版论文站、影子图书馆、PDF bot 或泄露账号。
+- 不无人值守高速批量下载。
+- 不把 Zotero 数据库、PDF、浏览器凭据、受限全文或敏感原始数据提交到 GitHub。
+- 不真实投稿、支付费用或联系编辑，除非用户另行明确授权并在操作时确认。
+- 不把相关或共激活直接写成因果机制；机制推论必须标注证据等级和替代解释。
 
-## 22. 写作与推理规则
+## 21. 完成条件
 
-- 区分 evidence、inference、recommendation。
-- 不从横断相关或相关性神经影像推断因果。
-- 不声称某脑区“证明”某心理机制。
-- 区分成人、青少年、儿童、老年、临床、高风险和健康样本。
-- 区分 human、animal 和 computational evidence。
-- 区分 emotion memory enhancement、emotion regulation、fear extinction 和 general memory consolidation。
-- 有 primary study 时，不把 review 当作 primary empirical evidence 引用。
-- 不把 null 或 mixed evidence 写成正向确定结论。
-- 避免“近年来，随着……”这类无证据开头。
-- 避免“具有重要理论和实践意义”这类空泛结尾，除非段落已说明具体意义。
-- 优先使用段落级论证：claim → evidence pattern → limitation/contrast → implication。
-
-## 23. 失败条件
-
-出现以下情况时，必须停止或降级报告，不能继续声称完成：
-
-- 没有冻结综述主题就开始正式大规模下载。
-- 检索式、数据库、日期、结果数无法复现。
-- 用摘要代替可获得全文支持精确主张。
-- 文献等级没有理由。
-- 质量评价只给总分，没有设计域判断。
-- 认知神经机制没有原文页码/章节/结果段支持。
-- 将脑区激活、ERP 成分或功能连接写成直接因果证明。
-- 将成人、动物或计算模型结论直接外推到目标人群。
-- 正文引用与参考文献不一致。
-- 主张无法定位到原文页码/章节/段落/表图。
-- 使用未授权 PDF、盗版来源、cookie、账号密码或突破访问限制。
-- 将模拟审稿意见表述为真实反馈。
-
-## 24. 最终回复格式
-
-每次阶段结束，向用户简洁报告：
-
-```text
-完成阶段：
-核心产物：
-关键发现：
-机制证据状态：
-证据缺口：
-风险/限制：
-下一步建议：
-需要用户确认的问题：
-```
-
-不要输出冗长过程日志；日志保存在运行目录。用户需要详细日志时再提供。
+只有在用户要求的阶段完成、关键 gate 通过、未解决风险列明后，才结束。返回运行目录、完成阶段、生成/修改文件、主要结论、验证结果、未解决 blocker 和下一步建议。不得在仍有关键引用、方法、数据、伦理、预处理、统计或机制推论问题时声称“可直接投稿”。
