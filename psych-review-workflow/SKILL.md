@@ -1,137 +1,174 @@
 ---
 name: psych-review-workflow
-description: Use this skill to run a reusable psychology literature-review workflow from broad topic exploration to focused review protocol, exhaustive literature collection, Zotero ingestion, screening, evidence matrix, HTML reference star map, APA-style manuscript drafting, source alignment, and simulated submission review. 适用于心理学、健康心理学、临床心理学、认知神经科学等方向的中文主导综述写作；可用于“人格功能损害”等具体主题，也可迁移到其他综述主题。不要用于伪造文献、绕过付费墙、无人值守批量下载、真实投稿提交或脱离证据矩阵的自由写作。
+description: Use this skill to run a standalone Chinese-first psychology literature-review workflow for general psychology, health psychology, clinical psychology, developmental psychology, psychometrics, and related topics. It supports broad-direction exploration, focused protocol freeze, saturated-but-bounded literature search, Chrome/Zotero Connector ingestion, folder fallback, classification, 1–4 relevance rating, quality appraisal, CSV/Excel/Markdown reading matrices, HTML reference star map, APA 7 manuscript writing, sentence/paragraph-to-source alignment, and simulated Chinese/English journal review. Do not use it to fabricate sources, bypass paywalls, save credentials, run unattended mass downloading, submit real manuscripts, or write prose unsupported by the evidence matrix.
 ---
 
 # Psychology Review Workflow / 心理学综述写作工作流
 
-本 skill 用于把一个初始研究方向推进为可投稿或可作为学位论文基础的综述稿。默认语言以中文为主，保留必要英文术语、数据库检索式、APA 引文和英文题录字段。
+本 skill 是一个**独立的通用心理学综述工作流**，不是 `psych-literature-review-workflow` 的路由或精简替代。它主要服务普通心理学、健康心理学、临床心理学、发展心理学、精神病理学、心理测量、干预与应用心理学等综述项目。
 
-它不是单纯“帮我写一篇综述”的写作器，而是一个可审计的综述研究流程：先帮用户聚焦选题，再系统搜集、筛查、阅读、建矩阵、建文献星图，最后基于证据写作、对齐引用并模拟投稿审稿。
+默认语言为中文，必要英文保留于数据库检索式、英文题名、量表名、理论名、变量名、DOI/PMID、APA 引文和参考文献表。
 
-## 适用场景
+当主题明显涉及 EEG/ERP、fMRI、PSG、眼动、神经机制、实验范式或脑区网络时，可以改用或借鉴 `psych-cog-neuro-review`；但本 skill 仍可处理其中的普通心理学综述部分。
+
+## 1. 适用场景
 
 使用本 skill，当用户提出以下任务之一：
 
-- 给出一个较宽研究方向，希望先通过综述和方法文献来聚焦选题。
-- 已有聚焦后的综述主题，希望进行正式文献检索、Zotero 入库、阅读矩阵和综述写作。
-- 需要为心理学、健康心理学、临床心理学、认知神经科学、发展心理学、精神病理学等方向建立可复用综述管道。
-- 需要输出 APA 风格综述稿、参考文献、文献阅读矩阵、证据—主张对齐表、HTML 文献星图和模拟审稿意见。
+- 只给出宽泛研究方向，需要先搜集综述、方法学文章和核心理论文章，帮助聚焦综述方向。
+- 已有聚焦后的综述主题，需要进行正式检索、Zotero 入库、分类筛选、阅读全文、矩阵整理和综述写作。
+- 需要中文为主、APA 第 7 版兼容的心理学综述稿。
+- 需要输出导师汇报版简表、文献阅读矩阵、HTML 文献星图、正文—参考文献对齐表和模拟投稿审稿意见。
 
 不要使用本 skill，当任务只是：
 
-- 修改单个段落、润色一封邮件、临时解释一个概念。
-- 用户只需要一张普通参考文献表，不需要流程化检索和证据审计。
-- 用户要求绕过数据库权限、验证码、MFA、付费墙、下载限制或使用盗版 PDF 来源。
-- 用户要求真实投稿、代替作者提交系统、支付版面费、联系编辑或伪造审稿意见。
+- 临时解释概念、润色单段文字、写邮件或生成普通参考文献列表。
+- 用户要求伪造文献、伪造 DOI、伪造页码、伪造审稿意见或伪造投稿结果。
+- 用户要求绕过数据库权限、验证码、MFA、付费墙、下载限制、出版社条款或使用盗版 PDF 来源。
+- 用户要求真实提交投稿系统、支付版面费、联系编辑或执行真实投稿动作。
 
-## 基本原则
+## 2. 默认综述类型
 
-1. **先聚焦，再正式综述**：不要在主题尚模糊时直接大规模下载全文。先通过探索式检索帮助用户确定边界。
-2. **证据优先于写作**：正式写作只能来自已验证的题录、全文、阅读矩阵和证据位置。
-3. **中文理解，英文溯源**：解释、阶段报告和写作建议以中文为主；检索式、题录、DOI、英文量表名、APA 引文保持英文准确性。
-4. **广覆盖但有停止规则**：正式检索要尽可能覆盖主题领域，但不能无限抓取。停止条件必须基于新增文献是否继续提供新的理论、方法、测量、样本、结论或矛盾证据。
-5. **分类阅读而不是堆文献**：先按综述类、理论类、方法/测量类、实证类、干预类、元分析/系统综述类等分类，再分层阅读。
-6. **等级判断不等于质量评分**：相关性等级 1–4 只表示与当前综述主题的贴合度；方法质量需要另按研究设计评价。
-7. **不伪造引用**：正文中每一个事实性、定义性、理论性、方法性或结论性主张，都必须能回到具体文献、页码、章节/段落或表图。
-8. **模拟投稿必须明确标注**：所有编辑意见、审稿意见和决策均为模拟，不得表述为真实期刊反馈。
+默认运行方式为：**半系统化叙述综述 / 整合型综述**。
 
-## 与现有 psych-* skills 的关系
+可按用户要求切换为：
 
-若仓库中已有以下技能，可以复用其阶段能力，但本 skill 对综述任务保留总控责任：
+- narrative review / 叙述性综述
+- theoretical review / 理论综述
+- scoping review / 范围综述
+- systematic review / 系统综述
+- methodological review / 方法学综述
+- measurement review / 测量工具综述
+- meta-analysis-prep review / 元分析预备综述
 
-- `$psych-evidence-search`：正式检索、检索日志、候选题录。
-- `$psych-zotero-ingest`：Zotero 入库、合法全文获取、附件核验。
-- `$psych-literature-screen`：筛查、质量评价、阅读卡、证据矩阵。
-- `$psych-mini-review`：简短证据综合与 claim-evidence map。
-- `$psych-manuscript-write`：手稿写作、引用核查、APA 风格修订。
-- `$psych-submission-review`：投稿适配、模拟审稿、修改矩阵。
+不要在没有正式协议、完整检索日志、纳排标准、筛查记录和偏倚风险评价时，把文章声称为“系统综述”。若只是借鉴 PRISMA 的透明性原则，应写作“半系统化叙述综述”或“透明化叙述综述”。
 
-当这些技能不足以覆盖“探索聚焦”“HTML 文献星图”“逐句引用对齐”等任务时，由本 skill 自行执行并保存对应产物。
+## 3. 运行模式
 
-## 启动时先问用户的关键问题
+首次运行时选择一个模式，并写入 `state.json` 与 `logs/decisions.md`。
 
-首次运行时，先用简洁中文询问，除非用户已经给出答案。用户没有完全回答时，可以用默认值继续，但必须记录为 `assumption`。
+| 模式 | 适用任务 | 最低要求 | 典型输出 |
+|---|---|---|---|
+| `lite` | 早期选题、课程综述、快速方向判断 | 阶段 00、01、02 简化版，阶段 04–06 可抽样完成 | 聚焦建议、初步文献表、简版框架 |
+| `standard` | 研究生综述、学位论文综述、中文期刊预备稿 | 阶段 00–11 全流程；单人筛查可接受但需声明 | 完整矩阵、正文草稿、引用对齐、模拟审稿 |
+| `strict` | 范围综述、系统综述、英文投稿预备稿、高风险引用核查 | 正式协议、完整检索日志、严格纳排、质量评价、完整对齐 | 可审计检索链、PRISMA 风格追踪、严格审计报告 |
 
-1. 综述类型：叙述综述、范围综述、系统综述、方法学综述、理论综述、整合综述，还是先不确定？
-2. 当前阶段：只是一个宽研究方向，还是已经有聚焦后的综述题目？
-3. 目标用途：课程作业、开题、学位论文综述、中文期刊、英文期刊、投稿预备稿？
-4. 主题边界：核心构念、目标人群、年龄段、临床/非临床样本、研究设计、是否包含干预或神经机制。
-5. 检索范围：年份、语言、数据库、是否纳入中文文献、是否需要灰色文献。
-6. 文献获取：Zotero 目标 collection 名称；是否允许使用 Chrome + Zotero Connector；没有权限时是否改为下载到指定文件夹后手动导入。
-7. 输出格式：Markdown、DOCX、HTML、CSV、BibTeX、APA 7 参考文献、投稿模拟报告。
-8. 写作约束：字数、中文/英文比例、目标期刊或学校格式、是否要求低 AI 痕迹、是否有不可使用的理论或技术。
+不要静默降低用户要求的模式。若条件不允许完成 `strict`，必须记录 blocker，并在用户同意或明确说明假设后降级。
 
-## 总体阶段
+## 4. 总原则
+
+1. **先探索聚焦，再正式综述**：主题未聚焦时，不直接大规模下载全文。
+2. **证据先于写作**：正式写作必须来自题录、全文、阅读卡、证据矩阵和来源位置。
+3. **广覆盖但有停止规则**：正式检索应尽可能覆盖主题，直到新增文献不再提供新的理论、方法、测量、人群、关键发现、争议或高质量证据。这里的停止不是数学意义的穷尽，而是综述写作价值饱和。
+4. **分类阅读**：先分类，再评级，再阅读全文；不要把所有文献平铺成普通参考文献表。
+5. **相关度与质量分开**：1–4 级表示与主题贴合度，不等于方法质量。方法质量另行评价。
+6. **正文写作时同步引文对齐**：不要等写完后才补引用。每个事实性、定义性、理论性、方法性或结论性主张在写作时就绑定来源。
+7. **中文优先，英文溯源**：说明、判断标准、矩阵、审稿意见默认中文；检索、题录和 APA 信息保持英文准确。
+8. **模拟投稿必须标注模拟性质**：不得把模拟反馈写成真实期刊意见。
+
+## 5. 与仓库其他 skills 的关系
+
+本 skill 保持独立，但可以借鉴或调用仓库中其他能力：
+
+- `psych-literature-review-workflow`：更完整的新总控范式，可作为流程一致性参考。
+- `psych-cog-neuro-review`：当综述涉及认知神经科学、脑机制、实验范式、生理指标时参考。
+- `psych-zotero-ingest`：用于 Zotero 入库、合法全文获取、PDF 核验和重复项处理。
+- `source-alignment` 类子 skill：用于正文—参考文献逐句/逐段对齐。
+
+当不同 skill 的约束冲突时，以用户在当前任务中明确确认的约束为准。若无特别说明，本 skill 的默认数据库范围与运行目录采用下文规定。
+
+## 6. 启动时的需求沟通
+
+首次运行时先简短询问，除非用户已经给出答案。用户未回答时，可以用默认值继续，但必须在 `logs/decisions.md` 中记录为 `assumption`。
+
+必要问题：
+
+1. 当前是宽研究方向，还是已经聚焦后的综述主题？
+2. 目标综述类型：叙述综述、理论综述、范围综述、系统综述、方法学综述、测量综述，还是默认半系统化叙述综述？
+3. 运行模式：`lite`、`standard`、`strict`，默认 `standard`。
+4. 目标用途：课程作业、开题、学位论文综述、中文期刊、英文期刊、投稿预备稿。
+5. 核心边界：构念、人群、年龄段、临床/非临床、研究设计、是否纳入干预、是否纳入神经机制。
+6. 文献获取方式：是否允许 Codex 使用 Chrome + Zotero Connector；Zotero 目标 collection 名称；若失败是否下载到文件夹由用户手动导入。
+7. 输出格式：Markdown、DOCX、CSV、Excel、HTML、BibTeX/RIS、APA 参考文献、模拟审稿报告。
+
+用户已明确回答时，不要重复询问。
+
+## 7. 默认运行目录
 
 默认建立一个运行目录：
 
 ```text
 review_runs/<YYYYMMDD>_<short_topic>/
+├── state.json
+├── manifest.json
+├── logs/
+│   ├── decisions.md
+│   └── events.jsonl
+├── literature/
+│   ├── 00_待导入Zotero/
+│   ├── 01_已导入Zotero/
+│   ├── 02_全文PDF/
+│   ├── 03_题录导出/
+│   ├── 04_阅读矩阵/
+│   ├── 05_星图/
+│   └── 06_综述正文/
+├── 00_exploration/
+├── 01_protocol/
+├── 02_search/
+├── 03_library/
+├── 04_screening/
+├── 05_matrix/
+├── 06_synthesis/
+├── 07_star_map/
+├── 08_outline/
+├── 09_manuscript/
+├── 10_alignment/
+└── 11_submission_review/
 ```
 
-每个阶段追加写入：
+不要覆盖旧文件。修订版使用 `_v2`、`_v3`，并在日志中说明修订原因。
 
-```text
-state.json
-manifest.json
-logs/events.jsonl
+## 8. 阶段总览
+
+| 阶段 | 名称 | 目标 | 主要产物 |
+|---|---|---|---|
+| 00 | 宽方向探索 | 从宽方向中识别可写综述方向 | `scoping_brief.md`, `seed_reviews.csv`, `seed_methods.csv`, `focus_options.md`, `导师汇报版简表.md` |
+| 01 | 聚焦与协议冻结 | 把聚焦主题转为可执行综述协议 | `review_protocol.md`, `concept_map.md`, `inclusion_exclusion.md` |
+| 02 | 正式大范围检索 | 饱和式搜集符合主题的文献 | `queries.md`, `search_log.csv`, `candidate_records.csv` |
+| 03 | Zotero/全文获取 | Chrome + Zotero Connector 入库，备选为文件夹手动导入 | `zotero_manifest.csv`, `pdf_manifest.csv`, `acquisition_report.md` |
+| 04 | 分类与初筛 | 分类文献并给出 1–4 级主题符合程度 | `classification.csv`, `relevance_ratings.csv`, `screening_log.csv` |
+| 05 | 全文阅读矩阵 | 深读全文并建立证据矩阵 | `literature_matrix.csv`, `literature_matrix.xlsx`, `literature_matrix.md`, `quality_appraisal.csv` |
+| 06 | 证据综合 | 汇总理论、方法、发现、矛盾和空白 | `claim_evidence_map.csv`, `contradictions.md`, `gap_register.md` |
+| 07 | HTML 文献星图 | 基于激活扩散模型建立参考文献网络 | `reference_star_map.html`, `star_map_data.json`, `weighting_notes.md` |
+| 08 | 写作架构 | 设计综述板块和论证链 | `section_plan.md`, `argument_map.md`, `citation_plan.csv` |
+| 09 | APA 综述正文 | 写作中文为主、APA 7 兼容的综述稿 | `manuscript.md`, `manuscript.docx`, `references.bib`, `apa_references.md` |
+| 10 | 原文—引用对齐 | 精确核查正文与参考文献来源 | `source_alignment_table.csv`, `source_alignment_table.xlsx`, `claim_audit.md` |
+| 11 | 模拟投稿审稿 | 模拟中文/英文期刊投稿前审查 | `journal_fit_memo.md`, `simulated_reviews.md`, `revision_matrix.csv` |
+
+## 9. 阶段 00：宽方向探索
+
+当用户只给出研究方向时，先做探索式检索。目标不是完整下载，而是帮助用户聚焦。
+
+优先搜集：
+
+- 最近 5–10 年综述、系统综述、范围综述、元分析。
+- 经典理论文章、概念界定文章、共识/指南。
+- 研究方法类文章、测量工具文章、量表验证文章。
+- 近 3 年高相关实证文章，用于判断前沿趋势。
+
+输出 `focus_options.md`，每个候选方向包括：中文题目、英文题目、核心研究问题、适合综述类型、文献基础、章节雏形、写作优势、写作风险、与用户研究方向的贴合度、是否建议继续。
+
+同时输出导师汇报版简表：
+
+```csv
+候选方向,核心问题,文献基础,创新点,风险,推荐等级,下一步建议
 ```
 
-不要覆盖旧文件；修订版使用 `_v2`、`_v3` 或在日志中记录覆盖授权。
+聚焦方向确认前，不进入正式大范围下载或 Zotero 批量入库。
 
-| 阶段 | 名称 | 主要产物 |
-|---|---|---|
-| 00 | 宽方向探索 | `00_exploration/scoping_brief.md`, `seed_reviews.csv`, `seed_methods.csv` |
-| 01 | 聚焦与协议冻结 | `01_protocol/review_protocol.md`, `concept_map.md`, `inclusion_exclusion.md` |
-| 02 | 正式检索 | `02_search/search_log.csv`, `queries.md`, `candidates.csv` |
-| 03 | Zotero/全文获取 | `03_library/zotero_manifest.csv`, `pdf_manifest.csv`, `acquisition_report.md` |
-| 04 | 分类与初筛 | `04_screening/classification.csv`, `screening_log.csv`, `relevance_ratings.csv` |
-| 05 | 深度阅读矩阵 | `05_matrix/evidence_matrix.csv`, `reading_cards/`, `quality_appraisal.csv` |
-| 06 | 证据综合 | `06_synthesis/claim_evidence_map.csv`, `contradictions.md`, `gap_register.md` |
-| 07 | 文献星图 | `07_star_map/reference_star_map.html`, `star_map_data.json`, `weighting_notes.md` |
-| 08 | 写作架构 | `08_outline/section_plan.md`, `argument_map.md`, `citation_plan.csv` |
-| 09 | 综述正文 | `09_manuscript/manuscript.md`, `references.bib`, `apa_references.md` |
-| 10 | 原文—引用对齐 | `10_alignment/source_alignment_table.csv`, `claim_audit.md` |
-| 11 | 模拟投稿与审稿 | `11_submission/journal_fit_memo.md`, `simulated_reviews.md`, `revision_matrix.csv` |
+## 10. 阶段 01：聚焦与协议冻结
 
-## 阶段 00：宽方向探索
-
-用户只给出一个大方向时，先做探索式检索，不进入正式全文下载。
-
-目标：找出该方向的核心概念、研究流派、常用测量、主要争议、代表性综述、代表性方法文章、近年高频主题，并向用户提供 2–5 个可聚焦的综述方向。
-
-执行步骤：
-
-1. 将用户方向拆成概念块：核心构念、相关构念、目标人群、机制、测量、方法、临床/教育/社会背景。
-2. 优先搜集：
-   - 最近 5–10 年的综述、系统综述、范围综述、元分析。
-   - 经典理论文章、共识/指南、测量工具与方法学文章。
-   - 近 3 年新兴实证研究，用于判断趋势。
-3. 生成候选聚焦方向，每个方向包括：
-   - 可能题目；
-   - 核心问题；
-   - 可写性；
-   - 文献量风险；
-   - 方法/测量基础；
-   - 与用户研究兴趣的贴合度；
-   - 不建议写的原因或边界。
-4. 与用户确认聚焦方向。如果用户不想反复沟通，选择“文献基础最稳 + 写作风险最低 + 与心理学主题最贴合”的方向继续。
-
-产物：
-
-```text
-00_exploration/scoping_brief.md
-00_exploration/seed_reviews.csv
-00_exploration/seed_methods.csv
-00_exploration/focus_options.md
-```
-
-## 阶段 01：聚焦与协议冻结
-
-聚焦后的综述方向必须转化为可执行协议。
-
-协议至少包括：
+用户确定聚焦后的综述方向后，进入协议冻结。协议至少包括：
 
 - 暂定题目，中英文各一版。
 - 综述类型及理由。
@@ -139,15 +176,28 @@ logs/events.jsonl
 - 核心构念定义、同义词、英文缩写、中文译名、量表名。
 - 纳入标准：人群、年龄、样本、研究设计、语言、年份、全文状态、文献类型。
 - 排除标准：无关人群、非心理学主题、纯评论、无法定位证据、重复报告等。
-- 检索数据库与补充检索：PubMed、PsycINFO、Web of Science、Scopus、OpenAlex、Crossref、Google Scholar、CNKI、万方、SinoMed，以及引文追踪。
+- 检索数据库与补充检索。
 - Zotero collection 名称和文件夹备选方案。
 - 计划输出和目标格式。
 - 质量评价工具选择。
 - 停止规则和修订规则。
 
-协议冻结后才能进入正式大范围检索。后续若修改范围，必须记录 amendment：修改内容、原因、影响哪些阶段。
+默认数据库范围：
 
-## 阶段 02：正式大范围检索
+- PubMed
+- PsycINFO
+- Web of Science
+- Crossref
+- Google Scholar（辅助检索，不单独声称完整）
+- CNKI
+- 期刊官网
+- Zotero 本地库
+
+不要默认加入 Scopus、APA PsycNet、Semantic Scholar、OpenAlex、SinoMed、万方或维普。若用户明确要求或项目需要，可作为附加数据库，并在协议中记录理由。
+
+协议冻结后才能进入正式检索。后续若修改范围，必须记录 amendment：修改内容、原因、影响哪些阶段。
+
+## 11. 阶段 02：正式大范围检索
 
 正式检索目标是覆盖主题领域，而不是只拿几篇好写的文章。
 
@@ -159,15 +209,11 @@ logs/events.jsonl
 4. 导出题录并统一字段：DOI、PMID、title、authors、year、journal、abstract、keywords、URL、database、query_id。
 5. 去重顺序：DOI → PMID → 标准化标题 + 第一作者 + 年份。保留每条记录的全部来源 provenance。
 6. 对核心 seed papers 做 backward citation chasing 和 forward citation chasing。
-7. 用“新增价值停止规则”判断是否继续：
-   - 连续一轮新增文献不再增加新理论、新量表、新人群、新方法、新关键发现、新争议或新高质量综述；
-   - 关键综述和高相关实证文章的参考文献已追踪；
-   - 主要数据库均完成检索并记录局限；
-   - 仍缺失的证据类型已明确记录为 gap，而不是继续无限搜索。
+7. 用新增价值停止规则判断是否继续：连续一轮新增文献不再增加新理论、新量表、新人群、新方法、新关键发现、新争议或新高质量综述；关键综述和高相关实证文章的参考文献已追踪；主要数据库均完成检索并记录局限；仍缺失的证据类型已记录为 gap。
 
 严禁把 Google Scholar、ResearchGate 或任意网页结果说成“完整检索”。
 
-## 阶段 03：Chrome + Zotero / 文件夹备选获取
+## 12. 阶段 03：Chrome + Zotero / 文件夹备选获取
 
 优先方案：Codex 使用 Chrome 中用户已登录的合法学术访问环境，调用 Zotero Connector 将文献导入本地 Zotero 的指定 collection。
 
@@ -178,12 +224,13 @@ logs/events.jsonl
 - 不绕过付费墙、下载限制、机器人检测、数据库条款或出版社限制。
 - 不使用盗版论文站、影子图书馆、PDF bot 或泄露账号。
 - 不无人值守高速批量下载。按批次处理，并在异常警告时停止。
+- 不把 PDF、Zotero 数据库、浏览器材料或账号信息提交到 GitHub。
 
 每篇文献必须验证：题名、作者、年份、DOI/PMID、Zotero parent item、附件 key、PDF 是否可读、首页题名是否匹配、页数是否合理。
 
-备选方案：当 Zotero Connector 不可用或用户希望手动导入时，将合法获取的 PDF、RIS/BibTeX、导入清单保存到用户指定文件夹。不得把 PDF、Zotero 数据库、账号信息提交到 GitHub。
+备选方案：当 Zotero Connector 不可用或用户希望手动导入时，将合法获取的 PDF、RIS/BibTeX、导入清单保存到用户指定文件夹，由用户手动导入 Zotero。
 
-## 阶段 04：分类、初筛与 1–4 级相关性
+## 13. 阶段 04：分类、初筛与 1–4 级相关性
 
 先分类，再决定阅读深度。
 
@@ -216,7 +263,15 @@ logs/events.jsonl
 
 等级判断必须给出理由，至少包括：主题贴合、人群贴合、方法贴合、证据用途、局限。
 
-## 阶段 05：深度阅读与文献矩阵
+除相关性等级外，同时给出辅助评分：
+
+```csv
+paper_id,relevance_level,method_quality,sample_fit,theory_contribution,evidence_strength,citation_value,network_connectivity,review_role,decision,reason
+```
+
+各辅助评分使用 1–4 分，不能用一个总分替代具体判断。
+
+## 14. 阶段 05：深度阅读与文献矩阵
 
 对 3–4 级文献进行结构化精读。2 级文献只在其确有背景价值时提取。1 级文献不作为正文证据。
 
@@ -235,15 +290,15 @@ logs/events.jsonl
 
 ### 文献矩阵推荐字段
 
-使用稳定 ID，优先 DOI；无 DOI 时使用 PMID；再无则使用规范化标题 + 第一作者 + 年份。
+输出 CSV、Excel、Markdown 三种格式。使用稳定 ID，优先 DOI；无 DOI 时使用 PMID；再无则使用规范化标题 + 第一作者 + 年份。
 
 ```csv
-paper_id,study_id,zotero_key,bibtex_key,citation_apa,year,document_type,relevance_level,relevance_reason,quality_domains,quality_concerns,review_role,constructs,population,age_range,country_or_region,sample_size,design,measures,methods_or_analysis,key_findings,effect_or_result_summary,mechanism_claim,limitations,contradictions,relation_to_topic,usable_for_sections,evidence_location,short_quote,claim_id,notes
+paper_id,study_id,zotero_key,bibtex_key,citation_apa,year,document_type,relevance_level,relevance_reason,method_quality,sample_fit,theory_contribution,evidence_strength,citation_value,network_connectivity,quality_domains,quality_concerns,review_role,constructs,population,age_range,country_or_region,sample_size,design,measures,methods_or_analysis,key_findings,effect_or_result_summary,mechanism_claim,limitations,contradictions,relation_to_topic,usable_for_sections,evidence_location,short_quote,claim_id,notes
 ```
 
-`evidence_location` 必须尽量精确到页码、章节、段落、表格或图号。`short_quote` 只保留必要短引文；优先用中文转述，保留英文原文片段用于核查。
+`evidence_location` 必须尽量精确到页码、章节、段落、表格或图号。`short_quote` 只保留必要短引文；优先用中文转述，保留英文原文片段用于核查。不得大量复制原文。
 
-## 阶段 06：证据综合
+## 15. 阶段 06：证据综合
 
 综合不是逐篇罗列，而是建立“主张—证据—限制”的结构。
 
@@ -254,18 +309,11 @@ paper_id,study_id,zotero_key,bibtex_key,citation_apa,year,document_type,relevanc
 - `gap_register.md`：概念缺口、测量缺口、样本缺口、设计缺口、机制缺口、实践缺口。
 - `methods_lessons.md`：可复用的研究设计、量表、统计方法、任务范式。
 
-标记证据状态：
+标记证据状态：`convergent`、`mixed`、`limited`、`indirect`、`contradictory`、`absent`。`absent` 不得写成已知结论。
 
-- `convergent`：多篇高相关文献支持。
-- `mixed`：方向不一致或依赖样本/测量/方法。
-- `limited`：证据少但直接相关。
-- `indirect`：间接支持，需要谨慎表述。
-- `contradictory`：存在直接反证。
-- `absent`：当前没有可靠证据，不得写成已知结论。
+## 16. 阶段 07：HTML 文献星图
 
-## 阶段 07：HTML 文献星图
-
-生成一个单文件 HTML：
+生成单文件 HTML：
 
 ```text
 07_star_map/reference_star_map.html
@@ -273,7 +321,7 @@ paper_id,study_id,zotero_key,bibtex_key,citation_apa,year,document_type,relevanc
 
 目标：帮助用户看到文献网络，而不是只看表格。
 
-### 节点类型
+节点类型：
 
 - `topic_seed`：用户聚焦后的主题核心。
 - `construct`：核心构念、相关构念、理论模型。
@@ -284,20 +332,9 @@ paper_id,study_id,zotero_key,bibtex_key,citation_apa,year,document_type,relevanc
 - `gap`：证据缺口。
 - `controversy`：争议或矛盾证据。
 
-### 边类型
+边类型：`defines`、`measures`、`tests`、`reviews`、`supports`、`contradicts`、`method_for`、`cites_or_extends`。
 
-- `defines`：定义/概念来源。
-- `measures`：测量工具或操作化。
-- `tests`：实证检验。
-- `reviews`：综述整合。
-- `supports`：支持某主张。
-- `contradicts`：反驳或限制某主张。
-- `method_for`：提供方法。
-- `cites_or_extends`：引文链或理论延伸。
-
-### 权重规则
-
-不得只用引用次数或期刊名决定权重。默认权重：
+默认权重：
 
 ```text
 paper_weight =
@@ -309,28 +346,11 @@ paper_weight =
   0.10 * writing_utility
 ```
 
-解释：
-
-- `relevance_score`：1–4 级相关性归一化。
-- `quality_score`：按设计质量域综合判断，不是简单总分。
-- `conceptual_coverage`：是否覆盖定义、机制、测量、人群或争议的关键位置。
-- `citation_network_role`：是否为 seed paper、被多篇核心文献引用、连接两个文献群。
-- `recency_or_update_value`：近年新证据、方法更新、最新综述；经典理论可手动保留高权重。
-- `writing_utility`：是否可直接支持正文关键段落。
-
-### 激活扩散模型思路
-
-以 `topic_seed` 为初始激活点，沿边向理论、测量、方法和实证文献扩散。扩散时：
-
-- 激活随路径长度衰减。
-- 支持边和方法边增加相邻节点激活。
-- 矛盾边不删除节点，而是标记为争议节点并提高审稿风险提示。
-- 多条独立路径到达同一文献时，提高该文献在星图中的可见度。
-- 不把扩散结果解释为因果关系；它只是“综述写作中的证据连接强度”。
+以 `topic_seed` 为初始激活点，沿边向理论、测量、方法和实证文献扩散。激活随路径长度衰减；支持边和方法边增加相邻节点激活；矛盾边不删除节点，而是标记为争议节点并提高审稿风险提示；多条独立路径到达同一文献时，提高可见度。不要把扩散结果解释为因果关系。
 
 HTML 应包含：搜索框、节点图例、筛选等级、点击节点显示 APA 引文/摘要/证据位置/可用于哪个章节、导出 JSON 的提示。
 
-## 阶段 08：写作架构
+## 17. 阶段 08：写作架构
 
 写作前先建立章节—证据计划。
 
@@ -341,7 +361,7 @@ HTML 应包含：搜索框、节点图例、筛选等级、点击节点显示 AP
 3. 概念界定与理论基础：核心概念、相邻概念、理论模型、历史演变。
 4. 测量与操作化：主要工具、维度、信效度、跨文化/年龄适用性、测量争议。
 5. 研究现状：按主题、机制、人群或研究设计组织，不逐篇罗列。
-6. 方法学评价：样本、设计、测量、统计、神经/实验范式、偏倚来源。
+6. 方法学评价：样本、设计、测量、统计、实验范式、偏倚来源。
 7. 关键机制或整合模型：提出证据支持的整合框架，清楚标注推论层级。
 8. 争议与不一致：结论冲突、测量差异、样本差异、文化差异、因果限制。
 9. 研究缺口与未来方向：具体到可检验问题、设计建议、变量/测量/样本建议。
@@ -349,18 +369,18 @@ HTML 应包含：搜索框、节点图例、筛选等级、点击节点显示 AP
 
 若综述主题是“人格功能损害”，默认重点包括：概念与 DSM-5 AMPD/LPFS、OPD 结构轴、STiP-5.1/LoPF-Q 等测量、青少年适用性、自伤/自杀相关证据、情绪调节机制、发展精神病理学视角、临床评估与干预启示。
 
-## 阶段 09：APA 风格综述写作
+## 18. 阶段 09：APA 风格综述写作
 
 写作规则：
 
-- 使用 APA 7 作者—年份引文格式。
+- 使用 APA 第 7 版作者—年份引文格式。
 - 正文每个事实性主张必须连接 `claim_id`。
 - 不写没有证据的“研究表明”。
 - 不把横断相关写成因果。
 - 不把成人样本结论直接外推到青少年。
 - 不把临床样本结论直接外推到普通群体。
 - 不把一种量表测到的构念当成整个理论构念。
-- 中文稿中保留首次出现英文术语和缩写：如 人格功能水平（Level of Personality Functioning, LPF）。
+- 中文稿中保留首次出现英文术语和缩写。
 - 引文密集段落要合并成论证，不要一篇一段。
 - 对争议、空白和方法限制的表述应明确，不用过度确定语气。
 
@@ -368,26 +388,24 @@ HTML 应包含：搜索框、节点图例、筛选等级、点击节点显示 AP
 
 ```text
 09_manuscript/manuscript.md
+09_manuscript/manuscript.docx
 09_manuscript/references.bib
 09_manuscript/apa_references.md
 09_manuscript/tables/
 09_manuscript/figures/
 ```
 
-## 阶段 10：原文—参考文献一一对齐
+## 19. 阶段 10：原文—参考文献一一对齐
 
 对齐分两步：写作中实时对齐，写完后全稿审计。
 
-### 写作中实时对齐
+写作中，每段写作前读取 `citation_plan.csv`，每写一个主张就标注 `claim_id`，对应矩阵中的 `paper_id` 和 `evidence_location`。
 
-每段写作前读取 `citation_plan.csv`，每写一个主张就标注 `claim_id`，对应矩阵中的 `paper_id` 和 `evidence_location`。
-
-### 写完后输出对齐表
-
-生成：
+写完后生成：
 
 ```text
 10_alignment/source_alignment_table.csv
+10_alignment/source_alignment_table.xlsx
 10_alignment/claim_audit.md
 ```
 
@@ -406,27 +424,22 @@ alignment_id,manuscript_section,manuscript_page,manuscript_paragraph,manuscript_
 - 任何 `missing_source` 或 `overstated` 必须修改正文或删除主张。
 - 参考文献表只保留正文实际引用文献；正文引用必须全部出现在参考文献表。
 
-## 阶段 11：模拟投稿与意见审核
+## 20. 阶段 11：模拟投稿与意见审核
 
-模拟投稿不是实际投稿。
+模拟投稿不是实际投稿。若涉及目标期刊 scope、article type、word limit、reference style、open science、AI policy、fees 或伦理要求，必须核查期刊当前官方说明，不得只凭记忆。
 
 步骤：
 
 1. 根据主题、文章类型、语言、方法和篇幅筛选 2–3 个可能期刊。
-2. 核查期刊当前 scope、article type、word limit、reference style、open science、AI policy、fees、伦理要求。
+2. 分别模拟中文心理学核心期刊和 SSCI/英文心理学期刊审稿路径，除非用户只指定一种。
 3. 写 `journal_fit_memo.md`：推荐目标、理由、风险、格式差距。
 4. 进行模拟编辑初筛：范围、创新性、综述类型匹配、方法透明度、引用完整性、伦理和学术诚信。
-5. 分角色模拟审稿：
-   - 理论/领域专家；
-   - 方法学与心理测量专家；
-   - 临床/发展或认知神经方向专家；
-   - 写作与 APA 格式审稿；
-   - 反方审稿人，专门寻找最强拒稿理由。
+5. 分角色模拟审稿：理论/领域专家、方法学与心理测量专家、临床/发展或应用方向专家、写作与 APA 格式审稿、反方审稿人。
 6. 输出模拟决定：`minor revision`、`major revision`、`reject and resubmit` 或 `not ready`。不要轻易给 `accept`。
 7. 生成 `revision_matrix.csv`：意见、严重度、证据、修改位置、操作、状态。
 8. 按证据完成修改，并再次运行引用、格式、方法、逻辑和过度推论审计。
 
-## 失败条件
+## 21. 失败条件
 
 出现以下情况时，必须停止或降级报告，不能继续声称完成：
 
@@ -442,7 +455,7 @@ alignment_id,manuscript_section,manuscript_page,manuscript_paragraph,manuscript_
 - 使用未授权 PDF、盗版来源、cookie、账号密码或突破访问限制。
 - 将模拟审稿意见表述为真实反馈。
 
-## 最终回复格式
+## 22. 最终回复格式
 
 每次阶段结束，向用户简洁报告：
 
