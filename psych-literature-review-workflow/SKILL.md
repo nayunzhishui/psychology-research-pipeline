@@ -1,28 +1,27 @@
 ---
 name: psych-literature-review-workflow
-description: Use this standalone Chinese-first psychology literature-review workflow to move from broad research-direction exploration to focused review protocol, saturated-but-bounded literature collection, Chrome/Zotero Connector ingestion, folder fallback, classification, 1–4 relevance rating, full-text evidence matrix, HTML reference star map, APA-style review writing, sentence/paragraph-to-source alignment, and simulated Chinese/English submission review. 这是“新的通用综述工作流”，适用于人格功能损害、健康心理学、临床心理学、发展心理学、心理测量、精神病理学、普通认知心理学等综述主题；不要用于实证数据分析、认知神经科学专用实验设计、伪造文献、绕过付费墙、无人值守批量下载、真实投稿提交，或脱离证据矩阵的自由写作。
+description: Use this standalone Chinese-first psychology literature-review workflow to move from broad research-direction exploration to focused review protocol, saturated-but-bounded literature collection, Chrome/Zotero Connector ingestion, folder fallback, classification, 1–4 relevance rating, full-text evidence matrix, HTML reference star map, APA-style review writing, sentence/paragraph-to-source alignment, and simulated Chinese/English submission review. 这是“新的通用综述工作流”，适用于人格功能损害、健康心理学、临床心理学、发展心理学、心理测量、精神病理学、普通认知心理学等综述主题；本 skill 被选中后必须独立完成任务，不依赖其他 skill、总索引或共享模板；不要用于实证数据分析、认知神经科学专用实验设计、伪造文献、绕过付费墙、无人值守批量下载、真实投稿提交，或脱离证据矩阵的自由写作。
 ---
 
 # Psychology Literature Review Workflow / 新的通用综述工作流
 
-本 skill 是三个主工作流之一，定位为**通用心理学文献综述写作工作流**。它用于把一个宽泛研究方向推进为可聚焦、可检索、可审计、可写作、可模拟投稿的综述项目。默认服务心理学、健康心理学、临床心理学、发展心理学、精神病理学、心理测量、心理干预、普通认知心理学等方向。当前可用于“人格功能损害（impairment in personality functioning）”等主题，但不能写死为某一个主题。
+本 skill 是三个主工作流之一，定位为**通用心理学文献综述写作独立工作流**。它用于把一个宽泛研究方向推进为可聚焦、可检索、可审计、可写作、可模拟投稿的综述项目。默认服务心理学、健康心理学、临床心理学、发展心理学、精神病理学、心理测量、心理干预、普通认知心理学等方向。当前可用于“人格功能损害（impairment in personality functioning）”等主题，但不能写死为某一个主题。
 
-默认语言为中文，必要英文保留于数据库检索式、英文题名、量表名、理论名、变量名、DOI/PMID、APA 引文、参考文献表和必要术语。
+默认语言为中文。必要英文保留于数据库检索式、英文题名、量表名、理论名、变量名、DOI/PMID、APA 引文、参考文献表和必要术语。
 
-## 1. 与另外两个主 skill 的边界
+## 1. 独立调用原则
 
-当前三个主 skill 为：
+本 skill 被用户或 Codex 选中后，应**独立完成通用心理学综述工作流**，不得把任务转交、拆分或依赖其他 skill。可以在边界判断时说明其他主 skill 更适合，但一旦继续使用本 skill，就必须在本文件范围内完成任务。
 
-1. `psychology-research-pipeline`：心理学实证论文工作流。
-2. `psych-cog-neuro-review`：认知神经科学工作流。
-3. `psych-literature-review-workflow`：新的通用综述工作流。
+当前三个主 skill 的边界仅用于选择，不用于运行时互相调用：
 
-边界规则：
+- `psychology-research-pipeline`：心理学实证论文工作流，用于含数据、实验、问卷、干预、心理测量或统计分析的论文项目。
+- `psych-cog-neuro-review`：认知神经科学工作流，用于 EEG/ERP、fMRI、PSG、眼动、生理指标、实验范式、脑机制或行为—神经整合主题。
+- `psych-literature-review-workflow`：新的通用综述工作流，用于不以神经/生理指标或实验数据分析为核心的心理学综述。
 
-- 若用户目标是**写一篇综述**，且不以神经/生理指标、实验范式或脑机制为核心，使用本 skill。
-- 若用户目标是**完成含数据或实验的心理学实证论文**，使用 `psychology-research-pipeline`。
-- 若综述主题明显涉及 EEG/ERP、fMRI、PSG、眼动、生理指标、实验范式、脑机制或行为—神经整合，可使用 `psych-cog-neuro-review`，或由本 skill 调用其认知神经科学专用模块。
-- `psych-review-workflow` 若仍存在，仅作为旧版辅助/历史兼容材料，不作为三个主 skill 之一。
+若用户目标是普通心理学综述，且不以神经/生理指标、实验范式或脑机制为核心，使用本 skill。若主题包含少量神经机制背景，但综述核心仍是心理学概念、测量、发展、临床或健康心理学证据，本 skill 仍可独立处理，不调用其他 skill。
+
+`psych-review-workflow` 若仍存在，仅为旧版辅助/历史兼容材料，不作为三个主 skill 之一。
 
 ## 2. 适用场景
 
@@ -39,7 +38,7 @@ description: Use this standalone Chinese-first psychology literature-review work
 - 用户要求凭空补文献、伪造页码、伪造 DOI、伪造审稿意见或伪造投稿结果。
 - 用户要求绕过数据库权限、验证码、MFA、付费墙、下载限制、出版社限制或使用盗版 PDF 来源。
 - 用户要求真实提交投稿系统、代替作者联系编辑、支付版面费或执行真实投稿动作。
-- 用户要求处理实证数据、跑统计模型或写实证论文结果，这类任务应转入 `psychology-research-pipeline`。
+- 用户要求处理实证数据、跑统计模型或写实证论文结果。此类任务不适合本 skill。
 
 ## 3. 默认综述类型与运行模式
 
@@ -75,6 +74,7 @@ description: Use this standalone Chinese-first psychology literature-review work
 6. **正文写作时同步引文对齐**：不要等写完后才补引用。每个事实性、定义性、理论性、方法性或结论性主张在写作时就绑定来源。
 7. **模拟审稿必须标注模拟性质**：不能让用户误以为是真实期刊反馈。
 8. **中文优先，英文溯源**：说明、判断标准、矩阵、审稿意见默认中文；检索、题录和 APA 信息保持英文准确。
+9. **独立完成**：本 skill 内部自带启动问题、检索规则、Zotero 边界、矩阵模板、写作流程、引用对齐和模拟审稿，不依赖外部 skill 或共享模板。
 
 ## 5. 启动时的需求沟通
 
@@ -94,16 +94,7 @@ description: Use this standalone Chinese-first psychology literature-review work
 
 ## 6. 默认数据库范围
 
-默认数据库：
-
-- PubMed
-- PsycINFO
-- Web of Science
-- Crossref
-- Google Scholar（辅助检索，不单独声称完整）
-- CNKI
-- 期刊官网
-- Zotero 本地库
+默认数据库：PubMed、PsycINFO、Web of Science、Crossref、Google Scholar（辅助检索，不单独声称完整）、CNKI、期刊官网、Zotero 本地库。
 
 不要默认加入 Scopus、APA PsycNet、Semantic Scholar、OpenAlex、SinoMed、万方或维普。若用户明确要求或项目需要，可作为附加数据库，并在协议中记录理由、检索式、结果数和局限。
 
@@ -146,133 +137,136 @@ review_runs/<YYYYMMDD>_<short_topic>/
 |---|---|---|---|
 | 00 | 宽方向探索 | 从宽方向中识别可写综述方向 | `scoping_brief.md`, `seed_reviews.csv`, `seed_methods.csv`, `focus_options.md`, `导师汇报版简表.md` |
 | 01 | 聚焦与协议冻结 | 把聚焦主题转为可执行综述协议 | `review_protocol.md`, `concept_map.md`, `inclusion_exclusion.md` |
-| 02 | 正式大范围检索 | 饱和式搜集符合主题的文献 | `queries.md`, `search_log.csv`, `candidate_records.csv` |
+| 02 | 正式大范围检索 | 饱和式搜集符合主题的文献 | `queries.md`, `search_log.csv`, `candidate_records.csv`, `search_saturation_log.csv` |
 | 03 | Zotero/全文获取 | Chrome + Zotero Connector 入库，备选为文件夹手动导入 | `zotero_manifest.csv`, `pdf_manifest.csv`, `acquisition_report.md` |
-| 04 | 分类与初筛 | 分类文献并给出 1–4 级主题符合程度 | `classification.csv`, `relevance_ratings.csv`, `screening_log.csv` |
+| 04 | 分类与初筛 | 分类文献并给出 1–4 级主题符合程度 | `classification.csv`, `relevance_ratings.csv`, `screening_log.csv`, `exclusion_reason_register.csv` |
 | 05 | 全文阅读矩阵 | 深读全文并建立证据矩阵 | `literature_matrix.csv`, `literature_matrix.xlsx`, `literature_matrix.md`, `quality_appraisal.csv` |
-| 06 | 证据综合 | 汇总理论、方法、发现、矛盾和空白 | `claim_evidence_map.csv`, `contradictions.md`, `gap_register.md` |
-| 07 | HTML 文献星图 | 基于激活扩散模型建立参考文献网络 | `reference_star_map.html`, `star_map_data.json`, `weighting_notes.md` |
-| 08 | 写作架构 | 设计综述板块和论证链 | `section_plan.md`, `argument_map.md`, `citation_plan.csv` |
-| 09 | APA 综述正文 | 写作中文为主、APA 7 兼容的综述稿 | `manuscript.md`, `manuscript.docx`, `references.bib`, `apa_references.md` |
-| 10 | 原文—引用对齐 | 精确核查正文与参考文献来源 | `source_alignment_table.csv`, `source_alignment_table.xlsx`, `claim_audit.md` |
-| 11 | 模拟投稿审稿 | 模拟中文/英文期刊投稿前审查 | `journal_fit_memo.md`, `simulated_reviews.md`, `revision_matrix.csv` |
+| 06 | 证据综合 | 汇总理论、方法、发现、矛盾和空白 | `claim_evidence_map.csv`, `contradiction_gap_register.csv`, `synthesis_memo.md` |
+| 07 | HTML 文献星图 | 以矩阵为基础制作参考文献星图 | `literature_star_map.html`, `star_map_weights.csv`, `star_map_notes.md` |
+| 08 | 综述框架 | 制定章节结构、论证顺序和图表计划 | `review_outline.md`, `section_claims.md`, `figure_table_plan.md` |
+| 09 | 正文写作 | 按 APA 第 7 版写作中文综述 | `manuscript.md`, `manuscript.docx`, `references.bib`, `apa_references.md` |
+| 10 | 引用对齐 | 精确核查正文与来源 | `source_alignment_table.csv`, `source_alignment_table.xlsx`, `unsupported_claims.md` |
+| 11 | 模拟投稿审稿 | 模拟中文核心与英文期刊审稿 | `journal_fit_memo.md`, `simulated_reviews.md`, `revision_matrix.csv`, `author_response_draft.md` |
 
 ## 9. 阶段 00：宽方向探索
 
-当用户只给出研究方向时，先做探索式检索。目标不是完整下载，而是帮助用户聚焦。
+用户只给出研究方向时，先搜集：
 
-优先搜集：最近 5–10 年综述、系统综述、范围综述、元分析；经典理论文章、概念界定文章、共识/指南；研究方法类文章、测量工具文章、量表验证文章；近 3 年高相关实证文章。
+- 近年高质量综述、元分析、范围综述、理论综述。
+- 方法学文章、测量工具文章、核心理论文章。
+- 领域内高被引或概念奠基文献。
+- 近期争议、空白、热点和常见研究设计。
 
-输出 `focus_options.md`，每个候选方向包括：中文题目、英文题目、核心研究问题、适合综述类型、文献基础、章节雏形、写作优势、写作风险、与用户研究方向的贴合度、是否建议继续。
+输出必须包括：
 
-同时输出导师汇报版简表：
+- `focus_options.md`：3–6 个可聚焦综述方向，每个方向给出可写性、文献量、创新点、风险。
+- `导师汇报版简表.md`：题目候选、核心问题、代表文献、可行性、建议优先级。
+- `seed_reviews.csv` 和 `seed_methods.csv`：初步文献清单，不当作正式纳入结果。
 
-```csv
-候选方向,核心问题,文献基础,创新点,风险,推荐等级,下一步建议
+只有用户确认聚焦方向后，才进入正式综述流程。若用户已经给出聚焦主题，可跳过本阶段，但必须记录。
+
+## 10. 阶段 01–04：协议、检索、Zotero、分类评级
+
+协议必须写明：研究问题、核心概念、纳入/排除标准、时间范围、语言范围、文献类型、数据库、检索式、停止规则、质量评价策略和输出格式。
+
+Zotero 与全文获取：
+
+- 优先使用 Chrome + Zotero Connector 保存题录和合法可得 PDF。
+- 用户本人处理校园 VPN、统一认证、MFA、验证码、付费确认和数据库授权。
+- Codex 不读取、不保存、不记录账号、密码、验证码、cookie、token、密钥或浏览器身份凭据。
+- 插件失败时，下载到 `literature/00_待导入Zotero/`，由用户手动导入 Zotero。
+- 不绕过付费墙、下载限制、机器人检测、数据库条款或出版社限制。
+- 不使用盗版论文站、影子图书馆、PDF bot 或泄露账号。
+- 不无人值守高速批量下载；遇到异常警告立即停止。
+- 不把 PDF、Zotero 数据库、浏览器材料或账号信息提交到 GitHub。
+
+文献分类至少包括：综述/元分析、理论概念、方法测量、横断实证、纵向实证、实验研究、干预研究、质性/混合方法、指南/共识。
+
+相关性 1–4 级：
+
+| 等级 | 含义 | 处理 |
+|---|---|---|
+| 4 | 高度核心，理论、方法、测量或结论对综述主线不可替代 | 全文精读，进入核心论证和星图中心 |
+| 3 | 直接服务某一核心章节或关键论点 | 摘要+方法+结果精读，必要时全文 |
+| 2 | 涉及核心概念之一，但与主题边界不完全匹配 | 选择性阅读，用于背景或补充 |
+| 1 | 背景相关或边缘相关，只能用于引言或排除理由 | 记录，一般不进入正文核心 |
+
+同时单独评分：方法质量、样本适配度、理论贡献、证据强度、引用价值、连接度。
+
+## 11. 阶段 05：全文阅读矩阵
+
+阅读矩阵至少包含以下字段：
+
+```text
+id | APA_reference | DOI_PMID | 文献类型 | 研究问题 | 理论框架 | 样本/对象 | 年龄段 | 研究设计 | 测量工具/变量 | 方法与统计 | 核心结果 | 局限 | 与综述主题关系 | 相关性等级 | 方法质量 | 理论贡献 | 证据强度 | 引用价值 | 可写入章节 | 可引用页码/段落 | exact_evidence_excerpt | 复核状态
 ```
 
-聚焦方向确认前，不进入正式大范围下载或 Zotero 批量入库。
+注意：`exact_evidence_excerpt` 只保留必要短摘录，不能大量复制原文。优先记录页码、章节、段落、表号、图号和自己的中文释义。
 
-## 10. 阶段 01：聚焦与协议冻结
+## 12. 阶段 06–07：证据综合与 HTML 文献星图
 
-协议至少包括：暂定题目、综述类型及理由、研究问题、核心构念定义、同义词、英文缩写、中文译名、量表名、纳入标准、排除标准、检索数据库、Zotero collection、文件夹备选方案、计划输出、质量评价工具、停止规则和修订规则。
+证据综合必须区分：
 
-协议冻结后才能进入正式检索。后续若修改范围，必须记录 amendment：修改内容、原因、影响哪些阶段。
+- 概念定义与术语边界。
+- 理论模型与发展脉络。
+- 测量工具与操作化。
+- 主要实证发现。
+- 方法学问题。
+- 争议与不一致结果。
+- 研究空白和未来方向。
 
-## 11. 阶段 02：正式大范围检索
+HTML 文献星图以文献矩阵为基础，并参考激活扩散模型。节点包括文献、理论、变量、方法、测量工具、核心结论。边包括引用关系、共同概念、共同方法、变量路径、理论归属和证据支持关系。
 
-执行步骤：
+权重建议：主题相关度 × 证据质量 × 理论贡献 × 方法价值 × 连接度 × 新近性 × 权威性。必须说明权重只是辅助可视化，不代表真实因果强度。
 
-1. 为每个核心概念建立英文、中文、缩写、量表名、诊断术语、相关理论名。
-2. 生成宽检索式和窄检索式。不同数据库使用不同语法，不要把一个检索式复制到所有平台。
-3. 每个数据库记录：平台、日期、检索式、过滤器、结果数、导出文件、备注。
-4. 导出题录并统一字段：DOI、PMID、title、authors、year、journal、abstract、keywords、URL、database、query_id。
-5. 去重顺序：DOI → PMID → 标准化标题 + 第一作者 + 年份。保留每条记录的 provenance。
-6. 对核心 seed papers 做 backward citation chasing 和 forward citation chasing。
-7. 用新增价值停止规则判断是否继续。
+## 13. 阶段 08–09：综述框架与 APA 写作
 
-严禁把 Google Scholar、ResearchGate 或任意网页结果说成“完整检索”。
+默认章节结构：
 
-## 12. 阶段 03：Chrome + Zotero / 文件夹备选获取
+1. 引言与问题提出。
+2. 概念界定与术语边界。
+3. 理论模型与发展脉络。
+4. 测量工具与操作化。
+5. 主要实证发现。
+6. 方法学评价。
+7. 争议与不一致结果。
+8. 整合性理论框架。
+9. 研究空白与未来方向。
+10. 结论。
 
-优先方案：Codex 使用 Chrome 中用户已登录的合法学术访问环境，调用 Zotero Connector 将文献导入本地 Zotero 的指定 collection。
+写作要求：
 
-边界：用户本人处理校园 VPN、统一认证、MFA、验证码、付费确认、数据库授权；Codex 不读取、不保存、不记录账号、密码、验证码、cookie、token、密钥或浏览器身份凭据；不绕过付费墙、下载限制、机器人检测、数据库条款或出版社限制；不使用盗版论文站、影子图书馆、PDF bot 或泄露账号；不无人值守高速批量下载；不把 PDF、Zotero 数据库、浏览器材料或账号信息提交到 GitHub。
+- APA 第 7 版兼容，包括标题层级、正文引用、参考文献、表格、图注、DOI、英文文献大小写。
+- 中文正文为主，英文术语首次出现可括注。
+- 不堆砌文献；每一段要有明确中心论点。
+- 不把相关研究写成因果结论。
+- 每个事实性、定义性、理论性、方法性或结论性主张在写作时即绑定来源。
 
-每篇文献必须验证：题名、作者、年份、DOI/PMID、Zotero parent item、附件 key、PDF 是否可读、首页题名是否匹配、页数是否合理。
+## 14. 阶段 10：正文—参考文献对齐
 
-## 13. 阶段 04：分类、初筛与 1–4 级相关性
+生成精确对齐表，至少包含：
 
-先分类，再决定阅读深度。至少分类为：系统综述/元分析、范围综述、叙述/理论综述、理论概念、方法测量、横断实证、纵向实证、实验研究、干预研究、质性/混合方法、评论/共识/指南。
-
-相关性等级：
-
-| 等级 | 名称 | 判定标准 | 阅读处理 |
-|---|---|---|---|
-| 4 | 核心文献 | 直接对应综述核心构念、目标人群/情境和关键理论、测量、方法或结果；若不引用会明显削弱综述 | 全文精读，进入矩阵和星图核心层 |
-| 3 | 重要相关 | 至少直接支持一个核心板块，如概念界定、机制、测量、方法或主要实证证据 | 阅读摘要、方法、结果、讨论；必要时全文精读 |
-| 2 | 背景相关 | 与主题有交集，但人群、变量、方法或理论边界不完全匹配 | 摘要和关键段落阅读 |
-| 1 | 边缘相关 | 只提供一般背景、相邻概念或排除理由 | 记录后通常不纳入正文核心引用 |
-
-同时评分：方法质量、样本适配度、理论贡献、证据强度、引用价值、与其他文献连接度。
-
-## 14. 阶段 05：全文阅读矩阵
-
-输出 CSV、Excel、Markdown 三种格式。核心字段：
-
-```csv
-stable_id,文献类型,相关性等级,方法质量,样本适配度,理论贡献,证据强度,引用价值,核心构念,人群/样本,研究设计,测量/任务,统计方法,主要发现,局限,可引用位置,适合写入章节,是否需要复核
+```text
+综述页码 | 综述段落 | 综述原句 | 支撑文献 | 文献页码 | 文献章节/段落/表图 | 原文证据简述 | 证据类型 | 支持程度 | 是否需要复核
 ```
 
-短摘录只保留必要证据，不大量复制原文。
+支持程度至少分为：`directly supported`、`partially supported`、`overextended`、`unsupported`、`needs page check`。
 
-## 15. 阶段 06–07：综合与 HTML 星图
+若某句无法定位来源，不得保留为确定性陈述。必须改写、补证据、标注待核查或删除。
 
-证据综合必须区分：定义性证据、理论性证据、方法性证据、实证发现、反证/矛盾、局限、未来方向。
+## 15. 阶段 11：模拟投稿与审稿
 
-HTML 文献星图基于激活扩散模型：
+默认同时模拟：
 
-- 节点：文献、理论、构念、变量、方法、测量工具、核心结论。
-- 边：引用关系、共同概念、变量路径、方法相似性、证据支持/冲突。
-- 权重：主题贴合度 × 方法质量 × 证据强度 × 连接度 × 新近性/经典性。
-- 输出：`reference_star_map.html`、`star_map_data.json`、`weighting_notes.md`。
+- 中文心理学核心/医学心理学/临床心理学相关期刊。
+- SSCI/英文心理学、临床心理学、健康心理学或发展心理学期刊。
 
-星图用于辅助理解，不替代全文阅读和质量评价。
-
-## 16. 阶段 08–09：写作架构与 APA 综述正文
-
-默认板块：引言与问题提出；概念界定与术语边界；理论模型与发展脉络；测量工具与操作化；主要实证发现；方法学评价；争议与不一致结果；整合性理论框架；研究空白与未来方向；结论。
-
-正文默认中文写作，兼容 APA 第 7 版。每个实质性主张写作时同步绑定来源。不要写完后硬补引用。
-
-## 17. 阶段 10：原文—引用对齐
-
-必须输出：
-
-```csv
-综述页码,综述段落,综述原句,支撑文献,文献页码,文献章节/段落/表图,原文证据短摘录,证据类型,支持强度,是否需要复核
-```
-
-标记 direct、partial、unsupported、overextended。对无法定位页码或段落的来源，必须标注需要复核，不能强行通过。
-
-## 18. 阶段 11：模拟投稿与审稿
-
-默认模拟两套：中文心理学核心/相关期刊，以及 SSCI/英文心理学期刊。期刊 scope、格式、版面费、开放获取、AI policy 和投稿要求必须联网核查，不能依赖旧知识。
+期刊 scope、格式、版面费、开放获取、AI policy 和投稿要求必须联网核查，不能依赖旧知识。
 
 审稿模块包括：编辑初筛、理论贡献审稿、方法学审稿、文献完整性审稿、APA 格式审稿、引文准确性审稿、修改意见清单、作者回复模板。
 
-模拟反馈必须标注为模拟，不得冒充真实期刊意见。
+所有审稿意见必须标注为模拟，不冒充真实期刊反馈，不替用户真实投稿、支付费用或联系编辑。
 
-## 19. 安全边界
+## 16. 完成条件
 
-- 不伪造文献、DOI、页码、PDF、样本、统计结果、审稿意见或期刊反馈。
-- 不绕过数据库权限、验证码、MFA、付费墙、下载限制或出版社条款。
-- 不保存账号、密码、验证码、cookie、token、密钥或浏览器身份凭据。
-- 不使用盗版论文站、影子图书馆、PDF bot 或泄露账号。
-- 不无人值守高速批量下载。
-- 不把 Zotero 数据库、PDF、浏览器凭据或受限全文提交到 GitHub。
-- 不真实投稿、支付费用或联系编辑，除非用户另行明确授权并在操作时确认。
-
-## 20. 完成条件
-
-只有在用户要求的阶段完成、关键 gate 通过、未解决风险列明后，才结束。返回运行目录、完成阶段、生成/修改文件、主要结论、验证结果、未解决 blocker 和下一步建议。不得在仍有关键引用、方法、伦理、检索或报告问题时声称“可直接投稿”。
+只有在用户要求的阶段完成、关键 gate 通过、未解决风险列明后，才结束。返回运行目录、完成阶段、生成/修改文件、主要结论、验证结果、未解决 blocker 和下一步建议。不得在仍有关键引用、方法、证据、格式或伦理问题时声称“可直接投稿”。
