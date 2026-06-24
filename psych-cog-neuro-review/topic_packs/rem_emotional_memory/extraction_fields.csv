@@ -1,0 +1,19 @@
+field_name,中文说明,required_when,allowed_or_example_values,notes
+sleep_design,睡眠设计,REM topic,overnight sleep; nap; sleep deprivation; sleep restriction; REM deprivation; correlational sleep study,区分操控性研究与自然睡眠研究
+sleep_measurement,睡眠测量方式,REM topic,PSG; actigraphy; sleep diary; questionnaire; self-report,REM 机制结论优先 PSG
+sleep_stage_focus,睡眠阶段焦点,REM topic,REM; N2; N3/SWS; total sleep time; sleep quality,不要把总睡眠效果直接写成 REM 效果
+rem_duration,REM 时长,if reported,minutes; percentage,记录单位
+rem_latency,REM 潜伏期,if reported,minutes,记录是否从入睡开始计算
+rem_density,REM 密度,if reported,eye movements per minute; study-defined,记录定义
+sleep_timing,睡眠与任务时间关系,REM topic,post-encoding; pre-retrieval; after extinction; before extinction recall,对应记忆阶段
+memory_phase,记忆阶段,REM topic,encoding; consolidation; retrieval; extinction learning; extinction recall; reconsolidation,必须区分
+emotional_material,情绪材料,REM topic,pictures; words; faces; scenes; conditioned stimuli; autobiographical material,记录正性/负性/中性
+memory_test,记忆测验,REM topic,recognition; recall; cued recall; discrimination; source memory,记录延迟时间
+behavioral_outcome,行为结果,REM topic,accuracy; reaction time; d-prime; bias; recall rate; recognition rate; valence rating; arousal rating,尽量提取效应方向
+fear_extinction_outcome,消退相关结果,if applicable,extinction learning; extinction recall; renewal; spontaneous recovery,不适用则 unknown
+neural_measure,神经指标,if reported,EEG; ERP; fMRI; PSG; connectivity; ROI; frequency band,记录具体指标
+brain_region_or_network,脑区或网络,if reported,amygdala; hippocampus; vmPFC; dlPFC; ACC; insula; DMN; salience network,避免过度功能定位
+clinical_status,临床状态,always,healthy; depression; anxiety; PTSD; insomnia; mixed; unknown,区分健康与临床样本
+main_claim_supported,可支持的核心结论,always,free text,只写能由原文支持的结论
+evidence_location,证据位置,always,page; section; table; figure; result paragraph,必须可追溯
+overclaim_risk,过度推断风险,always,low; medium; high,用于写作前限制结论
