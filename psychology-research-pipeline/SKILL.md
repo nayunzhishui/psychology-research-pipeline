@@ -1,23 +1,27 @@
 ---
 name: psychology-research-pipeline
-description: Use this standalone Chinese-first skill to orchestrate an auditable end-to-end empirical psychology paper workflow, including project scoping, research-question refinement, reporting standards, evidence search, Zotero ingestion, literature screening, mini-review/background synthesis, hypothesis and variable model construction, methods design, ethics/open-science planning, data management, statistical analysis, results writing, APA manuscript writing, source alignment, and simulated submission review. 这是“心理学实证论文工作流”，适用于问卷研究、实验研究、干预研究、纵向/横断研究、心理测量与临床/健康/发展心理学实证论文；不要把它用于单纯综述写作、普通概念解释、单段润色、伪造数据、伪造文献或真实投稿提交。
+description: Use this standalone Chinese-first skill for end-to-end empirical psychology paper workflows, including project scoping, research-question refinement, evidence search, Zotero ingestion, literature screening, hypothesis and variable-model construction, ethics/open-science planning, methods design, data management, statistical analysis, APA manuscript writing, source alignment, and simulated submission review. 这是“心理学实证论文工作流”，用于问卷、实验、干预、纵向/横断、心理测量、临床/健康/发展心理学等实证论文；本 skill 被选中后必须独立完成任务，不依赖其他 skill、总索引或共享模板；不要用于单纯综述写作、认知神经科学专用项目、伪造数据/文献、绕过权限、无人值守批量下载或真实投稿提交。
 ---
 
 # Psychology Empirical Paper Workflow / 心理学实证论文工作流
 
-本 skill 是三个主工作流之一，定位为**心理学实证论文从选题到投稿预备的总控流程**。它不是通用综述工作流，也不是认知神经科学专用工作流。文献综述在本流程中服务于实证研究问题、理论模型、变量选择、方法设计和论文引言，不应替代完整的独立综述项目。
+本 skill 是三个主工作流之一，定位为**心理学实证论文从选题到投稿预备的独立工作流**。它服务于含数据、实验、问卷、干预、测量或统计分析的论文项目。文献综述在本流程中只服务于研究问题、理论模型、变量选择、方法设计和论文引言，不替代完整的独立综述项目。
 
-默认语言为中文，必要英文保留于数据库检索式、量表名、统计方法、软件输出、APA 引文、参考文献、数据变量名和国际报告规范。
+默认语言为中文。必要英文保留于数据库检索式、量表名、统计方法、软件输出、APA 引文、参考文献、变量名和国际报告规范。
 
-## 1. 与另外两个主 skill 的边界
+## 1. 独立调用原则
 
-- `psychology-research-pipeline`：用于**实证论文**。核心产物是研究方案、数据分析、结果、讨论和投稿预备稿。
-- `psych-literature-review-workflow`：用于**新的通用综述工作流**。核心产物是综述协议、文献矩阵、HTML 星图、综述正文、引用对齐和模拟审稿。
-- `psych-cog-neuro-review`：用于**认知神经科学工作流**。当项目涉及 EEG/ERP、fMRI、PSG、眼动、生理指标、实验范式、脑机制或行为—神经整合时使用。
+本 skill 被用户或 Codex 选中后，应**独立完成实证论文工作流**，不得把任务转交、拆分或依赖其他 skill。可以在边界判断时说明其他主 skill 更适合，但一旦继续使用本 skill，就必须在本文件范围内完成任务。
 
-若用户的目标是“写一篇综述”，优先使用 `psych-literature-review-workflow`。若用户的目标是“完成一篇含数据或实验的心理学论文”，使用本 skill。若实证研究涉及认知神经科学方法，可借鉴或调用 `psych-cog-neuro-review` 的范式、神经指标和机制设计规范，但本 skill 仍保持实证论文总控责任。
+当前三个主 skill 的边界仅用于选择，不用于运行时互相调用：
 
-`psych-review-workflow` 若仍存在，仅作为旧版辅助/历史兼容材料，不作为三个主 skill 之一。
+- `psychology-research-pipeline`：心理学实证论文工作流。核心产物是研究方案、变量模型、数据分析、结果、讨论和投稿预备稿。
+- `psych-cog-neuro-review`：认知神经科学工作流。适合 EEG/ERP、fMRI、PSG、眼动、生理指标、实验范式、脑机制或行为—神经整合主题。
+- `psych-literature-review-workflow`：新的通用综述工作流。适合不以神经/生理指标为核心的心理学综述项目。
+
+若用户目标是单纯综述，不使用本 skill。若用户目标是普通心理学实证论文，使用本 skill。若实证研究中偶然涉及神经或生理术语，本 skill 仍独立处理方法边界、报告规范和写作，不要求调用其他 skill。
+
+`psych-review-workflow` 若仍存在，仅为旧版辅助/历史兼容材料，不作为三个主 skill 之一。
 
 ## 2. 适用场景
 
@@ -25,9 +29,9 @@ description: Use this standalone Chinese-first skill to orchestrate an auditable
 
 - 从研究兴趣推进到实证研究问题、假设和变量模型。
 - 设计问卷研究、实验研究、干预研究、纵向/横断研究、临床/健康心理学研究、发展心理学研究或心理测量研究。
-- 做文献检索、Zotero 入库、文献筛选和背景综述，但最终目的是支撑实证论文。
-- 制定研究设计、样本方案、量表/任务选择、伦理与开放科学计划。
-- 处理数据、做统计分析、解释结果、写 APA 论文、模拟投稿审稿。
+- 为实证论文检索理论、综述、方法和实证证据，并进行 Zotero 入库、筛选和小综述写作。
+- 制定样本方案、量表/任务选择、研究程序、伦理与开放科学计划。
+- 整理数据、制定统计分析计划、执行或解释分析、写 APA 论文和模拟投稿审稿。
 
 不要使用本 skill，当任务只是：
 
@@ -44,7 +48,7 @@ description: Use this standalone Chinese-first skill to orchestrate an auditable
 | 模式 | 适用任务 | 最低要求 | 典型输出 |
 |---|---|---|---|
 | `lite` | 课程论文、早期选题、研究设计草案 | 选题、简检索、变量模型、方法草案 | project brief, seed papers, hypotheses, methods sketch |
-| `standard` | 本科/研究生实证论文、普通投稿预备 | 00–10 全流程，含文献、方法、分析、写作和审稿 | research protocol, analysis plan, manuscript draft |
+| `standard` | 本科/研究生实证论文、普通投稿预备 | 00–11 全流程，含文献、方法、分析、写作和审稿 | research protocol, analysis plan, manuscript draft |
 | `strict` | 投稿级实证论文、高风险数据/临床主题、注册报告预备 | 冻结协议、完整检索日志、分析计划、代码/数据审计、引用对齐 | auditable empirical paper package |
 
 不要静默降低用户要求的模式。若数据、权限、时间或材料不支持 `strict`，记录 blocker，并明确降级假设。
@@ -110,7 +114,7 @@ empirical_runs/<YYYYMMDD>_<short_topic>/
 | 04 | 文献筛选与小综述 | 分类、评级、提取证据，服务引言和方法 | `screening_table.csv`, `literature_matrix.csv/xlsx/md`, `mini_review.md`, `claim_evidence_map.csv` |
 | 05 | 方法设计 | 确定样本、量表、任务、程序和分析计划 | `methods_plan.md`, `measurement_table.csv`, `statistical_analysis_plan.md` |
 | 06 | 数据管理 | 审计数据结构、变量命名、缺失与异常 | `data_dictionary.csv`, `data_audit.md`, `cleaning_log.md` |
-| 07 | 统计分析 | 按冻结计划分析并记录偏离 | `analysis_script`, `analysis_outputs/`, `analysis_report.md` |
+| 07 | 统计分析 | 按冻结计划分析并记录偏离 | `analysis_script`, `analysis_outputs/`, `analysis_report.md`, `analysis_deviation_log.md` |
 | 08 | 结果与图表 | 写作结果、表格、图和稳健性检查 | `results.md`, `tables/`, `figures/`, `robustness_checks.md` |
 | 09 | 论文写作 | APA 兼容论文草稿 | `manuscript.md`, `manuscript.docx`, `references.bib`, `apa_references.md` |
 | 10 | 对齐与审计 | 核查主张、引用、数字、表图和方法一致性 | `source_alignment_table.csv/xlsx`, `numeric_audit.md`, `claim_audit.md` |
@@ -137,14 +141,19 @@ empirical_runs/<YYYYMMDD>_<short_topic>/
 
 同时单独评价：方法质量、样本适配度、理论贡献、证据强度、引用价值、与本研究变量模型的连接度。
 
+阅读矩阵至少包括：题录、DOI/PMID、研究类型、样本、人群、变量、测量工具、研究设计、统计方法、核心发现、局限、可引用位置、与本研究关系、相关性等级、质量评价、是否进入正文。
+
 ## 8. 方法与分析硬约束
 
 - 先冻结研究问题、假设、变量和分析计划，再写结果。
 - 不从相关关系推出因果；区分横断、纵向、实验和干预设计的推论边界。
 - 不根据显著性事后改假设；探索性分析必须标注为 exploratory。
-- 不伪造样本量、描述统计、信效度、拟合指数、p 值、置信区间、效应量或软件输出。
-- 任何反向计分、缺失处理、异常值处理、量表合成、中心化、Bootstrap、模型比较、稳健性检查都必须记录。
-- 对敏感心理健康数据、临床信息、自伤自杀条目和身份信息，只处理最小必要信息；不得上传可识别原始数据。
+- 不伪造样本量、描述统计、信效度、模型拟合、p 值、置信区间、效应量或图表。
+- 缺失值、异常值、反向计分、量表总分/维度分、排除标准和协变量处理必须记录。
+- PROCESS、AMOS、Mplus、R 或 Python 输出要与正文数字逐项核对。
+- 样本量、power analysis、可行性和伦理风险必须独立说明。
+
+建议产物：`power_analysis_plan.md`, `sample_size_decision_log.md`, `variable_codebook.csv`, `missing_data_plan.md`, `assumption_checklist.md`, `analysis_deviation_log.md`。
 
 ## 9. 写作结构
 
