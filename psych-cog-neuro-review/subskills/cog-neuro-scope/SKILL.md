@@ -1,26 +1,58 @@
 ---
 name: cog-neuro-scope
-description: Local subskill under psych-cog-neuro-review for cognitive neuroscience project scoping and task-type classification.
+description: Local subskill under psych-cog-neuro-review for cognitive neuroscience review scoping and mechanism-boundary classification. Chinese-first; use only inside the cognitive neuroscience review workflow.
 ---
 
-# Cog Neuro Scope / 认知神经科学项目定标分 skill
+# 方向定标分 skill
 
-本分 skill 只属于认知神经科学工作流，用于判断任务是综述、实验设计、实证论文还是已有数据分析。
+## 目标
 
-## 需要确认
+把认知神经科学宽方向聚焦为可检索、可评价、可写作的综述问题和机制边界。
 
-1. 研究主题、核心构念、目标人群。
-2. 是否涉及 EEG/ERP、fMRI、PSG、眼动、皮电、HRV、内分泌或其他生理指标。
-3. 是否已有实验范式、刺激材料、E-Prime/PsychoPy 程序或数据。
-4. 目标用途：课程、开题、学位论文、中文期刊、英文期刊、注册报告。
+## 适用场景
 
-## 输出
+- 用户只有宽方向，需要形成机制综述、理论综述、方法学综述或范式综述主题。
+- 用户已有题目，但脑机制、实验范式、神经/生理指标或目标人群边界不清。
 
-- `scope_brief.md`
-- `task_type.md`
-- `mechanism_scope.md`
-- `导师汇报版简表.md`
+## 输入
 
-## 原则
+研究方向、核心构念、人群、可能范式、神经/生理指标、目标用途、已有文献或导师要求。
 
-认知神经科学项目必须明确行为指标、主观指标、神经/生理指标和理论机制之间的关系。
+## 执行步骤
+
+1. 判断综述类型：机制、理论、方法学、范式、指标、范围、系统综述预备或元分析预备。
+2. 明确构念、人群、任务范式、神经/生理指标和机制层级。
+3. 输出 2–4 个候选综述问题，比较创新性、可检索性、证据量和风险。
+4. 推荐主方向，并列出备选方向和放弃理由。
+
+## 输出文件
+
+- `方向定标简报_cog_neuro_scope.md`
+- `机制范围说明_mechanism_scope.md`
+- `候选综述问题_candidate_review_questions.md`
+- `导师汇报版简表_supervisor_brief.md`
+
+## 中文文件命名
+
+所有本地输出必须使用“中文主名_英文兼容名.扩展名”。
+
+## 质量检查
+
+- 机制问题是否清晰？
+- 范式和指标是否与构念匹配？
+- 人群和证据类型是否明确？
+- 是否能形成检索式和纳排标准？
+
+## 失败与停止条件
+
+- 无法界定机制边界时停止。
+- 主题缺乏可检索文献时停止。
+- 用户要求凭空写脑机制时停止。
+
+## 安全边界
+
+不承诺发表；不把初步方向写成最终结论；不凭空声称某脑区、网络或成分参与某机制。
+
+## 完成条件
+
+形成推荐方向、备选方向、机制边界、初步证据基础和待确认问题。
