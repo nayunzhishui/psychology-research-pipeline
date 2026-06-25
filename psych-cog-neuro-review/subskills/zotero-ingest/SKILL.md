@@ -1,109 +1,60 @@
 ---
-name: psych-cog-neuro-review-zotero-ingest
-description: Use this subskill during Stage 03 of psych-cog-neuro-review to import literature metadata into a named Zotero collection, use authenticated browser sessions only when the user already has legal access, trigger Zotero Connector, attach verified PDFs, deduplicate records, and report missing full text. 适用于认知神经科学综述的 Zotero 文献入库、合法全文获取和 PDF 匹配；不要用于绕过付费墙、验证码、数据库限制、cookie 提取或盗版全文获取。
+name: cog-neuro-zotero-ingest
+description: Local subskill under psych-cog-neuro-review for safe Zotero ingestion in cognitive neuroscience review projects. Chinese-first; use only inside the cognitive neuroscience review workflow.
 ---
 
-# Zotero Ingest for Cognitive Neuroscience Review / Zotero 文献入库子流程
+# Zotero 入库分 skill
 
-## Purpose
+## 目标
 
-Use this subskill only inside `psych-cog-neuro-review` Stage 03 Acquire / 获取与文献库. It mirrors the repository-level `psych-zotero-ingest` behavior, but writes outputs into the review run folder:
+把认知神经科学综述候选文献合法、安全、可追溯地导入 Zotero，并核验题录和全文状态。
 
-```text
-03_library/zotero_manifest.csv
-03_library/library_acquisition_manifest.csv
-03_library/zotero_collection_plan.md
-03_library/acquisition_report.md
-```
+## 适用场景
 
-## Preflight
+- 需要使用 Chrome + Zotero Connector 保存题录和 PDF。
+- 需要核验 DOI、PMID、题名、作者、年份、PDF 和目标 collection。
 
-Before any Zotero or browser action, require and record:
+## 输入
 
-1. candidate IDs from `02_search/candidate_records.csv`;
-2. exact target Zotero collection name and, when available, collection key;
-3. record cap for this acquisition batch;
-4. full-text policy: `metadata_only`, `metadata_plus_authorized_pdf`, or `user_provided_pdf_only`;
-5. standing additive write authorization for the named collection;
-6. whether Zotero Desktop, Zotero Connector, browser access, and local helper are available.
+候选文献表、DOI/PMID、数据库页面、期刊官网页面、Zotero collection、用户已合法访问的 PDF。
 
-If any of these are missing, stop Stage 03 and write the blocker to `03_library/acquisition_report.md`. Do not guess the collection.
+## 执行步骤
 
-## Tool routing
+1. 确认 Zotero collection 和本地文献目录。
+2. 使用 Zotero Connector 保存题录和 PDF。
+3. 核验题录与 PDF 是否匹配。
+4. 标记缺失全文、重复题录、题录不完整和需用户手动处理项。
+5. 导出 BibTeX/RIS/CSV，并生成入库清单。
 
-Read `references/zotero_tool_routing.md` first.
+## 输出文件
 
-Preferred route:
+- `Zotero入库清单_zotero_manifest.csv`
+- `PDF全文清单_pdf_manifest.csv`
+- `重复文献检查_duplicate_check.csv`
+- `全文获取报告_acquisition_report.md`
+- `全文获取失败清单_failed_ingest_queue.csv`
 
-1. Use structured metadata sources and local Zotero search first.
-2. Use Zotero helper where available: run `status --json`, resolve the exact collection, and search duplicates.
-3. Use browser and Zotero Connector only on verified article pages when the user already has legal access.
-4. Use Computer Use only for a Zotero Desktop action that helper/connector cannot perform, such as attaching a verified PDF to an existing parent item.
+## 中文文件命名
 
-## Process each candidate
+所有本地输出必须使用“中文主名_英文兼容名.扩展名”。
 
-For each candidate under the record cap:
+## 质量检查
 
-1. Search Zotero by DOI, PMID, then normalized title + first author + year.
-2. If a matching parent item and readable PDF already exist, record `duplicate-skipped` in `zotero_manifest.csv` and `duplicate_skipped` in `library_acquisition_manifest.csv`.
-3. If a matching parent item exists without the requested PDF, acquire only the missing authorized attachment.
-4. If no record exists, import metadata into the exact target collection. Prefer Zotero Connector from the verified article page. Fallback to RIS/BibTeX import when connector import is unavailable.
-5. Download only authorized scholarly files. Validate each PDF before attachment or before marking it complete.
-6. Attach verified PDFs only to the correct parent record. Never create attachment-only items when usable metadata exists.
-7. Verify title, creators, year, DOI/PMID/CNKI/Wanfang/VIP identifier where available, collection, parent item key, attachment child key, and readable full text.
-8. Write both manifests and update `acquisition_report.md` after each batch.
+- 题录是否完整？
+- PDF 是否与题录匹配？
+- DOI/PMID 是否可核验？
+- 失败项是否进入队列？
 
-## PDF validation
+## 失败与停止条件
 
-Before import or attachment, verify:
+- 无合法访问权限时停止全文获取。
+- PDF 与题录不匹配时不得进入阅读矩阵。
+- 大量题录缺失 DOI/PMID 时需先清洗题录。
 
-- expected content type and `.pdf` extension;
-- nonzero plausible size and `%PDF-` signature;
-- no HTML login page, error page, or executable disguised as PDF;
-- readable first page;
-- page count is plausible;
-- title/author/DOI agreement with the candidate record.
+## 安全边界
 
-If validation fails, quarantine the local file, record `failed-validation`, and do not attach it to Zotero.
+不保存账号密码、验证码、cookie、token 或密钥；不绕过付费墙、MFA、验证码、数据库条款或下载限制；不使用盗版来源。
 
-## Allowed statuses
+## 完成条件
 
-Use these status values in `zotero_manifest.csv`:
-
-- `complete`
-- `metadata-only`
-- `duplicate-skipped`
-- `access-blocked`
-- `failed-validation`
-- `manual_needed`
-- `user_provided`
-
-Use normalized snake_case values in `library_acquisition_manifest.csv` where needed:
-
-- `readable_pdf`
-- `metadata_only`
-- `abstract_only`
-- `access_blocked`
-- `duplicate_skipped`
-- `failed_validation`
-- `manual_needed`
-- `user_provided`
-
-## Hard boundaries
-
-- Do not read, save, enter, or request campus account, database account, publisher account, Zotero account, or browser passwords.
-- Do not extract, copy, save, export, or reuse cookies, session storage, local storage, browser profiles, saved passwords, tokens, or authentication artifacts.
-- Do not use unauthorized full-text sources, shadow libraries, piracy mirrors, PDF bots, leaked credentials, or non-authorized repository copies.
-- Do not bypass CAPTCHA, MFA, IP limits, database download limits, robots controls, publisher restrictions, or paywalls.
-- Stop the item and record `manual_needed` when CAPTCHA, secondary authentication, abnormal-download warnings, account-risk warnings, license ambiguity, payment prompts, or access uncertainty appears.
-- Do not run unattended high-frequency bulk acquisition. Process bounded batches under the configured record cap.
-- Do not commit PDFs, Zotero databases, downloaded full text, browser artifacts, credentials, API keys, tokens, cookies, or temporary downloads to GitHub.
-
-## Output rules
-
-- `zotero_manifest.csv` is the direct Zotero import manifest.
-- `library_acquisition_manifest.csv` is the richer review-pipeline manifest used by screening, extraction, and audit.
-- `acquisition_report.md` must include counts by status, unresolved records, validation failures, access blockers, and manual actions for the user.
-- `zotero_collection_plan.md` must record the exact collection name/key, record cap, full-text policy, helper/connector availability, and date of verification.
-
-Never claim full text is available based only on a landing page or metadata record. Never mark Stage 03 complete until every retained candidate has a traceable status.
+形成 Zotero 入库清单、PDF 全文清单、重复检查和失败队列，说明哪些文献可进入全文阅读。
