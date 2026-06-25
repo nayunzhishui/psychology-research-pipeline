@@ -1,4 +1,0 @@
-interface:
-  display_name: "Psychology Data Analysis"
-  short_description: "Run reproducible longitudinal analyses"
-  default_prompt: "Use $psych-data-analysis to audit and analyze the longitudinal psychology dataset reproducibly."
