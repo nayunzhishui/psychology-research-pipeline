@@ -1,4 +1,7 @@
 interface:
-  display_name: "Psychology Research Pipeline"
-  short_description: "Auditable literature-to-publication workflow"
-  default_prompt: "Use $psychology-research-pipeline to run an auditable psychology research-to-publication workflow."
+  display_name: "心理学实证论文工作流"
+  short_description: "中文优先的心理学实证论文全流程：选题、文献、Zotero、方法、数据分析、APA 写作、来源对齐和模拟审稿。"
+  default_prompt: "使用 $psychology-research-pipeline 运行一个中文优先、可审计的心理学实证论文工作流；除必要英文术语外，说明文字和本地生成文件名默认使用中文。"
+
+policy:
+  allow_implicit_invocation: true
