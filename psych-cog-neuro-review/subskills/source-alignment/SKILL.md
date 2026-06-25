@@ -1,72 +1,60 @@
 ---
-name: psych-review-source-alignment
-description: Use this subskill after a psychology or cognitive neuroscience review draft is written to create a paragraph-level matrix linking each claim-bearing review paragraph and empirical/theoretical/methodological judgment to exact source passages, pages, tables, figures, or result sections. 用于综述原文与参考文献原文的逐段对应核查；不要用于没有文献原文或阅读矩阵支持的自由核查。
+name: cog-neuro-source-alignment
+description: Local subskill under psych-cog-neuro-review for aligning cognitive neuroscience mechanism claims with exact source evidence. Chinese-first; use only inside the cognitive neuroscience review workflow.
 ---
 
-# Source Alignment / 综述原文—参考文献对应矩阵
+# 机制来源对齐分 skill
 
-## Purpose
+## 目标
 
-After a review draft is complete, verify exactly which source passage supports each paragraph and each substantive judgment. The goal is not only to check citation formatting, but to show “综述中的哪一段话，对应文献中的哪一段话或哪一个结果”。
+核查认知神经科学综述中的机制主张、脑区/网络/成分/指标表述、方法评价和参考文献原文是否一致。
 
-This subskill uses strictness level **B** by default: every empirical, theoretical, methodological, definitional, or mechanism judgment must map to a source location. Pure transition sentences do not need sentence-level source matching, but every claim-bearing paragraph must have at least one mapped claim.
+## 适用场景
 
-## Inputs
+- 综述正文已经形成草稿。
+- 需要检查每个机制主张是否有原文、页码、表图或结果部分支持。
 
-- `08_manuscript/review_draft.md` with stable paragraph IDs such as `P001`, `P002`
-- full-text PDFs, extracted notes, or reading cards when available
-- `05_extraction/literature_matrix.csv`
-- `05_extraction/neural_mechanism_matrix.csv`
-- `06_synthesis/claim_evidence_map.csv`
-- BibTeX/RIS/Zotero export or reference list
+## 输入
 
-## Required outputs
+综述正文、参考文献、文献阅读矩阵、机制矩阵、方法评价、PDF 全文或网页原文。
 
-- `09_audit/paragraph_source_alignment_matrix.csv`
-- `09_audit/paragraph_source_alignment_report.md`
-- `09_audit/unsupported_or_overstated_claims.md`
+## 执行步骤
 
-## Workflow
+1. 拆分正文中的机制主张、方法主张、结果主张和理论解释。
+2. 为每条主张绑定文献来源和原文位置。
+3. 判断支持程度：direct、partial、unsupported、overextended。
+4. 核查脑区、网络、ERP 成分、睡眠阶段、眼动指标、NIRS 指标和心理生理指标是否准确。
+5. 输出未支持主张、过度推断和修改建议。
 
-1. Segment the review draft into numbered paragraphs. If paragraph IDs are absent, add IDs without changing the argument.
-2. Split each claim-bearing paragraph into substantive claim units. Label claims as definition, empirical finding, theory, method, mechanism, limitation, comparison, implication, or inference.
-3. Ignore purely rhetorical transition clauses unless they contain a factual judgment.
-4. For each substantive claim, locate supporting source passages from PDFs, notes, matrices, tables, figures, abstracts, or result sections.
-5. Record the source passage precisely: source ID, citation key, author-year, page, section, paragraph/table/figure, short source excerpt, and the exact draft claim.
-6. Classify support strength: direct, partial, indirect, review-only, contradictory, unsupported, or overextended.
-7. Mark whether the draft citation is valid for that exact claim. A source can support one part of a sentence but not another; split claims when needed.
-8. Create a revision note for every unsupported, contradictory, or overextended claim.
-9. Revise the draft only when the user requested automatic revision; otherwise provide the matrix and issue list.
+## 输出文件
 
-## Matrix fields
+- `来源对齐表_source_alignment_table.csv`
+- `机制主张审计_mechanism_claim_audit.md`
+- `方法审计报告_method_audit.md`
+- `未支持主张清单_unsupported_claims.md`
+- `修改行动表_revision_actions.csv`
 
-Use this header for `paragraph_source_alignment_matrix.csv`:
+## 中文文件命名
 
-```csv
-review_paragraph_id,review_sentence_or_claim_id,review_claim_text,claim_type,is_claim_bearing,in_text_citation,claim_id,source_id,citation_key,source_author_year,source_title,source_location,page_or_location,source_passage_excerpt,support_strength,evidence_role,does_source_support_exact_claim,problem_type,revision_suggestion,notes
-```
+所有本地输出必须使用“中文主名_英文兼容名.扩展名”。
 
-## Support labels
+## 质量检查
 
-- `direct`: the source passage directly states the draft claim.
-- `partial`: the source supports part of the claim, but the claim needs narrowing.
-- `indirect`: the source supports a premise, not the final conclusion.
-- `review_only`: the source is a review or meta-analysis; acceptable for broad background but not as a primary empirical citation when primary studies are needed.
-- `contradictory`: the source conflicts with the draft claim.
-- `unsupported`: no source passage supports the claim.
-- `overextended`: the source supports a weaker claim than the draft makes.
+- 每个关键机制主张是否绑定来源？
+- 原文位置是否可追溯？
+- 是否存在过度推断？
+- 指标名称和结果方向是否准确？
 
-## Rules
+## 失败与停止条件
 
-- Do not treat a citation as valid merely because it appears near the sentence.
-- Do not require source mapping for empty transitions such as “基于上述研究” unless the sentence also states a factual claim.
-- Do not use titles or abstracts as full-text evidence when full text is available.
-- Do not quote long passages. Keep source excerpts short and only as needed for verification.
-- Do not convert review-level conclusions into primary empirical findings.
-- Do not accept vague source locations such as “paper says this”; use page, section, table, figure, or paragraph-level notes when available.
-- For neuroimaging claims, distinguish activation, connectivity, decoding, lesion evidence, and inferred psychological function.
-- For REM/emotional memory claims, distinguish REM duration, REM density, REM physiology, sleep deprivation, nap/night sleep, encoding, consolidation, retrieval, extinction, and reconsolidation.
+- 没有全文，不得做页码级强引用。
+- 没有来源对齐，不得声称“可投稿”。
+- unsupported 机制主张未处理前不得生成终稿。
 
-## Completion gate
+## 安全边界
 
-The draft passes only when every empirical, theoretical, definitional, methodological, or mechanism judgment is either directly supported, explicitly framed as inference, or revised. If any substantive claim remains unsupported, list it in `09_audit/unsupported_or_overstated_claims.md` with a concrete fix.
+不得为了对齐而伪造页码、文献、原文内容、脑区结果、ERP 成分、fMRI 激活、PSG 分期、眼动/NIRS/心理生理指标或 DOI。
+
+## 完成条件
+
+完成来源对齐表、机制主张审计、方法审计、未支持主张清单和修改行动表。
