@@ -1,0 +1,7 @@
+interface:
+  display_name: "Psychology Literature Review Workflow"
+  short_description: "Chinese-first standalone psychology literature-review workflow with scoped search, Zotero, matrix, star map, APA writing, source alignment, and simulated review."
+  default_prompt: "Use $psych-literature-review-workflow to run a standalone psychology literature-review workflow from broad topic exploration to source-aligned review manuscript."
+
+policy:
+  allow_implicit_invocation: true
