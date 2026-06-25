@@ -1,27 +1,60 @@
 ---
 name: review-scope
-description: Local subskill under psych-literature-review-workflow for broad-direction exploration and review focus refinement. Chinese-first.
+description: Local subskill under psych-literature-review-workflow for broad-direction exploration and review focus refinement. Chinese-first; use only inside the literature review workflow.
 ---
 
-# Review Scope / 综述方向聚焦分 skill
+# 综述方向聚焦分 skill
 
-本分 skill 只属于新的通用综述工作流，用于把宽泛研究方向聚焦为可写综述主题。
+## 目标
 
-## 任务
+把宽泛研究方向聚焦为可检索、可写作、可审计的心理学综述主题。
+
+## 适用场景
+
+- 用户只有宽方向，需要形成 2–4 个候选综述题目。
+- 用户已有题目，但综述类型、边界、人群或构念不清楚。
+- 需要为导师汇报、开题或投稿预备形成方向选择依据。
+
+## 输入
+
+研究方向、关键词、目标用途、目标人群、已知文献、导师要求或用户限制。
+
+## 执行步骤
 
 1. 初步检索高质量综述、方法学文章和核心理论文章。
-2. 识别可写方向、主题边界、目标人群、关键构念和研究空白。
-3. 输出多个候选综述题目并比较可写性。
-4. 帮助用户和 AI 共同确认聚焦方向。
+2. 划定构念、人群、时间、研究设计和证据类型边界。
+3. 输出 2–4 个候选综述方向，比较创新性、文献量、可写性和风险。
+4. 推荐一个主方向，并列出备选方向和放弃理由。
 
-## 输出
+## 输出文件
 
-- `scoping_brief.md`
-- `seed_reviews.csv`
-- `seed_methods.csv`
-- `focus_options.md`
-- `导师汇报版简表.md`
+- `综述方向聚焦_review_scope.md`
+- `种子综述文献表_seed_reviews.csv`
+- `种子方法学文献表_seed_methods.csv`
+- `综述方向候选方案_focus_options.md`
+- `导师汇报版简表_supervisor_brief.md`
 
-## 停止条件
+## 中文文件命名
 
-当至少形成 2–4 个可比较的综述方向，并明确推荐方向、备选方向和放弃理由时停止。
+所有本地输出必须使用“中文主名_英文兼容名.扩展名”。
+
+## 质量检查
+
+- 主题是否过宽或过窄？
+- 综述类型是否匹配目标？
+- 是否能形成明确检索式和纳排标准？
+- 是否有足够核心文献支撑？
+
+## 失败与停止条件
+
+- 无法界定核心构念或目标人群时停止。
+- 候选方向缺乏可检索文献时停止并回到方向探索。
+- 用户要求伪造文献或夸大创新性时停止。
+
+## 安全边界
+
+不承诺发表，不把初步方向写成最终结论，不把未检索的主题声称为文献空白。
+
+## 完成条件
+
+形成推荐方向、备选方向、放弃理由、初步检索依据和待用户确认问题。
