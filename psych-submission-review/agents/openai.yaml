@@ -1,4 +1,0 @@
-interface:
-  display_name: "Psychology Submission Review"
-  short_description: "Simulate journal review and revision cycles"
-  default_prompt: "Use $psych-submission-review to simulate submission, peer review, and revision."
