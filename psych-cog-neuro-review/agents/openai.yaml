@@ -1,7 +1,7 @@
 interface:
-  display_name: "Cognitive Neuroscience Workflow"
-  short_description: "Chinese-first standalone cognitive neuroscience workflow for reviews, experiments, mechanisms, methods, preprocessing, APA writing, and simulated review."
-  default_prompt: "Use $psych-cog-neuro-review to run a standalone cognitive neuroscience workflow for review, experiment design, empirical planning, mechanism synthesis, or manuscript preparation."
+  display_name: "认知神经科学工作流"
+  short_description: "中文优先的认知神经科学工作流，覆盖综述、实验设计、机制整合、方法计划、预处理计划、APA 写作和模拟审稿。"
+  default_prompt: "使用 $psych-cog-neuro-review 运行一个中文优先的认知神经科学工作流；除必要英文术语外，说明文字和本地生成文件名默认使用中文。"
 
 policy:
   allow_implicit_invocation: true
