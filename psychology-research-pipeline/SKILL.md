@@ -1,17 +1,17 @@
 ---
 name: psychology-research-pipeline
-description: Use this standalone Chinese-first skill for end-to-end empirical psychology paper workflows, including project scoping, research-question refinement, evidence search, Zotero ingestion, literature screening, hypothesis and variable-model construction, ethics/open-science planning, methods design, data management, statistical analysis, APA manuscript writing, source alignment, and simulated submission review. 这是“心理学实证论文工作流”，用于问卷、实验、干预、纵向/横断、心理测量、临床/健康/发展心理学等实证论文；本 skill 被选中后必须独立完成任务，不依赖其他 skill、总索引或共享模板；不要用于单纯综述写作、认知神经科学专用项目、伪造数据/文献、绕过权限、无人值守批量下载或真实投稿提交。
+description: Use this standalone Chinese-first main skill folder for end-to-end empirical psychology paper workflows, including project scoping, evidence search, Zotero ingestion, literature screening, hypothesis and variable-model construction, ethics/open-science planning, methods design, data management, statistical analysis, APA manuscript writing, source/data alignment, reporting standards, and simulated submission review. 这是“心理学实证论文工作流”，用于问卷、实验、干预、纵向/横断、心理测量、临床/健康/发展心理学等实证论文；本 skill 被选中后必须在本主 skill 文件夹范围内独立完成任务，可使用本目录下 subskills/，但不依赖其他主 skill、旧顶层辅助 skill、总索引或共享模板；不要用于单纯综述写作、认知神经科学专用项目、伪造数据/文献、绕过权限、无人值守批量下载或真实投稿提交。
 ---
 
 # Psychology Empirical Paper Workflow / 心理学实证论文工作流
 
-本 skill 是三个主工作流之一，定位为**心理学实证论文从选题到投稿预备的独立工作流**。它服务于含数据、实验、问卷、干预、测量或统计分析的论文项目。文献综述在本流程中只服务于研究问题、理论模型、变量选择、方法设计和论文引言，不替代完整的独立综述项目。
+本 skill 是三个主工作流之一，定位为**心理学实证论文从选题到投稿预备的独立工作流**。它服务于含数据、实验、问卷、干预、测量或统计分析的论文项目。文献综述在本流程中只服务于研究问题、理论模型、变量选择、方法设计和论文引言，不替代完整独立综述项目。
 
 默认语言为中文。必要英文保留于数据库检索式、量表名、统计方法、软件输出、APA 引文、参考文献、变量名和国际报告规范。
 
 ## 1. 独立调用原则
 
-本 skill 被用户或 Codex 选中后，应**独立完成实证论文工作流**，不得把任务转交、拆分或依赖其他 skill。可以在边界判断时说明其他主 skill 更适合，但一旦继续使用本 skill，就必须在本文件范围内完成任务。
+本 skill 被用户或 Codex 选中后，应**在本主 skill 文件夹范围内独立完成实证论文工作流**，范围包括主 `SKILL.md` 与本目录下的 `subskills/`。不得把任务转交、拆分或依赖其他主 skill、旧顶层辅助 skill、总索引或共享模板。可以在边界判断时说明其他主 skill 更适合，但一旦继续使用本 skill，就必须在本主 skill 文件夹范围内完成任务。
 
 当前三个主 skill 的边界仅用于选择，不用于运行时互相调用：
 
@@ -21,9 +21,24 @@ description: Use this standalone Chinese-first skill for end-to-end empirical ps
 
 若用户目标是单纯综述，不使用本 skill。若用户目标是普通心理学实证论文，使用本 skill。若实证研究中偶然涉及神经或生理术语，本 skill 仍独立处理方法边界、报告规范和写作，不要求调用其他 skill。
 
-`psych-review-workflow` 若仍存在，仅为旧版辅助/历史兼容材料，不作为三个主 skill 之一。
+## 2. 内部分 skill 结构
 
-## 2. 适用场景
+本目录下的 `subskills/` 是本主工作流的一部分。Codex 可在本 skill 被选中后，按阶段读取并使用这些分 skill。分 skill 不作为顶层入口，也不得跨主 skill 使用。
+
+推荐顺序：
+
+1. `subskills/project-scope`：选题、研究问题、假设、变量模型。
+2. `subskills/evidence-search`：理论、方法、量表和实证依据检索。
+3. `subskills/zotero-ingest`：Chrome + Zotero Connector 入库和 PDF/题录核验。
+4. `subskills/literature-screen`：实证论文所需文献分类、筛选、小综述和证据矩阵。
+5. `subskills/methods-design`：样本、量表、任务、伦理、开放科学和分析计划。
+6. `subskills/data-analysis`：数据审计、统计分析、结果解释和偏离记录。
+7. `subskills/reporting-standards`：STROBE、CONSORT/SPIRIT、测量研究和开放科学报告规范。
+8. `subskills/manuscript-write`：APA 实证论文写作。
+9. `subskills/source-alignment`：正文主张、参考文献、统计数字、表图和方法描述对齐。
+10. `subskills/submission-review`：模拟投稿审稿和修改矩阵。
+
+## 3. 适用场景
 
 使用本 skill，当用户需要：
 
@@ -33,17 +48,9 @@ description: Use this standalone Chinese-first skill for end-to-end empirical ps
 - 制定样本方案、量表/任务选择、研究程序、伦理与开放科学计划。
 - 整理数据、制定统计分析计划、执行或解释分析、写 APA 论文和模拟投稿审稿。
 
-不要使用本 skill，当任务只是：
+不要使用本 skill，当任务只是单纯综述、范围综述、系统综述、临时概念解释、单段润色、参考文献格式修正，或用户要求伪造数据/文献/统计结果/伦理审批/DOI/审稿意见、绕过权限、真实投稿操作。
 
-- 单纯写综述、范围综述、系统综述或文献矩阵。
-- 临时解释概念、润色单段文字、改参考文献格式。
-- 用户要求伪造数据、伪造统计结果、伪造问卷来源、伪造伦理审批、伪造 DOI、伪造审稿意见。
-- 用户要求绕过数据库权限、验证码、MFA、付费墙、下载限制或出版社条款。
-- 用户要求真实投稿、支付费用、联系编辑或代替作者完成投稿系统操作。
-
-## 3. 运行模式
-
-首次运行时选择一个模式，并写入 `state.json` 和 `logs/decisions.md`。
+## 4. 运行模式
 
 | 模式 | 适用任务 | 最低要求 | 典型输出 |
 |---|---|---|---|
@@ -53,7 +60,7 @@ description: Use this standalone Chinese-first skill for end-to-end empirical ps
 
 不要静默降低用户要求的模式。若数据、权限、时间或材料不支持 `strict`，记录 blocker，并明确降级假设。
 
-## 4. 启动时的需求沟通
+## 5. 启动时的需求沟通
 
 首次运行时先简短询问，除非用户已经给出答案。用户未回答时，可以用默认值继续，但必须记录为 `assumption`。
 
@@ -71,7 +78,7 @@ description: Use this standalone Chinese-first skill for end-to-end empirical ps
 
 用户已明确回答时，不要重复询问。
 
-## 5. 默认运行目录
+## 6. 默认运行目录
 
 ```text
 empirical_runs/<YYYYMMDD>_<short_topic>/
@@ -103,7 +110,7 @@ empirical_runs/<YYYYMMDD>_<short_topic>/
 
 不要覆盖旧文件。修订版使用 `_v2`、`_v3`，并记录修订原因。
 
-## 6. 阶段总览
+## 7. 阶段总览
 
 | 阶段 | 名称 | 目标 | 主要产物 |
 |---|---|---|---|
@@ -120,78 +127,30 @@ empirical_runs/<YYYYMMDD>_<short_topic>/
 | 10 | 对齐与审计 | 核查主张、引用、数字、表图和方法一致性 | `source_alignment_table.csv/xlsx`, `numeric_audit.md`, `claim_audit.md` |
 | 11 | 模拟投稿审稿 | 模拟中文/英文期刊投稿前审查 | `journal_fit_memo.md`, `simulated_reviews.md`, `revision_matrix.csv` |
 
-不要随意重排阶段。若某阶段失败，在同阶段修复；只有记录原因和影响范围后，才回到前一阶段。
+## 8. 关键硬约束
 
-## 7. 文献模块要求
-
-文献检索是实证论文的支撑模块，不是独立综述替代品。
-
-默认数据库：PubMed、PsycINFO、Web of Science、Crossref、Google Scholar（辅助）、CNKI、期刊官网、Zotero 本地库。不要默认加入 Scopus、APA PsycNet、Semantic Scholar、OpenAlex、SinoMed、万方或维普；用户明确要求时再作为附加数据库并记录理由。
-
-文献分类至少包括：综述/元分析、理论概念、方法测量、横断实证、纵向实证、实验研究、干预研究、质性/混合方法、指南/共识。
-
-相关性 1–4 级：
-
-| 等级 | 含义 | 处理 |
-|---|---|---|
-| 4 | 核心文献，直接支撑研究问题、变量模型、方法或关键假设 | 全文精读，进入矩阵和引言核心引用 |
-| 3 | 重要相关，支持某一章节或方法选择 | 摘要+方法+关键结果精读，必要时全文 |
-| 2 | 背景相关，提供概念、边界或补充证据 | 摘要/讨论选择性阅读 |
-| 1 | 边缘相关，只能用于背景或排除理由 | 记录后通常不进入正文核心 |
-
-同时单独评价：方法质量、样本适配度、理论贡献、证据强度、引用价值、与本研究变量模型的连接度。
-
-阅读矩阵至少包括：题录、DOI/PMID、研究类型、样本、人群、变量、测量工具、研究设计、统计方法、核心发现、局限、可引用位置、与本研究关系、相关性等级、质量评价、是否进入正文。
-
-## 8. 方法与分析硬约束
-
-- 先冻结研究问题、假设、变量和分析计划，再写结果。
+- 默认数据库：PubMed、PsycINFO、Web of Science、Crossref、Google Scholar（辅助）、CNKI、期刊官网、Zotero 本地库。不要默认加入 Scopus、APA PsycNet、Semantic Scholar、OpenAlex、SinoMed、万方或维普；用户明确要求时再作为附加数据库并记录理由。
+- 相关性 1–4 级表示与研究问题、变量模型、方法或假设的贴合度；方法质量、样本适配度、理论贡献、证据强度和引用价值另行评价。
+- 先冻结研究问题、假设、变量和分析计划，再写结果。不根据显著性事后改假设；探索性分析必须标注为 exploratory。
 - 不从相关关系推出因果；区分横断、纵向、实验和干预设计的推论边界。
-- 不根据显著性事后改假设；探索性分析必须标注为 exploratory。
-- 不伪造样本量、描述统计、信效度、模型拟合、p 值、置信区间、效应量或图表。
+- 不伪造样本量、描述统计、信效度、模型拟合、p 值、置信区间、效应量、图表、软件输出、问卷来源或伦理审批。
 - 缺失值、异常值、反向计分、量表总分/维度分、排除标准和协变量处理必须记录。
 - PROCESS、AMOS、Mplus、R 或 Python 输出要与正文数字逐项核对。
 - 样本量、power analysis、可行性和伦理风险必须独立说明。
 
-建议产物：`power_analysis_plan.md`, `sample_size_decision_log.md`, `variable_codebook.csv`, `missing_data_plan.md`, `assumption_checklist.md`, `analysis_deviation_log.md`。
-
 ## 9. 写作结构
 
-默认 APA 第 7 版兼容：
-
-1. Title / 中文题目与英文题目
-2. Abstract / 摘要
-3. Introduction / 引言：问题、理论、文献空白、研究目的与假设
-4. Method / 方法：被试、工具、程序、伦理、数据分析
-5. Results / 结果：描述统计、信效度、相关、模型、主分析、补充分析
-6. Discussion / 讨论：主要发现、理论意义、实践意义、局限、未来方向
-7. References / 参考文献
-8. Tables and Figures / 表图
-9. Supplementary materials / 补充材料
-
-每个事实性、理论性、方法性或结果解释性主张都必须绑定来源或分析产物。写作时同步建立 `source_alignment_table`，不要写完后硬补引用。
+默认 APA 第 7 版兼容：Title、Abstract、Introduction、Method、Results、Discussion、References、Tables and Figures、Supplementary materials。每个事实性、理论性、方法性或结果解释性主张都必须绑定来源或分析产物。写作时同步建立 `source_alignment_table`，不要写完后硬补引用。
 
 ## 10. Chrome + Zotero 边界
 
-- 用户本人处理校园 VPN、统一认证、MFA、验证码、付费确认和数据库授权。
-- Codex 不读取、不保存、不记录账号、密码、验证码、cookie、token、密钥或浏览器身份凭据。
-- 不绕过付费墙、下载限制、机器人检测、数据库条款或出版社限制。
-- 不使用盗版论文站、影子图书馆、PDF bot 或泄露账号。
-- 不无人值守高速批量下载；遇到异常警告立即停止。
-- 不把 PDF、Zotero 数据库、浏览器材料或账号信息提交到 GitHub。
+用户本人处理校园 VPN、统一认证、MFA、验证码、付费确认和数据库授权。Codex 不读取、不保存、不记录账号、密码、验证码、cookie、token、密钥或浏览器身份凭据；不绕过付费墙、下载限制、机器人检测、数据库条款或出版社限制；不使用盗版论文站、影子图书馆、PDF bot 或泄露账号；不无人值守高速批量下载；不把 PDF、Zotero 数据库、浏览器材料或账号信息提交到 GitHub。
 
 ## 11. 模拟投稿与最终审核
 
 默认模拟两套审查：中文心理学/医学心理学相关期刊，以及英文心理学/健康心理学/临床心理学期刊。期刊 scope、格式、版面费、开放获取、AI policy 和投稿要求必须联网核查，不能依赖旧知识。
 
-最终完成前必须通过：
-
-- 文献与正文主张对齐。
-- 数据、代码、表格、图和正文数字一致。
-- 方法、伦理、统计计划和结果一致。
-- APA 引文与参考文献一致。
-- 结果解释没有超出设计允许范围。
-- 模拟审稿意见已标注为模拟，不冒充真实期刊反馈。
+最终完成前必须通过：文献与正文主张对齐；数据、代码、表格、图和正文数字一致；方法、伦理、统计计划和结果一致；APA 引文与参考文献一致；结果解释没有超出设计允许范围；模拟审稿意见已标注为模拟。
 
 ## 12. 完成条件
 
