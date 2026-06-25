@@ -1,26 +1,60 @@
 ---
 name: review-zotero-ingest
-description: Local subskill under psych-literature-review-workflow for safe Zotero ingestion in literature review projects.
+description: Local subskill under psych-literature-review-workflow for safe Zotero ingestion in literature review projects. Chinese-first; use only inside the literature review workflow.
 ---
 
-# Review Zotero Ingest / 综述 Zotero 入库分 skill
+# Zotero 入库分 skill
 
-本分 skill 用于综述项目的题录、PDF 和全文入库管理。
+## 目标
+
+把综述候选文献合法、安全、可追溯地导入 Zotero，并核验题录和全文状态。
+
+## 适用场景
+
+- 需要使用 Chrome + Zotero Connector 保存题录和 PDF。
+- 需要建立 Zotero 入库清单、PDF 全文清单、重复文献检查和失败队列。
+
+## 输入
+
+候选文献表、DOI/PMID、数据库页面、期刊官网页面、Zotero collection 名称、用户已合法访问的 PDF。
+
+## 执行步骤
+
+1. 确认 Zotero collection 和本地文献目录。
+2. 使用 Zotero Connector 保存题录和 PDF。
+3. 核验题名、作者、年份、DOI/PMID 和 PDF 是否匹配。
+4. 记录重复、缺失 PDF、无法访问、题录不完整和需用户手动处理项。
+5. 导出 BibTeX/RIS/CSV，并写入清单。
+
+## 输出文件
+
+- `Zotero入库清单_zotero_manifest.csv`
+- `PDF全文清单_pdf_manifest.csv`
+- `重复文献检查_duplicate_check.csv`
+- `全文获取报告_acquisition_report.md`
+- `全文获取失败清单_failed_ingest_queue.csv`
+
+## 中文文件命名
+
+所有本地输出必须使用“中文主名_英文兼容名.扩展名”。
+
+## 质量检查
+
+- Zotero collection 是否正确？
+- 题录是否完整？
+- PDF 是否与题录匹配？
+- 失败项是否可追溯？
+
+## 失败与停止条件
+
+- 无合法访问权限时停止获取全文。
+- PDF 与题录不匹配时不得进入矩阵。
+- 大量题录缺失 DOI/PMID 时需先清洗题录。
 
 ## 安全边界
 
-不保存账号密码、验证码、cookie、token 或校园认证信息；不绕过付费墙、下载限制或出版社条款；只处理用户有权访问的文献。
+不保存账号密码、验证码、cookie、token 或密钥；不绕过付费墙、MFA、验证码、出版社条款或下载限制；不使用盗版来源。
 
-## 操作路径
+## 完成条件
 
-1. 确认 Zotero collection 和本地文献目录。
-2. 使用 Chrome + Zotero Connector 保存题录和 PDF。
-3. 失败时下载到 `literature/00_待导入Zotero/`，由用户手动导入。
-4. 导出 BibTeX/RIS，核对 DOI、题名、作者、年份和 PDF 是否匹配。
-
-## 输出
-
-- `zotero_manifest.csv`
-- `pdf_manifest.csv`
-- `duplicate_check.csv`
-- `acquisition_report.md`
+形成 Zotero 入库清单、PDF 全文清单、重复检查和失败队列，说明哪些文献可进入全文阅读。
