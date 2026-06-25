@@ -1,6 +1,13 @@
-# Literature Review Workflow Subskills / 通用综述内部分 skill
+# 通用综述内部分 skill
 
 本目录中的分 skill 只属于 `psych-literature-review-workflow`。当新的通用综述工作流被调用后，Codex 可以在本目录内按阶段使用分 skill；不得把这些分 skill 当作顶层独立入口，也不得调用其他主 skill。
+
+## 语言与文件命名
+
+- 自然语言说明默认使用中文。
+- 仅在路径名、YAML 键、数据库名、量表名、理论名、APA/DOI/Zotero/CSV/XLSX/HTML/Markdown/BibTeX/RIS 等必要位置保留英文。
+- 本地运行生成的文件夹名和文件名默认使用中文，具体遵循本主 skill 文件夹下的 `中文文件命名规范.md`。
+- 若某个分 skill 中仍保留英文产物名示例，实际生成时应按中文文件命名规范转换。
 
 ## 推荐顺序
 
