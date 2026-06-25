@@ -1,7 +1,7 @@
 interface:
   display_name: "心理学通用综述工作流"
   short_description: "中文优先的心理学综述全流程：方向聚焦、文献检索、Zotero、阅读矩阵、文献星图、APA 写作、来源对齐和模拟审稿。"
-  default_prompt: "使用 $psych-literature-review-workflow 运行一个中文优先的心理学综述工作流；除必要英文术语外，说明文字和本地生成文件名默认使用中文。"
+  default_prompt: "使用 $psych-literature-review-workflow 运行一个中文优先的心理学综述工作流；除必要英文术语外，说明文字使用中文；本地生成文件名默认使用“中文主名_英文兼容名.扩展名”。"
 
 policy:
   allow_implicit_invocation: true
