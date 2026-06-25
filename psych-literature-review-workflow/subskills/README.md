@@ -9,11 +9,12 @@
 3. `zotero-ingest`：Chrome + Zotero Connector 入库。
 4. `literature-screen`：分类、纳排和 1–4 级相关性评级。
 5. `literature-matrix`：全文阅读矩阵和证据提取。
-6. `source-alignment`：正文—参考文献—原文证据对齐。
-7. `manuscript-write`：APA 综述正文写作。
-8. `submission-review`：中文/英文期刊模拟审稿。
-9. `mini-review`：早期小综述或课程小综述。
-10. `old-review-workflow`：旧版综述流程迁移和兼容。
+6. `star-map`：基于阅读矩阵和激活扩散权重制作 HTML 文献星图。
+7. `source-alignment`：正文—参考文献—原文证据对齐。
+8. `manuscript-write`：APA 综述正文写作。
+9. `submission-review`：中文/英文期刊模拟审稿。
+10. `mini-review`：早期小综述或课程小综述。
+11. `old-review-workflow`：旧版综述流程迁移和兼容。
 
 ## 独立性
 
