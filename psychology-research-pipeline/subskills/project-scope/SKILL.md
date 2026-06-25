@@ -1,35 +1,65 @@
 ---
 name: empirical-project-scope
-description: Local subskill under psychology-research-pipeline for empirical psychology project scoping. Use only when the main empirical workflow is already selected. Chinese-first.
+description: Local subskill under psychology-research-pipeline for empirical psychology project scoping. Chinese-first; use only inside the empirical workflow.
 ---
 
-# Empirical Project Scope / 实证项目定标分 skill
-
-本分 skill 只属于 `psychology-research-pipeline`，不得作为顶层独立入口，也不得调用其他主 skill。
+# 项目定标分 skill
 
 ## 目标
 
-把宽泛研究兴趣转化为可执行的心理学实证论文项目。
+把宽泛研究兴趣转化为可执行、可检验、可写作的心理学实证论文项目。
 
-## 启动问题
+## 适用场景
 
-1. 当前是兴趣方向、初步题目、开题方案，还是已有数据？
-2. 研究类型：横断、纵向、实验、干预、混合方法、心理测量、临床/健康/发展心理学研究。
-3. 目标用途：课程论文、毕业论文、开题、中文期刊、英文期刊、注册报告。
-4. 核心构念、目标人群、样本来源、可用工具、时间限制。
+- 用户只有研究方向，需要形成题目、研究问题和变量模型。
+- 用户已有题目，但构念、变量、样本或方法边界不清楚。
+- 用户需要开题、导师汇报、学位论文或投稿预备的项目定标材料。
 
-## 输出
+## 输入
 
-- `project_brief.md`
-- `research_question_options.md`
-- `rq_hypotheses.md`
-- `construct_variable_map.csv`
-- `导师汇报版简表.md`
+- 研究方向、初步题目或已有开题材料。
+- 目标用途、样本条件、数据状态、研究类型、时间限制。
+- 既有文献、量表、数据文件或导师要求。
 
-## 标准
+## 执行步骤
 
-研究问题必须同时满足：清晰构念、可测变量、明确人群、可行设计、可检验假设、伦理可接受、数据分析可落地。
+1. 判断项目类型：横断、纵向、实验、干预、混合方法、心理测量或临床/健康/发展心理学研究。
+2. 提炼 2–4 个候选研究问题，并说明创新性、可行性和风险。
+3. 明确核心构念、变量角色、研究对象、设计类型和预期分析路径。
+4. 形成研究假设，区分主假设、次假设和探索性问题。
+5. 生成导师汇报版简表，并列出需要用户确认的问题。
 
-## 停止条件
+## 输出文件
 
-当研究问题、变量角色、样本范围、研究设计和最低分析路径均已明确时停止，并把未决问题写入 `logs/decisions.md`。
+- `项目定标简报_project_brief.md`
+- `研究问题与假设_research_questions_hypotheses.md`
+- `构念变量关系表_construct_variable_map.csv`
+- `导师汇报版简表_supervisor_brief.md`
+- `未决问题清单_open_questions.md`
+
+## 中文文件命名
+
+所有本地输出必须使用“中文主名_英文兼容名.扩展名”。若沿用英文模板名，必须在日志中记录中文对照。
+
+## 质量检查
+
+- 研究问题是否包含清晰构念、目标人群和可检验关系？
+- 变量是否能被可靠测量或操作化？
+- 研究设计是否足以支持预期推论？
+- 假设是否先于数据分析冻结？
+- 是否明确区分验证性分析和探索性分析？
+
+## 失败与停止条件
+
+- 无法确定核心构念时停止。
+- 无法获得合适测量工具或任务时停止。
+- 研究问题要求因果推论但设计只能支持相关推论时停止并降级表述。
+- 用户要求伪造数据、伦理、量表来源或显著结果时停止。
+
+## 安全边界
+
+不承诺发表，不代替伦理审批，不伪造研究条件，不把未经确认的假设写成既定结论。
+
+## 完成条件
+
+至少形成一个推荐题目、一个备选题目、一套变量模型、清晰假设、样本与设计边界、最低可行分析路径和待确认问题清单。
