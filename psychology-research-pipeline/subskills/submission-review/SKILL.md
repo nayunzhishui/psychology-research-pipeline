@@ -1,30 +1,75 @@
 ---
 name: empirical-submission-review
-description: Local subskill under psychology-research-pipeline for simulated submission review of empirical psychology manuscripts.
+description: Local subskill under psychology-research-pipeline for top-journal-prep simulated submission review of empirical psychology manuscripts. Chinese-first; use only inside the empirical workflow.
 ---
 
-# Empirical Submission Review / 实证论文模拟投稿审稿分 skill
+# 模拟投稿审稿分 skill
 
-本分 skill 用于投稿前模拟审稿，不执行真实投稿。
+## 目标
 
-## 审核维度
+以顶刊预备审查强度，对心理学实证论文进行模拟主编初筛、多角色审稿、修改矩阵和作者回复草稿准备。该流程不等于真实投稿，也不承诺发表。
 
-- 期刊 scope 与文章匹配度
-- 理论贡献与创新性
-- 方法设计与样本合理性
-- 数据分析和统计报告
-- APA 第 7 版格式
-- 图表、数字、引用和参考文献一致性
-- 伦理、开放科学和可重复性
+## 适用场景
 
-## 输出
+- 论文草稿、数据分析、方法说明和来源对齐已基本完成。
+- 需要模拟中文/英文期刊审稿，尤其需要高强度反对性审查。
+- 需要形成修改矩阵和作者回复草稿。
 
-- `journal_fit_memo.md`
-- `simulated_editor_decision.md`
-- `simulated_reviews.md`
-- `revision_matrix.csv`
-- `response_to_reviewers_draft.md`
+## 输入
 
-## 边界
+- 论文正文、参考文献、方法设计方案、统计分析报告、来源对齐表。
+- 目标期刊或候选期刊列表。
+- 报告规范检查表、开放科学材料、数据/代码/材料可用性说明。
 
-所有意见必须标注为模拟意见；不得声称来自真实编辑或真实期刊。
+## 执行步骤
+
+1. 进行主编初筛：scope、创新性、伦理、格式、数据透明性和明显拒稿风险。
+2. 模拟理论贡献审稿：理论新意、文献空白、假设合理性。
+3. 模拟方法学审稿：设计、样本、测量、程序和推论边界。
+4. 模拟统计审稿：分析计划、模型、效应量、置信区间、稳健性和探索性分析标注。
+5. 模拟测量工具审稿：量表来源、信效度、计分、反向题、跨群体适用性。
+6. 模拟开放科学审稿：数据、代码、材料、预注册、伦理和限制说明。
+7. 模拟 APA/格式审稿：标题层级、图表、引用、参考文献和补充材料。
+8. 模拟反对性审稿：主动寻找最可能导致拒稿的问题。
+9. 生成修改矩阵和作者回复草稿。
+
+## 输出文件
+
+- `模拟主编初筛_editor_screening.md`
+- `模拟理论贡献审稿_theory_review.md`
+- `模拟方法学审稿_methods_review.md`
+- `模拟统计审稿_statistical_review.md`
+- `模拟测量审稿_measurement_review.md`
+- `模拟开放科学审稿_open_science_review.md`
+- `模拟格式审稿_format_review.md`
+- `模拟反对性审稿_adversarial_review.md`
+- `修改矩阵_revision_matrix.csv`
+- `作者回复草稿_response_to_reviewers.md`
+- `顶刊预备度报告_top_journal_readiness.md`
+
+## 中文文件命名
+
+所有本地输出必须使用“中文主名_英文兼容名.扩展名”。
+
+## 质量检查
+
+- 是否已完成来源对齐？
+- 数据、方法、结果和讨论是否一致？
+- 是否核查目标期刊官网要求？
+- 是否明确标注模拟审稿性质？
+- 是否列出必须修改、建议修改和可暂缓修改的问题？
+
+## 失败与停止条件
+
+- 没有来源对齐，不得声称“可投稿”。
+- 没有期刊官网核查，不得给出最终投稿建议。
+- 没有统计输出或数据审计，不得通过统计审稿。
+- 模拟审稿发现高风险问题时，必须先生成修改矩阵，不得直接写“建议投稿”。
+
+## 安全边界
+
+不执行真实投稿，不联系编辑，不支付费用，不冒充真实审稿人，不伪造审稿意见或期刊反馈。
+
+## 完成条件
+
+完成全角色模拟审稿、顶刊预备度报告、修改矩阵和作者回复草稿，并明确当前状态：可继续修改、可预投稿、需重大返工或暂不建议投稿。
