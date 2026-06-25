@@ -1,7 +1,7 @@
 interface:
-  display_name: "Cognitive Neuroscience Review"
-  short_description: "Structured psychology and cognitive neuroscience review workflow."
-  default_prompt: "Use $psych-cog-neuro-review to run a structured cognitive neuroscience literature review workflow."
+  display_name: "Cognitive Neuroscience Workflow"
+  short_description: "Chinese-first standalone cognitive neuroscience workflow for reviews, experiments, mechanisms, methods, preprocessing, APA writing, and simulated review."
+  default_prompt: "Use $psych-cog-neuro-review to run a standalone cognitive neuroscience workflow for review, experiment design, empirical planning, mechanism synthesis, or manuscript preparation."
 
 policy:
   allow_implicit_invocation: true
