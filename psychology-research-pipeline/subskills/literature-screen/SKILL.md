@@ -1,39 +1,68 @@
 ---
 name: empirical-literature-screen
-description: Local subskill under psychology-research-pipeline for screening and extracting literature that supports empirical psychology papers. Use only inside the empirical workflow.
+description: Local subskill under psychology-research-pipeline for screening and extracting literature that supports empirical psychology papers. Chinese-first; use only inside the empirical workflow.
 ---
 
-# Empirical Literature Screen / 实证论文文献筛选分 skill
-
-本分 skill 只属于 `psychology-research-pipeline`，用于实证论文中的文献筛选、小综述和证据提取。它不是独立综述入口。
+# 文献筛选分 skill
 
 ## 目标
 
-把检索到的理论、综述、方法、量表和实证文章筛选成能服务研究问题、变量模型、方法设计和引言写作的证据材料。
+把候选文献筛选、分类、评级并提取为能支撑实证论文引言、方法和讨论的证据矩阵。
 
-## 分类
+## 适用场景
 
-至少区分：综述/元分析、理论概念、方法测量、横断实证、纵向实证、实验研究、干预研究、质性/混合方法、指南/共识。
+- 已有候选文献表或 Zotero 题录，需要去重、分类、纳排和评级。
+- 需要为实证论文形成小综述、阅读矩阵和主张证据对应表。
 
-## 相关性 1–4 级
+## 输入
 
-| 等级 | 含义 | 处理 |
-|---|---|---|
-| 4 | 核心文献，直接支撑研究问题、变量模型、方法或关键假设 | 全文精读，进入矩阵和引言核心引用 |
-| 3 | 重要相关，支持某一章节或方法选择 | 摘要、方法、结果和讨论重点阅读 |
-| 2 | 背景相关，提供概念边界或补充证据 | 选择性阅读 |
-| 1 | 边缘相关，只能用于背景或排除理由 | 记录后通常不进入正文核心 |
+- `候选文献表_candidate_records.csv`
+- Zotero 导出的 BibTeX/RIS/CSV
+- 已获取全文 PDF 或可访问网页
+- 项目定标和研究假设
 
-## 输出
+## 执行步骤
 
-- `screening_table.csv`
-- `classification.csv`
-- `literature_matrix.csv`
-- `literature_matrix.xlsx`
-- `literature_matrix.md`
-- `claim_evidence_map.csv`
-- `mini_review.md`
+1. 去重并核验题录信息。
+2. 按综述/元分析、理论、方法测量、横断、纵向、实验、干预、质性/混合方法、指南/共识分类。
+3. 按 1–4 级评估主题相关性；相关性不等于方法质量。
+4. 对 4 级核心文献全文精读；3 级重点阅读摘要、方法、结果和讨论；2 级选择性阅读；1 级记录排除或仅背景使用。
+5. 提取样本、人群、变量、测量工具、设计、统计方法、核心发现、局限和可引用位置。
+6. 生成小综述和主张证据对应表。
 
-## 质量要求
+## 输出文件
 
-相关性评分与方法质量评分分开。不得把仅看摘要的文献当成全文精读文献；不得用边缘文献支撑核心假设。
+- `文献筛选表_literature_screening.csv`
+- `文献分类表_literature_classification.csv`
+- `相关性评级表_relevance_ratings.csv`
+- `排除理由登记表_exclusion_reason_register.csv`
+- `文献阅读矩阵_literature_matrix.csv`
+- `文献阅读矩阵_literature_matrix.xlsx`
+- `小综述_mini_review.md`
+- `主张证据对应表_claim_evidence_map.csv`
+
+## 中文文件命名
+
+所有本地输出必须使用“中文主名_英文兼容名.扩展名”。
+
+## 质量检查
+
+- 是否区分主题相关性和方法质量？
+- 核心文献是否阅读全文并记录页码/章节/表图？
+- 排除文献是否记录理由？
+- 小综述中的关键主张是否能回到矩阵？
+
+## 失败与停止条件
+
+- 没有筛选记录，不得进入正式写作。
+- 没有全文，不得做强引用或页码级来源对齐。
+- 核心假设没有 3–4 级文献支撑时，必须回到证据检索阶段。
+- 文献矩阵字段缺失严重时，不得生成论文引言定稿。
+
+## 安全边界
+
+不伪造文献、页码、DOI、研究结果或量表信息；不把未读全文说成已精读。
+
+## 完成条件
+
+生成筛选表、分类表、相关性评级表、阅读矩阵、小综述和主张证据对应表，并列明证据空白。
