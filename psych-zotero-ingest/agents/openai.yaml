@@ -1,4 +1,0 @@
-interface:
-  display_name: "Psychology Zotero Ingest"
-  short_description: "Acquire and verify papers in Zotero"
-  default_prompt: "Use $psych-zotero-ingest to save verified literature into the named Zotero collection."
