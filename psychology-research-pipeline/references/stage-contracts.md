@@ -1,122 +1,91 @@
-# Stage contracts
+# 阶段契约
 
-## Contents
+## 目录与标识
 
-1. Run layout
-2. Gate contracts
-3. Shared identifiers
-4. Handoff rules
+每次运行位于 `<项目>/实证论文运行/<run-id>/`。使用 UTF-8、ISO 8601 时间和 RFC 4180 CSV。未知值写 `unknown`，不得猜测。
 
-## Run layout
+稳定标识：`run_id`、`candidate_id`、`study_id`、`claim_id`。Zotero item key 与 BibTeX key 分开保存。
 
-Each run lives at `<project>/research-pipeline/<run-id>/`:
+## 阶段 gate
 
-```text
-state.json
-manifest.json
-logs/events.jsonl
-01_scope/
-02_protocol/
-03_search/
-04_library/
-05_screening/
-06_synthesis/
-07_methods/
-08_analysis/
-09_manuscript/
-10_review/
-```
+### 00_scope — `00_项目定标`
 
-Artifacts are UTF-8. CSV files use one header row and RFC 4180 quoting. Dates are ISO 8601. Use `unknown` rather than an invented value.
+必需：`项目定标简报_project_brief.md`、`研究问题与假设_research_questions_hypotheses.md`、`构念变量关系表_construct_variable_map.csv`。
 
-## Gate contracts
+通过条件：主要问题、目标人群、波次、构念、观察变量、主要估计对象和推论边界明确；数据能回答问题；关键未知项已解决或阻断。
 
-### 01 Scope
+### 01_protocol — `01_标准与协议`
 
-Required: `project_brief.md`, `research_question.md`.
+必需：`实证研究协议_empirical_protocol.md`、`报告规范计划_reporting_plan.md`、`伦理与开放科学_ethics_open_science.md`。
 
-Pass when the primary RQ is answerable with observed waves and variables; constructs map to measures; population and time frame are clear; claims and exclusions are bounded; sensitive-data handling is stated; unresolved critical assumptions are absent.
+通过条件：假设、主要/次要结局、纳排、分析族、偏离政策、伦理事实、数据共享限制和适用规范冻结。不得伪造伦理审批号。
 
-### 02 Standards
+### 02_search — `02_证据检索`
 
-Required: `reporting_plan.md`, `protocol.md`.
+必需：`检索式记录_queries.md`、`检索记录_search_log.csv`、`候选文献表_candidate_records.csv`。
 
-Pass when the study type, governing reporting checklists, ethics/open-science plan, hypotheses, primary/secondary outcomes, inclusion rules, search bounds, and protocol-deviation policy are frozen. Journal-specific instructions must be verified at execution time.
+检索表至少包含 `search_id,database,platform,query,filters,run_at,result_count,export_file,notes`；候选表至少包含 `candidate_id,title,authors,year,doi,pmid,source,abstract,landing_url,database,search_id,dedup_status`。
 
-### 03 Search
+### 03_library — `03_Zotero与全文获取`
 
-Required: `search_log.csv`, `candidates.csv`.
+必需：`Zotero入库清单_zotero_manifest.csv`、`PDF全文清单_pdf_manifest.csv`、`全文获取报告_acquisition_report.md`。
 
-`search_log.csv` minimum columns: `search_id,database,platform,query,filters,run_at,result_count,export_file,notes`.
+通过条件：每个候选有 `complete`、`metadata-only`、`duplicate-skipped`、`access-blocked` 或 `failed-validation` 状态；complete 项具有可读 PDF 子附件且题录一致。
 
-`candidates.csv` minimum columns: `candidate_id,title,authors,year,doi,pmid,source,abstract,landing_url,database,search_id,dedup_status`.
+### 04_synthesis — `04_文献筛选与小综述`
 
-Pass when each concept has controlled vocabulary and free-text terms; at least two appropriate sources are searched unless justified; exact queries and counts are logged; candidates are deduplicated; no automated source is misrepresented as exhaustive.
+必需：`文献筛选表_literature_screening.csv`、`文献阅读矩阵_literature_matrix.csv`、`小综述_mini_review.md`、`主张证据对应表_claim_evidence_map.csv`。
 
-### 04 Acquire
+通过条件：纳排理由、同一研究多报告关联、证据位置、相关性与方法质量分开记录；矛盾和零结果未被删除；关键主张可追溯。
 
-Required: `zotero_manifest.csv`, `acquisition_report.md`.
+### 05_methods — `05_方法设计`
 
-Manifest minimum columns: `candidate_id,zotero_item_key,title,year,doi,collection,attachment_key,attachment_status,validation_status,source_url,notes`.
+必需：`方法设计方案_methods_plan.md`、`测量工具表_measurement_table.csv`、`统计分析计划_statistical_analysis_plan.md`。
 
-Allowed status: `complete`, `metadata-only`, `duplicate-skipped`, `access-blocked`, `failed-validation`.
+通过条件：样本流、计分、信效度、测量不变性、估计对象、模型、估计量、缺失、异常、协变量、聚类、性别比较、多重检验、诊断、稳健性、输出和偏离规则均预先定义。
 
-Pass when every included candidate has a status; metadata matches the source; the named collection is verified; `complete` items have a readable PDF child; temporary files are retained when verification fails.
+### 06_data — `06_数据管理`
 
-### 05 Screen
+必需：`数据字典_data_dictionary.csv`、`数据质量审计_data_audit.md`、`数据清理记录_cleaning_log.csv`。
 
-Required: `screening_log.csv`, `evidence_matrix.csv`.
+通过条件：源文件哈希、ID、波次连接、重复、异常编码、范围、反向计分、总分公式、缺失、流失、分布、零膨胀、聚类和隐私风险完成审计；所有修订可追溯且未覆盖原始数据。
 
-Screening minimum columns: `candidate_id,stage,decision,reason,reviewer_basis,full_text_available,decided_at`.
+### 07_analysis — `07_统计分析`
 
-Evidence minimum columns: `study_id,candidate_id,citation,design,country,sample,waves,intervals,constructs,measures,analysis,main_findings,effect_data,limitations,quality,doi,zotero_item_key,evidence_location`.
+必需：`统计分析报告_analysis_report.md`、`分析偏离记录_analysis_deviation_log.csv`、`分析清单_analysis_manifest.json`、`结果表格_results_tables.md`。
 
-Pass when title/abstract and full-text decisions have explicit reasons; duplicate reports of one sample are linked; study quality is design-appropriate; evidence locations support extracted claims.
+manifest 必须记录源文件及哈希、软件与包版本、代码文件、随机种子、冻结计划、偏离和输出。通过条件：代码从只读源数据运行；模型识别和收敛；估计、不确定性、拟合、诊断和偏离完整。
 
-### 06 Synthesize
+### 08_results — `08_结果与图表`
 
-Required: `mini_review.md`, `claim_evidence_map.csv`.
+必需：`结果写作稿_results.md`、`图表计划_figure_table_plan.md`、`稳健性检查_robustness_checks.md`。
 
-Claim map minimum columns: `claim_id,claim_text,claim_type,study_ids,support_level,contradictions,verification_status,manuscript_destination`.
+通过条件：正文、表和图数字一致；主要与探索性结果分开；零结果和相反结果报告；稳健性与主结果关系得到解释。
 
-Pass when synthesis is thematic rather than paper-by-paper; direct evidence is separated from interpretation; contradictory and null results are retained; no claim lacks traceable evidence; gaps are not merely “few studies.”
+### 09_manuscript — `09_论文正文`
 
-### 07 Methods
+必需：`论文正文_manuscript.md`、`参考文献_references.bib`、`APA参考文献_apa_references.md`。
 
-Required: `methods_plan.md`, `analysis_plan.md`.
+通过条件：题目至声明完整；方法与代码一致；结果与输出一致；观察性推论措辞克制；敏感人群、伦理、数据和代码可用性说明明确。
 
-Pass when measures/scoring, participant flow, missingness, estimand, model specification, assumptions, estimator, covariates, sex/gender analysis, multiplicity, diagnostics, sensitivity analyses, model comparison, output tables, and deviation rules are specified before outcome analysis.
+### 10_alignment — `10_对齐审计`
 
-### 08 Analyze
+必需：`来源对齐表_source_alignment_table.csv`、`数字核查报告_numeric_audit.md`、`主张核查报告_claim_audit.md`。
 
-Required: `data_audit.md`, `results.md`, `analysis_manifest.json`.
+通过条件：所有关键主张为 direct/qualified；unsupported/overextended 均已删除、降级或补证；样本量、系数、区间、p 值、拟合和表图逐项核对。
 
-Manifest minimum keys: `data_files`, `file_hashes`, `software`, `packages`, `code_files`, `random_seed`, `analysis_plan`, `deviations`, `outputs`.
+### 11_review — `11_模拟投稿审稿`
 
-Pass when IDs/waves/scoring/missingness are audited; code runs from clean inputs; estimates, uncertainty, fit and diagnostics are reported; robustness checks are reconciled; deviations are labeled; no identifying rows are emitted.
+必需：`模拟审稿意见_simulated_reviews.md`、`修改矩阵_revision_matrix.csv`、`作者回复草稿_response_to_reviewers.md`、`最终审计_final_audit.md`。
 
-### 09 Write
+通过条件：目标期刊官网与文章类型已实时核查；理论、方法、统计、测量、开放科学和完整性审查均有结论；重大问题已解决或明确拒绝并说明理由；模拟性质醒目标注。
 
-Required: `manuscript.md`, `references.bib`, `citation_audit.md`.
+## 交接与失效
 
-Pass when title through references are complete; every empirical claim maps to a verified citation or result; methods match code; results match outputs; causal language is calibrated; abstract contains no unsupported values; tables/figures are referenced; limitations and ethics are explicit.
+每阶段记录输入、输出、冻结决策、未决非关键问题和下一阶段不得静默改变的假设。上游变更使下游产物失效时，在 `文件清单_manifest.json` 标为 `stale`，回到最早受影响阶段重新通过 gate。
 
-### 10 Review
+## 机器接口与返回码
 
-Required: `editorial_decision.md`, `reviewer_report.md`, `revision_matrix.csv`, `final_audit.md`.
+统一入口为 `scripts/pipeline.py`。成功返回 `0`；证据不足、审计 flag 未决、模型输出无效或投稿条件不满足返回 `3`；阶段 gate 内容不合格返回 `1`；命令或路径参数错误返回 `2`。标准输出优先为 UTF-8 JSON，便于自动编排和复核。
 
-Revision matrix minimum columns: `comment_id,severity,source,comment,response,action,artifact,location,status,evidence`.
-
-Pass when journal fit is reasoned; independent editorial, methods/statistics, domain, and integrity reviews are represented; decision matches defects; every required revision is resolved or explicitly declined with rationale; final citation, reporting, ethics, and reproducibility audits pass.
-
-## Shared identifiers
-
-- `run_id`: immutable per run.
-- `candidate_id`: assigned at retrieval and retained through Zotero and screening.
-- `study_id`: groups multiple reports from the same sample/study.
-- `claim_id`: connects synthesis, manuscript, and review.
-- Zotero item keys and BibTeX keys are different; store both when used.
-
-## Handoff rules
-
-Every stage handoff states inputs consumed, outputs produced, decisions frozen, unresolved noncritical issues, and assumptions the next stage must not silently change. If an upstream change invalidates a downstream artifact, mark it stale in `manifest.json` and rerun its gate.
+`verify-run` 检查十二阶段但不推进；`autopilot` 从 `current_stage` 开始逐项 `advance`，在第一个失败 gate 停止。自动推进不得把模板存在、代码已生成或模拟审稿等同于研究内容有效、分析已执行或真实期刊认可。

@@ -1,173 +1,129 @@
 ---
 name: psychology-research-pipeline
-description: Use this standalone Chinese-first main skill folder for end-to-end empirical psychology paper workflows. 这是“心理学实证论文工作流”，用于问卷、实验、干预、纵向/横断、心理测量、临床/健康/发展心理学等实证论文；本 skill 被选中后必须在本主 skill 文件夹范围内独立完成任务，可使用本目录下 subskills/、templates/、checklists/、rubrics/、examples/，但不依赖其他主 skill、旧顶层辅助 skill、总索引或共享模板；本地生成文件默认使用“中文主名_英文兼容名.扩展名”；不要用于单纯综述写作、认知神经科学专用项目、伪造数据/文献、绕过权限、无人值守批量下载或真实投稿提交。
+description: End-to-end, Chinese-first workflow for auditable empirical psychology papers. Use for cross-sectional, longitudinal, experimental, intervention, psychometric, developmental, clinical, or health psychology projects that require scoping, evidence search, measurement design, data audit, statistical analysis, APA-compatible writing, claim-source alignment, and simulated submission review. Especially use when the user has SPSS/CSV/Excel data, repeated-measures panels, SEM or RI-CLPM questions, sensitive adolescent data, or needs a submission-ready evidence package. Do not use for literature-review-only projects, fabricated data or citations, bypassing access controls, or real journal submission.
 ---
 
 # 心理学实证论文工作流
 
-本 skill 是三个主工作流之一，定位为**心理学实证论文从选题到投稿预备的独立工作流**。它服务于含数据、实验、问卷、干预、测量或统计分析的论文项目。文献综述在本流程中只服务于研究问题、理论模型、变量选择、方法设计和论文引言，不替代完整独立综述项目。
+在本 skill 内完成从项目定标到模拟投稿审查的可审计流程。默认中文沟通；数据库检索式、量表名、变量名、统计模型、软件输出、APA 引文和文件扩展名保留必要英文。
 
-默认语言为中文。必要英文保留于数据库检索式、量表名、变量名、统计方法、软件输出、APA 引文、参考文献、文件扩展名和国际报告规范。
+## 核心规则
 
-## 1. 独立调用原则
+- 先冻结问题、估计对象、变量、计分和分析计划，再查看主结果。
+- 区分主要、次要和探索性分析；所有偏离均进入偏离记录。
+- 不伪造文献、量表来源、伦理信息、数据、统计量或期刊反馈。
+- 不从观察性关联推出因果；不以“一组显著、另一组不显著”证明组间差异。
+- 不覆盖旧运行；修订使用新版本并记录原因。
+- 涉及青少年自伤时，限制行级数据、学校标识和小单元组合的暴露。
+- 遇到关键阻断条件，生成 `停止原因与补救清单_stop_reason_and_fix.md`，不得生成“可投稿”结论。
 
-本 skill 被用户或 Codex 选中后，应**在本主 skill 文件夹范围内独立完成实证论文工作流**，范围包括主 `SKILL.md` 与本目录下的 `subskills/`、`templates/`、`checklists/`、`rubrics/`、`examples/`。不得把任务转交、拆分或依赖其他主 skill、旧顶层辅助 skill、总索引或共享模板。
+## 启动
 
-当前三个主 skill 的边界仅用于选择，不用于运行时互相调用：
+从已有材料提取并确认：研究设计、用途、核心构念、样本、波次、数据状态、分析软件、文献获取方式、目标期刊和输出格式。未确认项作为 `assumption` 写入 `日志/决策记录_decisions.md`。
 
-- `psychology-research-pipeline`：心理学实证论文工作流。核心产物是研究方案、变量模型、数据分析、结果、讨论和投稿预备稿。
-- `psych-cog-neuro-review`：认知神经科学工作流。适合 EEG/ERP、fMRI、PSG、眼动、生理指标、实验范式、脑机制或行为—神经整合主题。
-- `psych-literature-review-workflow`：新的通用综述工作流。适合不以神经/生理指标为核心的心理学综述项目。
+所有自动化只通过统一入口 `scripts/pipeline.py` 调用；兼容脚本只供测试和内部转发。首次运行并盘点资料：
 
-若用户目标是单纯综述，不使用本 skill。若用户目标是普通心理学实证论文，使用本 skill。若实证研究中偶然涉及神经或生理术语，本 skill 仍独立处理方法边界、报告规范和写作，不要求调用其他 skill。
-
-## 2. 内部分工
-
-### subskills/
-
-分 skill 负责执行细节。推荐顺序：
-
-1. `project-scope`：选题、研究问题、假设、变量模型。
-2. `evidence-search`：理论、方法、量表和实证依据检索。
-3. `zotero-ingest`：Chrome + Zotero Connector 入库和 PDF/题录核验。
-4. `literature-screen`：文献分类、筛选、小综述和证据矩阵。
-5. `methods-design`：样本、量表、任务、伦理、开放科学和分析计划。
-6. `data-analysis`：数据审计、统计分析、结果解释和偏离记录。
-7. `reporting-standards`：STROBE、CONSORT/SPIRIT、APA JARS、测量研究和开放科学报告规范。
-8. `manuscript-write`：APA 实证论文写作。
-9. `source-alignment`：正文主张、参考文献、统计数字、表图和方法描述对齐。
-10. `submission-review`：顶刊预备强度的模拟投稿审稿和修改矩阵。
-
-### templates/ checklists/ rubrics/ examples/
-
-- `templates/`：提供可直接填写的研究方案、矩阵、分析计划、来源对齐和审稿模板。
-- `checklists/`：提供强制检查清单，包括 APA JARS、STROBE、CONSORT/SPIRIT、开放科学、统计分析和停止条件。
-- `rubrics/`：提供 1–5 分评分标准，区分“学位论文可用”“普通期刊可用”“高水平期刊可用”“顶刊预备强度”。
-- `examples/`：提供 lite/standard/strict 启动示例和高强度模拟审稿示例。
-
-## 3. 本地文件命名
-
-本地运行时，文件夹名和文件名默认采用：
-
-```text
-中文主名_英文兼容名.扩展名
+```powershell
+python scripts/pipeline.py init --project <项目目录> --title <题目> --mode strict
+python scripts/pipeline.py inventory --run-dir <运行目录> --source <资料目录>
 ```
 
-示例：
+旧版十阶段运行仅通过 `pipeline.py migrate` 迁移已识别文本产物；未映射文件只记哈希、不复制，迁移后仍必须通过十二阶段 gate。
+
+模式：
+
+- `lite`：定标、种子证据、变量模型和方法草案。
+- `standard`：完成全部阶段并形成普通投稿预备包。
+- `strict`：增加冻结协议、数据/代码审计、来源对齐和强制 gate。
+- `top-journal-prep`：在 strict 基础上增加反对性审稿和不可投稿风险清单；不承诺发表。
+
+## 唯一目录契约
+
+运行目录固定为 `实证论文运行/<run-id>/`：
 
 ```text
-文献阅读矩阵_literature_matrix.csv
-统计分析计划_statistical_analysis_plan.md
-来源对齐表_source_alignment_table.csv
-模拟审稿意见_simulated_reviews.md
+状态记录_state.json
+文件清单_manifest.json
+日志/决策记录_decisions.md
+日志/事件记录_events.jsonl
+文献/
+00_项目定标/
+01_标准与协议/
+02_证据检索/
+03_Zotero与全文获取/
+04_文献筛选与小综述/
+05_方法设计/
+06_数据管理/
+07_统计分析/
+08_结果与图表/
+09_论文正文/
+10_对齐审计/
+11_模拟投稿审稿/
 ```
 
-若因软件或脚本限制必须使用纯英文名，必须在 `日志/决策记录_decisions.md` 中记录原因，并提供中文对照。
+脚本、stage contract、模板和 gate 必须使用这一契约；禁止创建另一套英文阶段目录。
 
-## 4. 运行模式
+## 阶段执行
 
-| 模式 | 适用任务 | 最低要求 | 典型输出 |
-|---|---|---|---|
-| `lite` | 课程论文、早期选题、研究设计草案 | 选题、简检索、变量模型、方法草案 | 项目定标、种子文献、假设、方法草案 |
-| `standard` | 本科/研究生实证论文、普通投稿预备 | 00–11 全流程，含文献、方法、分析、写作和审稿 | 研究协议、分析计划、论文草稿 |
-| `strict` | 投稿级实证论文、高风险数据/临床主题、注册报告预备 | 冻结协议、完整检索日志、分析计划、代码/数据审计、引用对齐 | 可审计实证论文包 |
-| `top-journal-prep` | 顶刊预备审查强度 | 在 strict 基础上增加反对性审稿、开放科学审计、理论贡献评分和不可投稿风险清单 | 顶刊预备度报告、全角色模拟审稿、修改矩阵 |
+1. **00 项目定标**：定义主要研究问题、估计对象、推论边界、构念—变量映射和不可做事项。
+2. **01 标准与协议**：冻结假设、结局、纳排、伦理、开放科学、偏离政策和适用报告规范。
+3. **02 证据检索**：记录精确检索式、平台、日期、结果数和候选记录。
+4. **03 Zotero与全文获取**：合法入库、去重、核验题录和可读 PDF；失败保留明确状态。
+5. **04 筛选与小综述**：区分相关性与质量，提取证据位置，保留矛盾与零结果，建立主张—证据映射。
+6. **05 方法设计**：冻结样本、量表计分、缺失、估计量、协变量、聚类、乘法性、稳健性和模型比较。
+7. **06 数据管理**：核验 ID、波次连接、重复、范围、异常编码、反向计分、缺失、流失、分布和隐私风险。
+8. **07 统计分析**：只按冻结计划运行；保存代码、软件版本、随机种子、输入哈希、输出和偏离。
+9. **08 结果与图表**：报告估计值、不确定性、效应量、拟合、诊断、稳健性和探索性标记。
+10. **09 论文正文**：按目标期刊和 APA JARS 组织题目、摘要、引言、方法、结果、讨论、声明与参考文献。
+11. **10 对齐审计**：逐项核对正文主张、引用、代码、数字、表图和方法。
+12. **11 模拟投稿审稿**：实时核查期刊官网；模拟主编、理论、方法、统计、测量、开放科学和反对性审稿。
 
-不得承诺发表顶级文章。只能提供顶刊预备审查强度的流程、材料和质量控制。
+## 自动化命令
 
-## 5. 启动时必须确认
+按阶段生成、验证和推进；任何命令返回 `blocked` 时停止，不得绕过：
 
-1. 当前是宽研究方向、已定题目，还是已有数据/实验材料？
-2. 研究类型：横断、纵向、实验、干预、混合方法、心理测量、临床/健康心理学研究。
-3. 目标用途：课程论文、毕业论文、开题、学位论文、中文期刊、英文期刊、注册报告或顶刊预备。
-4. 核心变量：自变量、因变量、中介、调节、协变量、分组变量、核心量表或任务。
-5. 样本与对象：年龄、人群、临床/非临床、招募来源、样本量或已有 N。
-6. 数据状态：无数据、已有问卷、已有实验数据、已有 SPSS/Excel/CSV/Mplus/AMOS 输出。
-7. 分析工具：SPSS、PROCESS、AMOS、Mplus、R、Python、JASP 或其他。
-8. 文献获取方式：是否允许 Chrome + Zotero Connector；Zotero collection；失败时是否使用文件夹手动导入。
-9. 输出格式：Markdown、DOCX、CSV、Excel、图表、APA 参考文献、模拟审稿报告。
-
-用户已明确回答时，不要重复询问；用户未回答时，可以用假设继续，但必须写入 `日志/决策记录_decisions.md`。
-
-## 6. 默认运行目录
-
-```text
-实证论文运行/<日期>_<简短主题>/
-├── 状态记录_state.json
-├── 文件清单_manifest.json
-├── 日志/
-│   ├── 决策记录_decisions.md
-│   └── 事件记录_events.jsonl
-├── 文献/
-│   ├── 00_待导入Zotero/
-│   ├── 01_已导入Zotero/
-│   ├── 02_全文PDF/
-│   ├── 03_题录导出/
-│   ├── 04_阅读矩阵/
-│   └── 05_论文引用/
-├── 00_项目定标/
-├── 01_标准与协议/
-├── 02_证据检索/
-├── 03_Zotero与全文获取/
-├── 04_文献筛选与小综述/
-├── 05_方法设计/
-├── 06_数据管理/
-├── 07_统计分析/
-├── 08_结果与图表/
-├── 09_论文正文/
-├── 10_对齐审计/
-└── 11_模拟投稿审稿/
+```powershell
+python scripts/pipeline.py audit-data --run-dir <运行目录> --data <sav或csv> --spec <审计规格json>
+python scripts/pipeline.py freeze-data --run-dir <运行目录> --data <数据> --spec <规格> [--decisions <逐项决策json>]
+python scripts/pipeline.py dedupe-evidence --run-dir <运行目录> --input <候选文献csv>
+python scripts/pipeline.py generate-analysis --run-dir <运行目录> --data <冻结数据> --spec <分析规格json>
+python scripts/pipeline.py validate-results --run-dir <运行目录> --input <模型输出json>
+python scripts/pipeline.py render-manuscript --run-dir <运行目录> --template <正文模板> --results <已验证结果json> --claims <主张表csv> --references <bib>
+python scripts/pipeline.py build-submission --run-dir <运行目录> --journal-policy <实时核查json> --manuscript <正文> --numeric-audit <数字审计json> --claim-audit <主张审计md>
 ```
 
-不要覆盖旧文件。修订版使用 `_v2`、`_v3`，并记录修订原因。
+`generate-analysis` 生成测量不变性、RI-CLPM、直接组间约束检验、零值密集两部分敏感性和模拟检验力 R 代码，但不把“已生成”写成“已执行”。`validate-results` 只接受收敛、post-check 通过且估计—区间—p 值内部一致的机器可读输出。`freeze-data` 对每个审计 flag 要求与当前审计哈希绑定的逐项决策。
 
-## 7. 阶段总览
+检查单阶段或自动推进所有已满足阶段：
 
-| 阶段 | 名称 | 主要产物 |
-|---|---|---|
-| 00 | 项目定标 | `项目定标简报_project_brief.md`, `研究问题与假设_research_questions_hypotheses.md`, `构念变量关系表_construct_variable_map.csv` |
-| 01 | 标准与协议 | `实证研究协议_empirical_protocol.md`, `报告规范计划_reporting_plan.md`, `伦理与开放科学_ethics_open_science.md` |
-| 02 | 证据检索 | `检索式记录_queries.md`, `检索记录_search_log.csv`, `候选文献表_candidate_records.csv` |
-| 03 | Zotero/全文获取 | `Zotero入库清单_zotero_manifest.csv`, `PDF全文清单_pdf_manifest.csv`, `全文获取报告_acquisition_report.md` |
-| 04 | 文献筛选与小综述 | `文献筛选表_literature_screening.csv`, `文献阅读矩阵_literature_matrix.csv/xlsx/md`, `小综述_mini_review.md` |
-| 05 | 方法设计 | `方法设计方案_methods_plan.md`, `测量工具表_measurement_table.csv`, `统计分析计划_statistical_analysis_plan.md` |
-| 06 | 数据管理 | `数据字典_data_dictionary.csv`, `数据质量审计_data_audit.md`, `数据清理记录_cleaning_log.md` |
-| 07 | 统计分析 | `统计分析报告_analysis_report.md`, `分析偏离记录_analysis_deviation_log.csv`, `结果表格_results_tables.md` |
-| 08 | 结果与图表 | `结果写作稿_results.md`, `图表计划_figure_table_plan.md`, `稳健性检查_robustness_checks.md` |
-| 09 | 论文写作 | `论文正文_manuscript.md`, `论文正文_manuscript.docx`, `APA参考文献_apa_references.md` |
-| 10 | 对齐与审计 | `来源对齐表_source_alignment_table.csv`, `数字核查报告_numeric_audit.md`, `主张核查报告_claim_audit.md` |
-| 11 | 模拟投稿审稿 | `模拟审稿意见_simulated_reviews.md`, `修改矩阵_revision_matrix.csv`, `作者回复草稿_response_to_reviewers.md` |
+```powershell
+python scripts/pipeline.py gate --run-dir <运行目录> --stage <stage-id>
+python scripts/pipeline.py gate --run-dir <运行目录> --stage <stage-id> --advance
+python scripts/pipeline.py verify-run --run-dir <运行目录>
+python scripts/pipeline.py autopilot --run-dir <运行目录>
+```
 
-## 8. 强制停止条件
+`autopilot` 只自动推进已通过证据 gate 的阶段；缺资料、关键判断未确认或占位符未清除时安全停止。它不会生成研究事实、伦理信息、统计结果或期刊反馈。
 
-遇到以下情况必须停止并汇报，不得继续生成“完成稿”：
+## 按需读取
 
-- 没有数据，不得写结果。
-- 没有统计输出，不得写 p 值、效应量、置信区间或模型拟合指标。
-- 没有全文，不得做强引用或页码级来源对齐。
-- 没有量表来源，不得写“采用某量表”或声称信效度。
-- 没有伦理信息，不得声称伦理合规。
-- 没有期刊官网核查，不得生成最终投稿结论。
-- 没有来源对齐，不得声称“可投稿”。
-- 发现数据、引文、方法或统计结果无法核验时，必须生成 `停止原因与补救清单_stop_reason_and_fix.md`。
+- 阶段输入、输出、字段与 gate：读取 `references/stage-contracts.md`。
+- 纵向面板、RI-CLPM、自伤和性别差异：读取 `references/longitudinal-panel-nssi.md`。
+- 报告规范选择：读取 `references/psychology-standards.md`。
+- 文献与 Zotero 工具路线：读取 `references/tool-routing.md`。
+- 当前课题变量与风险：读取 `references/project-profile.md`。
+- 运行模板由 `scripts/pipeline_schema.py` 生成；顶层 `templates/` 仅提供可复用工作表，不定义运行目录。
 
-## 9. 顶刊预备质量门槛
+## 强制停止条件
 
-顶刊预备不是发表承诺，而是审查强度。必须至少经过以下 gate：
+- ID、波次连接或量表计分规则无法确认。
+- 没有数据却要求写结果，或没有输出却要求写统计量。
+- 核心变量跨波不可比且无法修复。
+- 关键自伤变量存在无法解释的负值、极端值或编码混合。
+- 没有全文却要求页码级强引用。
+- 没有伦理材料却要求声称伦理合规。
+- 没有来源对齐或期刊官网核查却要求“可投稿”。
 
-1. 研究问题清晰、理论贡献明确，非重复性选题。
-2. 样本、设计、测量和分析计划能支持研究推论。
-3. 数据质量、缺失、异常、反向计分和剔除标准可审计。
-4. 统计模型、效应量、置信区间、稳健性检查和探索性分析标注清楚。
-5. 开放科学材料、数据、代码、协议和限制说明明确。
-6. 每个关键主张都有来源或数据输出支撑。
-7. 模拟审稿包括主编、理论、方法、统计、测量、开放科学、格式和反对性审稿。
-8. 不满足 gate 时，不得写“可直接投稿”，只能写“待补充后再评估”。
+## 完成条件
 
-## 10. Chrome + Zotero 边界
-
-用户本人处理校园 VPN、统一认证、MFA、验证码、付费确认和数据库授权。Codex 不读取、不保存、不记录账号、密码、验证码、cookie、token、密钥或浏览器身份凭据；不绕过付费墙、下载限制、机器人检测、数据库条款或出版社限制；不使用盗版论文站、影子图书馆、PDF bot 或泄露账号；不无人值守高速批量下载；不把 PDF、Zotero 数据库、浏览器材料或账号信息提交到 GitHub。
-
-## 11. 完成条件
-
-只有在用户要求的阶段完成、关键 gate 通过、未解决风险列明后，才结束。返回运行目录、完成阶段、生成/修改文件、主要结论、验证结果、未解决 blocker 和下一步建议。不得在关键引用、方法、数据、伦理、统计或报告问题未解决时声称“可直接投稿”。
+仅在用户要求的阶段通过 gate、关键数字可追溯、未解决风险明确列出后结束。返回运行目录、完成阶段、改动文件、主要结果、验证、偏离和 blocker；不得把模拟审稿表述为真实期刊反馈。

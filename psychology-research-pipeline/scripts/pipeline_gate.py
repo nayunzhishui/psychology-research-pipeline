@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate stage artifacts and advance a research pipeline state."""
+"""Validate stage artifacts and advance schema-v2 research pipeline state."""
 
 from __future__ import annotations
 
@@ -8,46 +8,35 @@ import csv
 import hashlib
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
+from pipeline_schema import CSV_HEADERS, PLACEHOLDER, SCHEMA_VERSION, STAGE_BY_ID, STAGE_IDS, STAGES, relative_artifacts
 
-STAGES = [
-    "01_scope", "02_protocol", "03_search", "04_library", "05_screening",
-    "06_synthesis", "07_methods", "08_analysis", "09_manuscript", "10_review",
-]
 
-REQUIRED = {
-    "01_scope": ["01_scope/project_brief.md", "01_scope/research_question.md"],
-    "02_protocol": ["02_protocol/reporting_plan.md", "02_protocol/protocol.md"],
-    "03_search": ["03_search/search_log.csv", "03_search/candidates.csv"],
-    "04_library": ["04_library/zotero_manifest.csv", "04_library/acquisition_report.md"],
-    "05_screening": ["05_screening/screening_log.csv", "05_screening/evidence_matrix.csv"],
-    "06_synthesis": ["06_synthesis/mini_review.md", "06_synthesis/claim_evidence_map.csv"],
-    "07_methods": ["07_methods/methods_plan.md", "07_methods/analysis_plan.md"],
-    "08_analysis": ["08_analysis/data_audit.md", "08_analysis/results.md", "08_analysis/analysis_manifest.json"],
-    "09_manuscript": ["09_manuscript/manuscript.md", "09_manuscript/references.bib", "09_manuscript/citation_audit.md"],
-    "10_review": ["10_review/editorial_decision.md", "10_review/reviewer_report.md", "10_review/revision_matrix.csv", "10_review/final_audit.md"],
-}
-
-CSV_HEADERS = {
-    "03_search/search_log.csv": {"search_id", "database", "query", "run_at", "result_count"},
-    "03_search/candidates.csv": {"candidate_id", "title", "year", "doi", "database", "dedup_status"},
-    "04_library/zotero_manifest.csv": {"candidate_id", "zotero_item_key", "attachment_status", "validation_status"},
-    "05_screening/screening_log.csv": {"candidate_id", "stage", "decision", "reason"},
-    "05_screening/evidence_matrix.csv": {"study_id", "candidate_id", "design", "sample", "main_findings", "evidence_location"},
-    "06_synthesis/claim_evidence_map.csv": {"claim_id", "claim_text", "study_ids", "verification_status"},
-    "10_review/revision_matrix.csv": {"comment_id", "severity", "comment", "response", "status"},
+SEMANTIC_GROUPS = {
+    "00_scope": [["估计对象"], ["推论边界"], ["主要研究问题"]],
+    "01_protocol": [["主要", "primary"], ["偏离"], ["伦理"], ["开放科学", "数据可用性"]],
+    "05_methods": [["估计对象"], ["缺失"], ["测量不变性", "不适用"], ["性别", "不适用"], ["聚类", "不适用"], ["多重", "multiplicity", "不适用"], ["稳健性"]],
+    "06_data": [["ID", "标识"], ["重复"], ["计分"], ["缺失"], ["流失", "不适用"], ["分布"], ["隐私"]],
+    "07_analysis": [["收敛", "不适用"], ["估计", "效应"], ["区间", "置信"], ["偏离"]],
+    "08_results": [["主要结果"], ["稳健性"], ["探索性", "无探索性"]],
+    "09_manuscript": [["摘要"], ["方法"], ["结果"], ["讨论"], ["声明"]],
+    "10_alignment": [["样本量"], ["p值", "p 值"], ["表图"], ["unsupported"], ["overextended"]],
+    "11_review": [["模拟性质"], ["目标期刊"], ["方法"], ["统计"], ["开放科学"], ["最终状态"]],
 }
 
 
 def now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now().astimezone().isoformat(timespec="seconds")
 
 
 def sha256(path: Path) -> str:
-    digest = hashlib.sha256(path.read_bytes()).hexdigest()
-    return digest
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def atomic_json(path: Path, payload: dict) -> None:
@@ -56,67 +45,156 @@ def atomic_json(path: Path, payload: dict) -> None:
     os.replace(temp, path)
 
 
-def validate_file(run_dir: Path, relative: str) -> list[str]:
-    path = run_dir / relative
+def read_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle)
+        return reader.fieldnames or [], list(reader)
+
+
+def validate_file(path: Path) -> list[str]:
     errors: list[str] = []
     if not path.is_file():
-        return [f"missing: {relative}"]
+        return [f"missing: {path.name}"]
     if path.stat().st_size == 0:
-        return [f"empty: {relative}"]
+        return [f"empty: {path.name}"]
     text = path.read_text(encoding="utf-8", errors="replace")
-    if "__REQUIRED__" in text or "[TODO]" in text:
-        errors.append(f"placeholder remains: {relative}")
-    if path.suffix.lower() == ".md" and len(text.strip()) < 80:
-        errors.append(f"too little content: {relative}")
-    if path.suffix.lower() == ".csv":
-        rows = list(csv.DictReader(text.splitlines()))
-        expected = CSV_HEADERS.get(relative, set())
-        actual = set(rows[0].keys()) if rows else set(csv.DictReader(text.splitlines()).fieldnames or [])
-        missing = expected - actual
+    if PLACEHOLDER in text or "[TODO]" in text:
+        errors.append(f"placeholder remains: {path.name}")
+    suffix = path.suffix.lower()
+    if suffix == ".md" and len(text.strip()) < 120:
+        errors.append(f"too little content: {path.name}")
+    elif suffix == ".csv":
+        headers, rows = read_csv(path)
+        expected = set(CSV_HEADERS.get(path.name, []))
+        missing = expected - set(headers)
         if missing:
-            errors.append(f"missing CSV columns in {relative}: {sorted(missing)}")
+            errors.append(f"missing CSV columns in {path.name}: {sorted(missing)}")
         if not rows:
-            errors.append(f"no data rows: {relative}")
-    if path.suffix.lower() == ".json":
+            errors.append(f"no data rows: {path.name}")
+    elif suffix == ".json":
         try:
             json.loads(text)
         except json.JSONDecodeError as exc:
-            errors.append(f"invalid JSON {relative}: {exc}")
-    if relative.endswith("references.bib") and "@" not in text:
-        errors.append(f"no BibTeX entries: {relative}")
+            errors.append(f"invalid JSON {path.name}: {exc}")
+    elif suffix == ".bib" and "@" not in text:
+        errors.append(f"no BibTeX entries: {path.name}")
     return errors
 
 
-def append_gate_event(run_dir: Path, state: dict, stage: str, passed: bool, errors: list[str]) -> None:
+def validate_semantics(stage_id: str, paths: list[Path], strict: bool) -> list[str]:
+    if not strict:
+        return []
+    corpus = "\n".join(path.read_text(encoding="utf-8", errors="ignore") for path in paths if path.suffix.lower() in {".md", ".csv"})
+    errors = []
+    for alternatives in SEMANTIC_GROUPS.get(stage_id, []):
+        if not any(term.lower() in corpus.lower() for term in alternatives):
+            errors.append(f"semantic evidence missing for {stage_id}: {' / '.join(alternatives)}")
+    return errors
+
+
+def validate_analysis_manifest(path: Path) -> list[str]:
+    errors: list[str] = []
+    if not path.is_file():
+        return errors
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return errors
+    required = {"schema_version", "data_files", "file_hashes", "software", "packages", "code_files", "random_seed", "analysis_plan", "deviations", "outputs"}
+    missing = required - set(payload)
+    if missing:
+        errors.append(f"analysis manifest keys missing: {sorted(missing)}")
+        return errors
+    for raw_path in payload.get("data_files", []):
+        source = Path(raw_path).expanduser()
+        if not source.is_absolute():
+            source = (path.parent / source).resolve()
+        if not source.is_file():
+            errors.append(f"analysis source missing: {raw_path}")
+            continue
+        expected_hash = payload.get("file_hashes", {}).get(raw_path)
+        if expected_hash and expected_hash != sha256(source):
+            errors.append(f"analysis source hash mismatch: {raw_path}")
+    for raw_path in payload.get("code_files", []):
+        code_path = Path(raw_path).expanduser()
+        if not code_path.is_absolute():
+            code_path = (path.parent / code_path).resolve()
+        if not code_path.is_file():
+            errors.append(f"analysis code missing: {raw_path}")
+    return errors
+
+
+def validate_alignment(path: Path) -> list[str]:
+    if not path.is_file():
+        return []
+    _, rows = read_csv(path)
+    errors = []
+    for index, row in enumerate(rows, start=2):
+        support = (row.get("支持程度") or "").strip().lower()
+        status = (row.get("处理状态") or "").strip().lower()
+        if support in {"unsupported", "overextended"} and status not in {"resolved", "已解决", "删除", "降级", "补证"}:
+            errors.append(f"unresolved {support} claim at {path.name}:{index}")
+    return errors
+
+
+def validate_review(path: Path) -> list[str]:
+    if not path.is_file():
+        return []
+    _, rows = read_csv(path)
+    errors = []
+    for index, row in enumerate(rows, start=2):
+        severity = (row.get("severity") or "").strip().lower()
+        status = (row.get("status") or "").strip().lower()
+        if severity in {"critical", "major", "致命", "重大"} and status not in {"resolved", "closed", "已解决", "已关闭"}:
+            errors.append(f"unresolved {severity} review item at {path.name}:{index}")
+    return errors
+
+
+def append_gate_event(run_dir: Path, state: dict, stage_id: str, passed: bool, errors: list[str]) -> None:
     event = {
-        "timestamp": now(), "run_id": state["run_id"], "stage": stage,
+        "timestamp": now(), "run_id": state["run_id"], "stage": stage_id,
         "action": "gate_check", "status": "completed" if passed else "failed",
-        "tool": "pipeline_gate.py", "inputs": REQUIRED[stage], "outputs": [],
+        "tool": "pipeline_gate.py", "inputs": relative_artifacts(STAGE_BY_ID[stage_id]), "outputs": [],
         "decision": "pass" if passed else "revise", "reason": None,
-        "error": None if passed else "; ".join(errors), "next_gate": stage,
+        "error": None if passed else "; ".join(errors), "next_gate": stage_id,
     }
-    with (run_dir / "logs" / "events.jsonl").open("a", encoding="utf-8", newline="\n") as handle:
+    log_path = run_dir / "日志" / "事件记录_events.jsonl"
+    log_path.parent.mkdir(exist_ok=True)
+    with log_path.open("a", encoding="utf-8", newline="\n") as handle:
         handle.write(json.dumps(event, ensure_ascii=False) + "\n")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-dir", required=True)
-    parser.add_argument("--stage", required=True, choices=STAGES)
+    parser.add_argument("--stage", required=True, choices=STAGE_IDS)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--check", action="store_true")
     mode.add_argument("--advance", action="store_true")
     args = parser.parse_args()
 
     run_dir = Path(args.run_dir).expanduser().resolve()
-    state_path = run_dir / "state.json"
-    manifest_path = run_dir / "manifest.json"
+    state_path = run_dir / "状态记录_state.json"
+    manifest_path = run_dir / "文件清单_manifest.json"
     if not state_path.is_file():
-        parser.error(f"state.json missing: {state_path}")
+        parser.error(f"状态记录_state.json missing: {state_path}")
     state = json.loads(state_path.read_text(encoding="utf-8"))
-    errors = [error for relative in REQUIRED[args.stage] for error in validate_file(run_dir, relative)]
-    passed = not errors
-    append_gate_event(run_dir, state, args.stage, passed, errors)
+    if state.get("schema_version") != SCHEMA_VERSION:
+        parser.error(f"Unsupported schema version: {state.get('schema_version')}; expected {SCHEMA_VERSION}")
+
+    stage = STAGE_BY_ID[args.stage]
+    paths = [run_dir / relative for relative in relative_artifacts(stage)]
+    errors = [error for path in paths for error in validate_file(path)]
+    strict = state.get("mode") in {"strict", "top-journal-prep"}
+    errors.extend(validate_semantics(args.stage, paths, strict))
+    if args.stage == "07_analysis":
+        errors.extend(validate_analysis_manifest(run_dir / stage["dir"] / "分析清单_analysis_manifest.json"))
+    elif args.stage == "10_alignment":
+        errors.extend(validate_alignment(run_dir / stage["dir"] / "来源对齐表_source_alignment_table.csv"))
+    elif args.stage == "11_review":
+        errors.extend(validate_review(run_dir / stage["dir"] / "修改矩阵_revision_matrix.csv"))
+
+    append_gate_event(run_dir, state, args.stage, not errors, errors)
     if errors:
         print("GATE FAILED")
         for error in errors:
@@ -131,20 +209,23 @@ def main() -> int:
 
     if args.stage not in state["completed_stages"]:
         state["completed_stages"].append(args.stage)
-    index = STAGES.index(args.stage)
+    index = STAGE_IDS.index(args.stage)
     if index == len(STAGES) - 1:
         state["status"] = "complete"
         state["current_stage"] = None
     else:
-        state["current_stage"] = STAGES[index + 1]
+        state["current_stage"] = STAGE_IDS[index + 1]
     state["updated_at"] = now()
     atomic_json(state_path, state)
 
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.is_file() else {"schema_version": 1, "run_id": state["run_id"], "artifacts": []}
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     by_path = {item["path"]: item for item in manifest.get("artifacts", [])}
-    for relative in REQUIRED[args.stage]:
-        path = run_dir / relative
-        by_path[relative] = {"path": relative, "sha256": sha256(path), "bytes": path.stat().st_size, "status": "validated"}
+    for path in paths:
+        relative = path.relative_to(run_dir).as_posix()
+        by_path[relative] = {
+            "path": relative, "sha256": sha256(path), "bytes": path.stat().st_size,
+            "status": "validated", "stage": args.stage,
+        }
     manifest["artifacts"] = [by_path[key] for key in sorted(by_path)]
     atomic_json(manifest_path, manifest)
     print(f"ADVANCED TO: {state['current_stage'] or 'complete'}")

@@ -1,6 +1,6 @@
 # Current project profile
 
-Snapshot: 2026-06-23. Treat as intake evidence, not a frozen protocol.
+Snapshot: 2026-07-18. Treat as intake evidence, not a frozen protocol.
 
 ## Workspace
 
@@ -35,6 +35,17 @@ Observed derived variables include parent-conflict resolution, conflict degree/t
 - Verify measurement invariance feasibility and item consistency across waves.
 - Decide whether the primary estimand is within-person dynamics, between-person differences, or both.
 - Use “sex differences” unless the questionnaire demonstrably measured gender.
+
+## Current data-audit red flags
+
+These are audit triggers, not final error determinations:
+
+- T1–T2 participant IDs disagree on 29 rows; T2–T3 IDs disagree on 33 rows. T2 contains one duplicated ID.
+- T2 sex contains values `3`, `13`, and `22`; T3 contains `12` and `50`. Resolve against the questionnaire and source files before grouping.
+- Depression totals are T1 `20–73`, T2 `20–80`, and T3 `19–83`; confirm item count, scoring, missing-item rule, and out-of-range records.
+- NSSI measures are zero-heavy. T3 NSSI severity includes `-1`, and T3 NSSI level reaches `450`; inspect raw items and derivation syntax.
+- T2 interparental-conflict total is exactly `conflict degree + 24 - resolution`, while T3 total does not consistently follow that formula; no directly comparable T1 total is currently identified.
+- School prefixes and the questionnaire metadata indicate likely school clustering; determine school/class structure and privacy-safe reporting.
 
 ## Method candidates, not decisions
 

@@ -25,9 +25,9 @@ def main() -> int:
     args = parser.parse_args()
 
     run_dir = Path(args.run_dir).expanduser().resolve()
-    state_path = run_dir / "state.json"
+    state_path = run_dir / "状态记录_state.json"
     if not state_path.is_file():
-        parser.error(f"state.json missing: {state_path}")
+        parser.error(f"状态记录_state.json missing: {state_path}")
     state = json.loads(state_path.read_text(encoding="utf-8"))
     event = {
         "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -43,7 +43,7 @@ def main() -> int:
         "error": args.error,
         "next_gate": args.next_gate,
     }
-    log_path = run_dir / "logs" / "events.jsonl"
+    log_path = run_dir / "日志" / "事件记录_events.jsonl"
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with log_path.open("a", encoding="utf-8", newline="\n") as handle:
         handle.write(json.dumps(event, ensure_ascii=False) + "\n")

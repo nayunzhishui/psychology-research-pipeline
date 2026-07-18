@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Initialize a non-destructive psychology research pipeline run."""
+"""Initialize a non-destructive, schema-v2 psychology research run."""
 
 from __future__ import annotations
 
@@ -8,33 +8,32 @@ import hashlib
 import json
 import os
 import re
-import shutil
-from datetime import datetime, timezone
+import unicodedata
+from datetime import datetime
 from pathlib import Path
 
+from pipeline_schema import RUN_ROOT, SCHEMA_VERSION, STAGES, all_artifacts, template_text
 
-STAGES = [
-    "01_scope",
-    "02_protocol",
-    "03_search",
-    "04_library",
-    "05_screening",
-    "06_synthesis",
-    "07_methods",
-    "08_analysis",
-    "09_manuscript",
-    "10_review",
+
+LITERATURE_DIRS = [
+    "00_待导入Zotero", "01_已导入Zotero", "02_全文PDF",
+    "03_题录导出", "04_阅读矩阵", "05_论文引用",
 ]
 
 
 def now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now().astimezone().isoformat(timespec="seconds")
 
 
 def slugify(value: str) -> str:
-    value = value.strip().lower()
-    value = re.sub(r"[^a-z0-9]+", "-", value).strip("-")
-    return value[:36] or "study"
+    value = unicodedata.normalize("NFKC", value.strip())
+    value = re.sub(r"[^\w\u3400-\u9fff]+", "-", value, flags=re.UNICODE)
+    value = re.sub(r"[-_]{2,}", "-", value).strip("-_")
+    return value[:48] or "study"
+
+
+def safe_run_id(value: str) -> bool:
+    return bool(value) and value not in {".", ".."} and not any(char in value for char in '<>:"/\\|?*')
 
 
 def sha256(path: Path) -> str:
@@ -54,7 +53,8 @@ def atomic_json(path: Path, payload: dict) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--project", required=True, help="Existing project root")
-    parser.add_argument("--title", required=True, help="Short research title")
+    parser.add_argument("--title", required=True, help="Research title")
+    parser.add_argument("--mode", choices=["lite", "standard", "strict", "top-journal-prep"], default="standard")
     parser.add_argument("--run-id", help="Stable run id; generated when omitted")
     parser.add_argument("--resume", action="store_true", help="Return an existing run without overwriting it")
     args = parser.parse_args()
@@ -63,79 +63,80 @@ def main() -> int:
     if not project.is_dir():
         parser.error(f"Project root does not exist: {project}")
 
-    run_id = args.run_id or f"{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}-{slugify(args.title)}"
-    if not re.fullmatch(r"[A-Za-z0-9._-]+", run_id):
-        parser.error("run-id may contain only letters, digits, dot, underscore, and hyphen")
+    run_id = args.run_id or f"{datetime.now().astimezone():%Y%m%d_%H%M%S}_{slugify(args.title)}"
+    if not safe_run_id(run_id):
+        parser.error("run-id contains an unsafe path character")
 
-    run_dir = (project / "research-pipeline" / run_id).resolve()
-    expected_parent = (project / "research-pipeline").resolve()
-    if expected_parent not in run_dir.parents:
-        parser.error("Resolved run directory escaped the project research-pipeline directory")
+    run_root = (project / RUN_ROOT).resolve()
+    run_dir = (run_root / run_id).resolve()
+    if run_root not in run_dir.parents:
+        parser.error(f"Resolved run directory escaped {RUN_ROOT}")
 
+    state_path = run_dir / "状态记录_state.json"
     if run_dir.exists():
-        if args.resume and (run_dir / "state.json").is_file():
+        if args.resume and state_path.is_file():
             print(run_dir)
             return 0
         parser.error(f"Run already exists; use --resume or another run-id: {run_dir}")
 
     run_dir.mkdir(parents=True)
     for stage in STAGES:
-        (run_dir / stage).mkdir()
-    (run_dir / "logs").mkdir()
+        (run_dir / stage["dir"]).mkdir()
+    (run_dir / "日志").mkdir()
+    for name in LITERATURE_DIRS:
+        (run_dir / "文献" / name).mkdir(parents=True, exist_ok=True)
 
-    template_root = Path(__file__).resolve().parents[1] / "assets" / "templates"
-    if not template_root.is_dir():
-        raise SystemExit(f"Template directory missing: {template_root}")
-    for source in sorted(template_root.rglob("*")):
-        if source.is_file():
-            relative = source.relative_to(template_root)
-            destination = run_dir / relative
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(source, destination)
+    for relative in all_artifacts():
+        path = run_dir / relative
+        path.write_text(template_text(path.name), encoding="utf-8", newline="\n")
 
     created_at = now()
     state = {
-        "schema_version": 1,
+        "schema_version": SCHEMA_VERSION,
         "run_id": run_id,
         "title": args.title,
+        "mode": args.mode,
         "project_root": str(project),
         "run_dir": str(run_dir),
         "created_at": created_at,
         "updated_at": created_at,
         "status": "active",
-        "current_stage": STAGES[0],
+        "current_stage": STAGES[0]["id"],
         "completed_stages": [],
+        "blocked_stages": [],
     }
-    atomic_json(run_dir / "state.json", state)
+    atomic_json(state_path, state)
+
+    decisions = (
+        "# 决策记录\n\n"
+        f"- {created_at} | 初始化 | mode={args.mode} | title={args.title}\n"
+        "- 未确认事项必须标为 assumption；冻结后修改必须记录原因和影响。\n"
+    )
+    (run_dir / "日志" / "决策记录_decisions.md").write_text(decisions, encoding="utf-8", newline="\n")
+
+    event = {
+        "timestamp": created_at, "run_id": run_id, "stage": "00_admin",
+        "action": "run_initialized", "status": "completed", "tool": "init_research_run.py",
+        "inputs": [str(project)], "outputs": [str(run_dir)], "decision": "start",
+        "reason": f"new {args.mode} research pipeline run", "error": None,
+        "next_gate": STAGES[0]["id"],
+    }
+    (run_dir / "日志" / "事件记录_events.jsonl").write_text(
+        json.dumps(event, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
+    )
 
     artifacts = []
     for path in sorted(run_dir.rglob("*")):
-        if path.is_file() and path.name not in {"state.json", "manifest.json"}:
+        if path.is_file() and path.name not in {"状态记录_state.json", "文件清单_manifest.json"}:
             artifacts.append({
                 "path": path.relative_to(run_dir).as_posix(),
-                "sha256": sha256(path),
-                "bytes": path.stat().st_size,
+                "sha256": sha256(path), "bytes": path.stat().st_size,
                 "status": "template" if "__REQUIRED__" in path.read_text(encoding="utf-8", errors="ignore") else "created",
+                "stage": next((stage["id"] for stage in STAGES if stage["dir"] in path.parts), "00_admin"),
             })
-    atomic_json(run_dir / "manifest.json", {"schema_version": 1, "run_id": run_id, "artifacts": artifacts})
-
-    event = {
-        "timestamp": created_at,
-        "run_id": run_id,
-        "stage": "00_admin",
-        "action": "run_initialized",
-        "status": "completed",
-        "tool": "init_research_run.py",
-        "inputs": [str(project)],
-        "outputs": [str(run_dir)],
-        "decision": "start",
-        "reason": "new research pipeline run",
-        "error": None,
-        "next_gate": STAGES[0],
-    }
-    (run_dir / "logs" / "events.jsonl").write_text(
-        json.dumps(event, ensure_ascii=False) + "\n", encoding="utf-8"
-    )
+    atomic_json(run_dir / "文件清单_manifest.json", {
+        "schema_version": SCHEMA_VERSION, "run_id": run_id, "artifacts": artifacts,
+    })
     print(run_dir)
     return 0
 

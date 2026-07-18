@@ -1,0 +1,50 @@
+{
+  "profile": "three-wave-interparental-conflict-depression-self-harm",
+  "id_by_wave": {
+    "T1": "学号",
+    "T2": "学号0",
+    "T3": "学号1"
+  },
+  "sex_by_wave": {
+    "T1": "性别",
+    "T2": "性别0",
+    "T3": "性别1"
+  },
+  "allowed_sex_values": [1, 2],
+  "measures": [
+    {"construct": "depression", "wave": "T1", "variable": "抑郁T1", "expected_min": 20, "expected_max": 80},
+    {"construct": "depression", "wave": "T2", "variable": "抑郁T2", "expected_min": 20, "expected_max": 80},
+    {"construct": "depression", "wave": "T3", "variable": "T3抑郁", "expected_min": 20, "expected_max": 80},
+    {"construct": "self_harm_count", "wave": "T1", "variable": "自伤次数T1", "expected_min": 0},
+    {"construct": "self_harm_count", "wave": "T2", "variable": "自伤次数T2", "expected_min": 0},
+    {"construct": "self_harm_count", "wave": "T3", "variable": "T3自伤次数", "expected_min": 0},
+    {"construct": "self_harm_severity", "wave": "T1", "variable": "自伤严重程度T1", "expected_min": 0},
+    {"construct": "self_harm_severity", "wave": "T2", "variable": "自伤严重T2", "expected_min": 0},
+    {"construct": "self_harm_severity", "wave": "T3", "variable": "T3自伤程度", "expected_min": 0},
+    {"construct": "self_harm_level", "wave": "T1", "variable": "自伤伤害水平T1", "expected_min": 0},
+    {"construct": "self_harm_level", "wave": "T2", "variable": "自伤伤害水平T2", "expected_min": 0},
+    {"construct": "self_harm_level", "wave": "T3", "variable": "T3自伤水平", "expected_min": 0},
+    {"construct": "conflict_resolution", "wave": "T1", "variable": "问题解决T1", "expected_min": 6, "expected_max": 30},
+    {"construct": "conflict_resolution", "wave": "T2", "variable": "解决情况T2", "expected_min": 6, "expected_max": 30},
+    {"construct": "conflict_resolution", "wave": "T3", "variable": "T3父母冲突解决情况", "expected_min": 6, "expected_max": 30},
+    {"construct": "conflict_degree", "wave": "T1", "variable": "冲突程度T1", "expected_min": 12, "expected_max": 60},
+    {"construct": "conflict_degree", "wave": "T2", "variable": "冲突程度T2", "expected_min": 12, "expected_max": 60},
+    {"construct": "conflict_degree", "wave": "T3", "variable": "T3父母冲突程度", "expected_min": 12, "expected_max": 60}
+  ],
+  "score_relations": [
+    {
+      "name": "T2 conflict total formula",
+      "target": "父母冲突总分T2",
+      "intercept": 24,
+      "coefficients": {"冲突程度T2": 1, "解决情况T2": -1},
+      "tolerance": 0.000001
+    },
+    {
+      "name": "T3 conflict total formula using T2 rule",
+      "target": "T3父母冲突总分",
+      "intercept": 24,
+      "coefficients": {"T3父母冲突程度": 1, "T3父母冲突解决情况": -1},
+      "tolerance": 0.000001
+    }
+  ]
+}

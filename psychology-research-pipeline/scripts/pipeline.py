@@ -1,0 +1,435 @@
+#!/usr/bin/env python3
+"""Single public command interface for the empirical psychology pipeline."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+from pipeline_schema import STAGE_IDS
+from audit_panel_data import load_frame
+
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+
+
+def state_path(run_dir: Path) -> Path:
+    return run_dir / "状态记录_state.json"
+
+
+def load_state(run_dir: Path) -> dict:
+    path = state_path(run_dir)
+    if not path.is_file():
+        raise SystemExit(f"状态记录_state.json missing: {path}")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def status_payload(run_dir: Path) -> dict:
+    state = load_state(run_dir)
+    completed = len(state.get("completed_stages", []))
+    return {
+        **state,
+        "completion_percent": round(completed / len(STAGE_IDS) * 100, 1),
+        "remaining_stages": [stage for stage in STAGE_IDS if stage not in state.get("completed_stages", [])],
+    }
+
+
+def run_child(script: str, arguments: list[str]) -> subprocess.CompletedProcess[str]:
+    environment = os.environ.copy()
+    environment["PYTHONIOENCODING"] = "utf-8"
+    return subprocess.run(
+        [sys.executable, str(SCRIPT_DIR / script), *arguments],
+        text=True, encoding="utf-8", capture_output=True, env=environment,
+    )
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def audit_paths(run_dir: Path) -> tuple[Path, Path, Path]:
+    output_dir = run_dir / "06_数据管理"
+    return output_dir, output_dir / "数据质量审计_data_audit.json", output_dir / "数据质量审计_data_audit.md"
+
+
+def execute_audit(run_dir: Path, data: str, spec: str) -> dict:
+    output_dir, json_path, _ = audit_paths(run_dir)
+    result = run_child("audit_panel_data.py", [
+        "--data", data, "--spec", spec, "--output-dir", str(output_dir),
+    ])
+    if result.returncode:
+        raise SystemExit(result.stderr or result.stdout)
+    return json.loads(json_path.read_text(encoding="utf-8"))
+
+
+def command_init(args: argparse.Namespace) -> int:
+    child_args = ["--project", args.project, "--title", args.title, "--mode", args.mode]
+    if args.run_id:
+        child_args.extend(["--run-id", args.run_id])
+    if args.resume:
+        child_args.append("--resume")
+    result = run_child("init_research_run.py", child_args)
+    if result.returncode:
+        sys.stderr.write(result.stderr or result.stdout)
+        return result.returncode
+    run_dir = Path(result.stdout.strip()).resolve()
+    print(json.dumps(status_payload(run_dir), ensure_ascii=False))
+    return 0
+
+
+def command_migrate(args: argparse.Namespace) -> int:
+    init_args = ["--project", args.project, "--title", args.title, "--mode", args.mode]
+    if args.run_id:
+        init_args.extend(["--run-id", args.run_id])
+    initialized = run_child("init_research_run.py", init_args)
+    if initialized.returncode:
+        sys.stderr.write(initialized.stderr or initialized.stdout)
+        return initialized.returncode
+    run_dir = Path(initialized.stdout.strip()).resolve()
+    result = run_child("migrate_legacy_run.py", [
+        "--legacy-run", args.legacy_run, "--run-dir", str(run_dir),
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_status(args: argparse.Namespace) -> int:
+    print(json.dumps(status_payload(Path(args.run_dir).expanduser().resolve()), ensure_ascii=False))
+    return 0
+
+
+def command_inventory(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    child_args = ["--run-dir", str(run_dir)]
+    for source in args.source:
+        child_args.extend(["--source", source])
+    result = run_child("inventory_sources.py", child_args)
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_gate(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("pipeline_gate.py", [
+        "--run-dir", str(run_dir), "--stage", args.stage,
+        "--advance" if args.advance else "--check",
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_verify_run(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    stages = []
+    for stage in STAGE_IDS:
+        result = run_child("pipeline_gate.py", ["--run-dir", str(run_dir), "--stage", stage, "--check"])
+        stages.append({
+            "stage": stage, "status": "ready" if result.returncode == 0 else "blocked",
+            "details": [line[2:] for line in result.stdout.splitlines() if line.startswith("- ")],
+        })
+    blocked = [item["stage"] for item in stages if item["status"] == "blocked"]
+    payload = {"status": "ready" if not blocked else "blocked", "blocked_stages": blocked, "stages": stages}
+    print(json.dumps(payload, ensure_ascii=False))
+    return 0 if not blocked else 3
+
+
+def command_autopilot(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    advanced = []
+    while True:
+        state = load_state(run_dir)
+        stage = state.get("current_stage")
+        if state.get("status") == "complete" or stage is None:
+            print(json.dumps({"status": "complete", "advanced_stages": advanced, **status_payload(run_dir)}, ensure_ascii=False))
+            return 0
+        result = run_child("pipeline_gate.py", ["--run-dir", str(run_dir), "--stage", stage, "--advance"])
+        if result.returncode:
+            print(json.dumps({
+                "status": "blocked", "blocked_stage": stage, "advanced_stages": advanced,
+                "details": [line[2:] for line in result.stdout.splitlines() if line.startswith("- ")],
+            }, ensure_ascii=False))
+            return 3
+        advanced.append(stage)
+
+
+def command_audit_data(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    print(json.dumps(execute_audit(run_dir, args.data, args.spec), ensure_ascii=False))
+    return 0
+
+
+def command_freeze_data(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    data_path = Path(args.data).expanduser().resolve()
+    spec_path = Path(args.spec).expanduser().resolve()
+    output_dir, audit_json, _ = audit_paths(run_dir)
+    report = None
+    if args.decisions and audit_json.is_file():
+        candidate = json.loads(audit_json.read_text(encoding="utf-8"))
+        if candidate.get("sha256") == sha256(data_path) and candidate.get("spec_sha256") == sha256(spec_path):
+            report = candidate
+    if report is None:
+        report = execute_audit(run_dir, args.data, args.spec)
+
+    resolved_flags: list[dict] = []
+    decision_log = None
+    if report.get("flags") and args.decisions:
+        decisions_path = Path(args.decisions).expanduser().resolve()
+        decisions = json.loads(decisions_path.read_text(encoding="utf-8"))
+        allowed_resolutions = {"corrected", "excluded", "verified-valid", "analysis-accommodation", "not-applicable"}
+        errors = []
+        if decisions.get("schema_version") != 1:
+            errors.append("decision schema_version must be 1")
+        if decisions.get("audit_sha256") != sha256(audit_json):
+            errors.append("decision audit_sha256 does not match the current audit")
+        by_flag = {item.get("flag"): item for item in decisions.get("decisions", []) if item.get("flag")}
+        for flag in report["flags"]:
+            item = by_flag.get(flag)
+            if not item:
+                errors.append(f"unresolved audit flag: {flag}")
+                continue
+            if item.get("status") != "resolved" or item.get("resolution") not in allowed_resolutions:
+                errors.append(f"invalid resolution for audit flag: {flag}")
+            for field in ["rationale", "evidence", "approved_by", "decided_at"]:
+                if not str(item.get(field, "")).strip():
+                    errors.append(f"decision field {field} missing for audit flag: {flag}")
+            resolved_flags.append(item)
+        unknown = sorted(set(by_flag) - set(report["flags"]))
+        if unknown:
+            errors.append(f"decisions contain flags absent from current audit: {unknown}")
+        if errors:
+            print(json.dumps({"status": "blocked", "reason": "invalid or incomplete decisions", "errors": errors}, ensure_ascii=False))
+            return 3
+        decision_log = output_dir / "数据审计决策记录_data_decisions.md"
+        lines = ["# 数据审计决策记录", "", f"- 审计：`{audit_json.name}`", f"- 审计 SHA-256：`{sha256(audit_json)}`", ""]
+        for index, item in enumerate(resolved_flags, 1):
+            lines.extend([
+                f"## 决策 {index}", "", f"- 阻断项：{item['flag']}",
+                f"- 处理：{item['resolution']}", f"- 理由：{item['rationale']}",
+                f"- 证据定位：{item['evidence']}", f"- 批准者：{item['approved_by']}",
+                f"- 日期：{item['decided_at']}", "",
+            ])
+        decision_log.write_text("\n".join(lines), encoding="utf-8", newline="\n")
+    elif report.get("flags"):
+        print(json.dumps({
+            "status": "blocked", "reason": "unresolved data audit flags",
+            "flags": report["flags"],
+        }, ensure_ascii=False))
+        return 3
+
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    variables = set(spec.get("id_by_wave", {}).values()) | set(spec.get("sex_by_wave", {}).values())
+    variables |= {item["variable"] for item in spec.get("measures", [])}
+    for relation in spec.get("score_relations", []):
+        variables.add(relation["target"])
+        variables.update(relation["coefficients"])
+    frame, _ = load_frame(data_path, sorted(variables))
+    frozen_path = output_dir / "冻结分析数据_frozen.csv"
+    temp_path = frozen_path.with_suffix(".csv.tmp")
+    frame.to_csv(temp_path, index=False, encoding="utf-8-sig")
+    os.replace(temp_path, frozen_path)
+    manifest = {
+        "schema_version": 1, "status": "frozen", "source_data": str(data_path),
+        "source_sha256": sha256(data_path), "spec": str(spec_path),
+        "spec_sha256": sha256(spec_path), "audit": str(audit_json),
+        "audit_sha256": sha256(audit_json), "frozen_data": str(frozen_path),
+        "frozen_sha256": sha256(frozen_path), "rows": int(len(frame)),
+        "columns": list(frame.columns), "flags": report.get("flags", []),
+        "resolved_flags": resolved_flags,
+        "decision_log": str(decision_log.resolve()) if decision_log else None,
+    }
+    manifest_path = output_dir / "冻结清单_freeze_manifest.json"
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(manifest, ensure_ascii=False))
+    return 0
+
+
+def command_generate_analysis(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    output_dir = run_dir / "07_统计分析"
+    result = run_child("generate_longitudinal_analysis.py", [
+        "--data", args.data, "--spec", args.spec, "--output-dir", str(output_dir),
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_validate_results(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("validate_analysis_results.py", [
+        "--run-dir", str(run_dir), "--input", args.input,
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_dedupe_evidence(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("evidence_dedupe.py", [
+        "--input", args.input, "--output-dir", str(run_dir / "04_文献筛选与小综述"),
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_render_manuscript(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("render_manuscript.py", [
+        "--template", args.template, "--results", args.results, "--claims", args.claims,
+        "--references", args.references, "--output-dir", str(run_dir / "09_论文正文"),
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_build_submission(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("build_submission_package.py", [
+        "--run-dir", str(run_dir), "--journal-policy", args.journal_policy,
+        "--manuscript", args.manuscript, "--numeric-audit", args.numeric_audit,
+        "--claim-audit", args.claim_audit,
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Psychology research pipeline")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    init = subparsers.add_parser("init", help="initialize a run")
+    init.add_argument("--project", required=True)
+    init.add_argument("--title", required=True)
+    init.add_argument("--mode", choices=["lite", "standard", "strict", "top-journal-prep"], default="standard")
+    init.add_argument("--run-id")
+    init.add_argument("--resume", action="store_true")
+    init.set_defaults(handler=command_init)
+
+    migrate = subparsers.add_parser("migrate", help="migrate recognized artifacts from the legacy ten-stage layout")
+    migrate.add_argument("--project", required=True)
+    migrate.add_argument("--legacy-run", required=True)
+    migrate.add_argument("--title", required=True)
+    migrate.add_argument("--mode", choices=["lite", "standard", "strict", "top-journal-prep"], default="standard")
+    migrate.add_argument("--run-id")
+    migrate.set_defaults(handler=command_migrate)
+
+    status = subparsers.add_parser("status", help="read run status")
+    status.add_argument("--run-dir", required=True)
+    status.set_defaults(handler=command_status)
+
+    inventory = subparsers.add_parser("inventory", help="hash research sources without previewing sensitive rows")
+    inventory.add_argument("--run-dir", required=True)
+    inventory.add_argument("--source", action="append", required=True)
+    inventory.set_defaults(handler=command_inventory)
+
+    gate = subparsers.add_parser("gate", help="check or advance one canonical stage")
+    gate.add_argument("--run-dir", required=True)
+    gate.add_argument("--stage", choices=STAGE_IDS, required=True)
+    gate.add_argument("--advance", action="store_true")
+    gate.set_defaults(handler=command_gate)
+
+    verify = subparsers.add_parser("verify-run", help="check all twelve stage contracts")
+    verify.add_argument("--run-dir", required=True)
+    verify.set_defaults(handler=command_verify_run)
+
+    autopilot = subparsers.add_parser("autopilot", help="advance valid stages and stop at the first evidence gate")
+    autopilot.add_argument("--run-dir", required=True)
+    autopilot.set_defaults(handler=command_autopilot)
+
+    audit = subparsers.add_parser("audit-data", help="audit SPSS/CSV panel data without row-level disclosure")
+    audit.add_argument("--run-dir", required=True)
+    audit.add_argument("--data", required=True)
+    audit.add_argument("--spec", required=True)
+    audit.set_defaults(handler=command_audit_data)
+
+    freeze = subparsers.add_parser("freeze-data", help="freeze analysis data only after a clean audit")
+    freeze.add_argument("--run-dir", required=True)
+    freeze.add_argument("--data", required=True)
+    freeze.add_argument("--spec", required=True)
+    freeze.add_argument("--decisions", help="JSON decisions resolving every current audit flag")
+    freeze.set_defaults(handler=command_freeze_data)
+
+    analysis = subparsers.add_parser("generate-analysis", help="generate auditable R code for longitudinal analysis")
+    analysis.add_argument("--run-dir", required=True)
+    analysis.add_argument("--data", required=True)
+    analysis.add_argument("--spec", required=True)
+    analysis.set_defaults(handler=command_generate_analysis)
+
+    validate_results = subparsers.add_parser("validate-results", help="validate model output and generate traceable result artifacts")
+    validate_results.add_argument("--run-dir", required=True)
+    validate_results.add_argument("--input", required=True)
+    validate_results.set_defaults(handler=command_validate_results)
+
+    evidence = subparsers.add_parser("dedupe-evidence", help="normalize and deduplicate candidate evidence")
+    evidence.add_argument("--run-dir", required=True)
+    evidence.add_argument("--input", required=True)
+    evidence.set_defaults(handler=command_dedupe_evidence)
+
+    manuscript = subparsers.add_parser("render-manuscript", help="render only verified result and claim placeholders")
+    manuscript.add_argument("--run-dir", required=True)
+    manuscript.add_argument("--template", required=True)
+    manuscript.add_argument("--results", required=True)
+    manuscript.add_argument("--claims", required=True)
+    manuscript.add_argument("--references", required=True)
+    manuscript.set_defaults(handler=command_render_manuscript)
+
+    submission = subparsers.add_parser("build-submission", help="build a privacy-safe simulated submission package")
+    submission.add_argument("--run-dir", required=True)
+    submission.add_argument("--journal-policy", required=True)
+    submission.add_argument("--manuscript", required=True)
+    submission.add_argument("--numeric-audit", required=True)
+    submission.add_argument("--claim-audit", required=True)
+    submission.set_defaults(handler=command_build_submission)
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    return args.handler(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
