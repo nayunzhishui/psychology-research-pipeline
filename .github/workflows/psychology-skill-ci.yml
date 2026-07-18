@@ -33,4 +33,9 @@ jobs:
       - run: python -m pip install pandas
       - run: mkdir -p "$RUNNER_TEMP/r-output"
       - run: python scripts/generate_longitudinal_analysis.py --data tests/fixtures/synthetic_panel.csv --spec tests/fixtures/synthetic_analysis_spec.json --output-dir "$RUNNER_TEMP/r-output"
-      - run: find "$RUNNER_TEMP/r-output/code" -name '*.R' -print0 | xargs -0 -n1 Rscript -e 'parse(file=commandArgs(trailingOnly=TRUE)[1])' --args
+      - name: Parse every generated R script
+        shell: bash
+        run: |
+          while IFS= read -r -d '' file; do
+            Rscript -e 'parse(file=commandArgs(trailingOnly=TRUE)[1])' "$file"
+          done < <(find "$RUNNER_TEMP/r-output/code" -name '*.R' -print0)

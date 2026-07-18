@@ -289,21 +289,39 @@ class PipelineCliTests(unittest.TestCase):
             self.assertIn("group.equal", Path(generated["code_files"][3]).read_text(encoding="utf-8"))
             self.assertIn("zero-heavy", Path(generated["code_files"][4]).read_text(encoding="utf-8"))
 
-            fake_rscript = project / "fake-rscript.cmd"
-            fake_rscript.write_text(
-                "@echo off\n"
-                "if \"%1\"==\"--version\" (echo R version 4.5.0 & exit /b 0)\n"
-                "for %%F in (\"%1\") do set base=%%~nF\n"
-                "if \"%base%\"==\"01_measurement_gate\" echo ok>..\\measurement_score_summary.csv\n"
-                "if \"%base%\"==\"02_ri_clpm\" (echo ok>..\\ri_clpm_parameters.csv & echo ok>..\\ri_clpm_fit.csv & echo ok>..\\ri_clpm_fit.rds)\n"
-                "if \"%base%\"==\"03_sex_group_comparison\" echo ok>..\\sex_group_constraint_test.txt\n"
-                "if \"%base%\"==\"04_distribution_sensitivity\" echo ok>..\\distribution_sensitivity_fits.rds\n"
-                "if \"%base%\"==\"05_power_simulation\" echo ok>..\\power_simulation_plan.rds\n"
-                "if \"%base%\"==\"06_descriptives_missingness\" (echo ok>..\\descriptives.csv & echo ok>..\\missingness.csv)\n"
-                "if \"%base%\"==\"07_export_machine_output\" echo {}>..\\model_output.json\n"
-                "exit /b 0\n",
-                encoding="utf-8",
-            )
+            if os.name == "nt":
+                fake_rscript = project / "fake-rscript.cmd"
+                fake_rscript.write_text(
+                    "@echo off\n"
+                    "if \"%1\"==\"--version\" (echo R version 4.5.0 & exit /b 0)\n"
+                    "for %%F in (\"%1\") do set base=%%~nF\n"
+                    "if \"%base%\"==\"01_measurement_gate\" echo ok>..\\measurement_score_summary.csv\n"
+                    "if \"%base%\"==\"02_ri_clpm\" (echo ok>..\\ri_clpm_parameters.csv & echo ok>..\\ri_clpm_fit.csv & echo ok>..\\ri_clpm_fit.rds)\n"
+                    "if \"%base%\"==\"03_sex_group_comparison\" echo ok>..\\sex_group_constraint_test.txt\n"
+                    "if \"%base%\"==\"04_distribution_sensitivity\" echo ok>..\\distribution_sensitivity_fits.rds\n"
+                    "if \"%base%\"==\"05_power_simulation\" echo ok>..\\power_simulation_plan.rds\n"
+                    "if \"%base%\"==\"06_descriptives_missingness\" (echo ok>..\\descriptives.csv & echo ok>..\\missingness.csv)\n"
+                    "if \"%base%\"==\"07_export_machine_output\" echo {}>..\\model_output.json\n"
+                    "exit /b 0\n",
+                    encoding="utf-8",
+                )
+            else:
+                fake_rscript = project / "fake-rscript"
+                fake_rscript.write_text(
+                    "#!/bin/sh\n"
+                    "[ \"$1\" = \"--version\" ] && { echo 'R version 4.5.0'; exit 0; }\n"
+                    "base=$(basename \"$1\" .R)\n"
+                    "[ \"$base\" = \"01_measurement_gate\" ] && echo ok > ../measurement_score_summary.csv\n"
+                    "[ \"$base\" = \"02_ri_clpm\" ] && { echo ok > ../ri_clpm_parameters.csv; echo ok > ../ri_clpm_fit.csv; echo ok > ../ri_clpm_fit.rds; }\n"
+                    "[ \"$base\" = \"03_sex_group_comparison\" ] && echo ok > ../sex_group_constraint_test.txt\n"
+                    "[ \"$base\" = \"04_distribution_sensitivity\" ] && echo ok > ../distribution_sensitivity_fits.rds\n"
+                    "[ \"$base\" = \"05_power_simulation\" ] && echo ok > ../power_simulation_plan.rds\n"
+                    "[ \"$base\" = \"06_descriptives_missingness\" ] && { echo ok > ../descriptives.csv; echo ok > ../missingness.csv; }\n"
+                    "[ \"$base\" = \"07_export_machine_output\" ] && echo '{}' > ../model_output.json\n"
+                    "exit 0\n",
+                    encoding="utf-8",
+                )
+                fake_rscript.chmod(0o755)
             executed = json.loads(self.invoke(
                 "run-analysis", "--run-dir", str(run_dir), "--manifest", generated["manifest"],
                 "--rscript", str(fake_rscript),
