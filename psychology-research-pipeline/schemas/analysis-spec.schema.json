@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "analysis-spec.schema.json",
+  "title": "Longitudinal analysis specification",
+  "type": "object",
+  "required": ["schema_version", "waves", "constructs", "measurement_mode"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "waves": {"type": "array", "minItems": 3, "uniqueItems": true, "items": {"type": "string"}},
+    "constructs": {"type": "object", "minProperties": 2},
+    "measurement_mode": {"enum": ["score-comparability", "item-level"]},
+    "group_variable": {"type": ["string", "null"]},
+    "cluster_variable": {"type": ["string", "null"]},
+    "estimator": {"type": "string"},
+    "missing": {"type": "string"}
+  }
+}

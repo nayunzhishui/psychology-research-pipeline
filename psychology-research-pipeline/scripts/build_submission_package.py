@@ -10,14 +10,18 @@ import json
 import shutil
 from datetime import date
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def validate_policy(policy: dict) -> list[str]:
-    required = {"journal", "article_type", "checked_at", "scope_fit", "word_limit", "ai_policy", "data_policy", "submission_url", "source_urls"}
+def validate_policy(policy: dict, base_dir: Path) -> list[str]:
+    required = {
+        "journal", "article_type", "checked_at", "scope_fit", "word_limit", "ai_policy",
+        "data_policy", "official_domains", "submission_url", "source_urls", "source_snapshots",
+    }
     errors = [f"journal policy fields missing: {sorted(required - set(policy))}"] if required - set(policy) else []
     if errors:
         return errors
@@ -31,12 +35,40 @@ def validate_policy(policy: dict) -> list[str]:
     urls = [policy.get("submission_url", ""), *policy.get("source_urls", [])]
     if any(not url.startswith("https://") for url in urls):
         errors.append("journal policy URLs must be verified HTTPS sources")
+    domains = {value.lower().strip(".") for value in policy.get("official_domains", []) if value}
+    if not domains:
+        errors.append("at least one official publisher or journal domain is required")
+    disallowed = {"example.com", "example.org", "localhost"}
+    for url in urls:
+        host = (urlparse(url).hostname or "").lower().strip(".")
+        if host in disallowed or not any(host == domain or host.endswith("." + domain) for domain in domains):
+            errors.append(f"journal policy URL is outside declared official domains: {url}")
+    snapshots = {item.get("url"): item for item in policy.get("source_snapshots", []) if item.get("url")}
+    for url in policy.get("source_urls", []):
+        snapshot = snapshots.get(url)
+        if not snapshot:
+            errors.append(f"journal policy source snapshot missing: {url}")
+            continue
+        try:
+            retrieved = date.fromisoformat(snapshot.get("retrieved_at", ""))
+            age = (date.today() - retrieved).days
+            if age < 0 or age > 90:
+                errors.append(f"journal policy snapshot is not current: {url}")
+        except ValueError:
+            errors.append(f"journal policy snapshot retrieved_at must use ISO date: {url}")
+        snapshot_path = Path(snapshot.get("file", "")).expanduser()
+        if not snapshot_path.is_absolute():
+            snapshot_path = (base_dir / snapshot_path).resolve()
+        if not snapshot_path.is_file():
+            errors.append(f"journal policy snapshot file missing: {url}")
+        elif snapshot.get("sha256") != sha256(snapshot_path):
+            errors.append(f"journal policy snapshot hash mismatch: {url}")
     return errors
 
 
 def build(run_dir: Path, policy_path: Path, manuscript: Path, numeric_audit: Path, claim_audit: Path) -> dict:
     policy = json.loads(policy_path.read_text(encoding="utf-8"))
-    errors = validate_policy(policy)
+    errors = validate_policy(policy, policy_path.parent)
     numeric = json.loads(numeric_audit.read_text(encoding="utf-8"))
     if numeric.get("status") != "verified":
         errors.append("numeric audit is not verified")

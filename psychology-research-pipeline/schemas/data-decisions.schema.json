@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "data-decisions.schema.json",
+  "title": "Data-audit decisions",
+  "type": "object",
+  "required": ["schema_version", "audit_sha256", "decisions"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "audit_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["issue_id", "status", "resolution", "rationale", "evidence", "approved_by", "decided_at"],
+        "properties": {
+          "issue_id": {"type": "string", "pattern": "^issue-[0-9a-f]{12}$"},
+          "flag": {"type": "string"},
+          "status": {"const": "resolved"},
+          "resolution": {"type": "string"},
+          "rationale": {"type": "string", "minLength": 1},
+          "evidence": {"type": "string", "minLength": 1},
+          "approved_by": {"type": "string", "minLength": 1},
+          "decided_at": {"type": "string", "format": "date"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

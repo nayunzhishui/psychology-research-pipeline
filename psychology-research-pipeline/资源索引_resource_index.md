@@ -5,7 +5,7 @@
 | 任务 | 必读资源 |
 |---|---|
 | 初始化、推进和 gate | `references/stage-contracts.md`、`scripts/pipeline_schema.py` |
-| 本课题定标与数据审计 | `references/project-profile.md`、`references/project-data-audit-spec.json` |
+| 本课题定标与数据审计 | `project-packs/interparental-conflict-depression-nssi/` |
 | 三波 RI-CLPM、自伤、性别差异 | `references/longitudinal-panel-nssi.md` |
 | APA JARS、STROBE、SAGER | `references/psychology-standards.md` |
 | 文献获取与 Zotero | `references/tool-routing.md` |
@@ -17,8 +17,10 @@
 | 资料元数据盘点 | `scripts/inventory_sources.py` |
 | 文献规范化去重 | `scripts/evidence_dedupe.py` |
 | RI-CLPM、测量不变性与敏感性代码 | `scripts/generate_longitudinal_analysis.py` |
+| 哈希校验与真实 R 执行 | `scripts/analysis_runner.py` |
 | 模型输出一致性与结果产物 | `scripts/validate_analysis_results.py` |
 | 已验证数字/主张渲染正文 | `scripts/render_manuscript.py` |
 | 期刊政策核查与隐私安全预投稿包 | `scripts/build_submission_package.py` |
+| JSON 机器契约 | `schemas/` |
 
 运行时唯一产物契约由 `scripts/pipeline_schema.py` 生成。顶层 `templates/` 不得作为另一套运行目录来源。

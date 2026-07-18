@@ -61,11 +61,14 @@ def audit_paths(run_dir: Path) -> tuple[Path, Path, Path]:
     return output_dir, output_dir / "数据质量审计_data_audit.json", output_dir / "数据质量审计_data_audit.md"
 
 
-def execute_audit(run_dir: Path, data: str, spec: str) -> dict:
+def execute_audit(run_dir: Path, data: str, spec: str, private_register: str | None = None) -> dict:
     output_dir, json_path, _ = audit_paths(run_dir)
-    result = run_child("audit_panel_data.py", [
+    child_args = [
         "--data", data, "--spec", spec, "--output-dir", str(output_dir),
-    ])
+    ]
+    if private_register:
+        child_args.extend(["--private-register", private_register])
+    result = run_child("audit_panel_data.py", child_args)
     if result.returncode:
         raise SystemExit(result.stderr or result.stdout)
     return json.loads(json_path.read_text(encoding="utf-8"))
@@ -77,6 +80,8 @@ def command_init(args: argparse.Namespace) -> int:
         child_args.extend(["--run-id", args.run_id])
     if args.resume:
         child_args.append("--resume")
+    if args.project_pack:
+        child_args.extend(["--project-pack", args.project_pack])
     result = run_child("init_research_run.py", child_args)
     if result.returncode:
         sys.stderr.write(result.stderr or result.stdout)
@@ -176,7 +181,7 @@ def command_autopilot(args: argparse.Namespace) -> int:
 def command_audit_data(args: argparse.Namespace) -> int:
     run_dir = Path(args.run_dir).expanduser().resolve()
     load_state(run_dir)
-    print(json.dumps(execute_audit(run_dir, args.data, args.spec), ensure_ascii=False))
+    print(json.dumps(execute_audit(run_dir, args.data, args.spec, args.private_register), ensure_ascii=False))
     return 0
 
 
@@ -199,27 +204,40 @@ def command_freeze_data(args: argparse.Namespace) -> int:
     if report.get("flags") and args.decisions:
         decisions_path = Path(args.decisions).expanduser().resolve()
         decisions = json.loads(decisions_path.read_text(encoding="utf-8"))
-        allowed_resolutions = {"corrected", "excluded", "verified-valid", "analysis-accommodation", "not-applicable"}
         errors = []
         if decisions.get("schema_version") != 1:
             errors.append("decision schema_version must be 1")
         if decisions.get("audit_sha256") != sha256(audit_json):
             errors.append("decision audit_sha256 does not match the current audit")
+        by_issue = {item.get("issue_id"): item for item in decisions.get("decisions", []) if item.get("issue_id")}
         by_flag = {item.get("flag"): item for item in decisions.get("decisions", []) if item.get("flag")}
-        for flag in report["flags"]:
-            item = by_flag.get(flag)
+        issues = report.get("issues", [{
+            "issue_id": f"legacy-{index}", "message": flag,
+            "allowed_resolutions": ["source-verified", "corrected", "excluded"],
+        } for index, flag in enumerate(report["flags"], 1)])
+        for issue in issues:
+            flag = issue["message"]
+            item = by_issue.get(issue["issue_id"]) or by_flag.get(flag)
             if not item:
                 errors.append(f"unresolved audit flag: {flag}")
                 continue
-            if item.get("status") != "resolved" or item.get("resolution") not in allowed_resolutions:
-                errors.append(f"invalid resolution for audit flag: {flag}")
+            if item.get("status") != "resolved":
+                errors.append(f"audit issue is not resolved: {issue['issue_id']}")
+            if item.get("resolution") not in issue.get("allowed_resolutions", []):
+                errors.append(
+                    f"resolution is not allowed for {issue['issue_id']}: {item.get('resolution')}; "
+                    f"allowed={issue.get('allowed_resolutions', [])}"
+                )
             for field in ["rationale", "evidence", "approved_by", "decided_at"]:
                 if not str(item.get(field, "")).strip():
                     errors.append(f"decision field {field} missing for audit flag: {flag}")
             resolved_flags.append(item)
-        unknown = sorted(set(by_flag) - set(report["flags"]))
-        if unknown:
-            errors.append(f"decisions contain flags absent from current audit: {unknown}")
+        known_ids = {issue["issue_id"] for issue in issues}
+        known_flags = set(report["flags"])
+        unknown_ids = sorted(set(by_issue) - known_ids)
+        unknown_flags = sorted(set(by_flag) - known_flags)
+        if unknown_ids or unknown_flags:
+            errors.append(f"decisions contain issues absent from current audit: ids={unknown_ids}, flags={unknown_flags}")
         if errors:
             print(json.dumps({"status": "blocked", "reason": "invalid or incomplete decisions", "errors": errors}, ensure_ascii=False))
             return 3
@@ -236,7 +254,7 @@ def command_freeze_data(args: argparse.Namespace) -> int:
     elif report.get("flags"):
         print(json.dumps({
             "status": "blocked", "reason": "unresolved data audit flags",
-            "flags": report["flags"],
+            "flags": report["flags"], "issues": report.get("issues", []),
         }, ensure_ascii=False))
         return 3
 
@@ -286,6 +304,20 @@ def command_validate_results(args: argparse.Namespace) -> int:
     load_state(run_dir)
     result = run_child("validate_analysis_results.py", [
         "--run-dir", str(run_dir), "--input", args.input,
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_run_analysis(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("analysis_runner.py", [
+        "--manifest", args.manifest, "--rscript", args.rscript,
+        "--output-dir", str(run_dir / "07_统计分析"),
     ])
     if result.stdout:
         sys.stdout.write(result.stdout)
@@ -346,6 +378,7 @@ def build_parser() -> argparse.ArgumentParser:
     init.add_argument("--mode", choices=["lite", "standard", "strict", "top-journal-prep"], default="standard")
     init.add_argument("--run-id")
     init.add_argument("--resume", action="store_true")
+    init.add_argument("--project-pack", help="attach a versioned project-pack directory")
     init.set_defaults(handler=command_init)
 
     migrate = subparsers.add_parser("migrate", help="migrate recognized artifacts from the legacy ten-stage layout")
@@ -383,6 +416,7 @@ def build_parser() -> argparse.ArgumentParser:
     audit.add_argument("--run-dir", required=True)
     audit.add_argument("--data", required=True)
     audit.add_argument("--spec", required=True)
+    audit.add_argument("--private-register", help="local ignored JSONL row-issue register")
     audit.set_defaults(handler=command_audit_data)
 
     freeze = subparsers.add_parser("freeze-data", help="freeze analysis data only after a clean audit")
@@ -397,6 +431,12 @@ def build_parser() -> argparse.ArgumentParser:
     analysis.add_argument("--data", required=True)
     analysis.add_argument("--spec", required=True)
     analysis.set_defaults(handler=command_generate_analysis)
+
+    run_analysis = subparsers.add_parser("run-analysis", help="execute generated R code with hash and output verification")
+    run_analysis.add_argument("--run-dir", required=True)
+    run_analysis.add_argument("--manifest", required=True)
+    run_analysis.add_argument("--rscript", default="Rscript")
+    run_analysis.set_defaults(handler=command_run_analysis)
 
     validate_results = subparsers.add_parser("validate-results", help="validate model output and generate traceable result artifacts")
     validate_results.add_argument("--run-dir", required=True)

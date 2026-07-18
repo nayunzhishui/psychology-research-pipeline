@@ -28,7 +28,7 @@ python scripts/pipeline.py init --project <项目目录> --title <题目> --mode
 python scripts/pipeline.py inventory --run-dir <运行目录> --source <资料目录>
 ```
 
-旧版十阶段运行仅通过 `pipeline.py migrate` 迁移已识别文本产物；未映射文件只记哈希、不复制，迁移后仍必须通过十二阶段 gate。
+通用工作流不得硬编码单一课题。特定研究通过 `--project-pack <课题包目录>` 附加版本化 profile、数据审计规格和分析规格；初始化时复制并哈希到运行目录。旧版十阶段运行仅通过 `pipeline.py migrate` 迁移已识别文本产物；未映射文件只记哈希、不复制，迁移后仍必须通过十二阶段 gate。
 
 模式：
 
@@ -83,16 +83,19 @@ python scripts/pipeline.py inventory --run-dir <运行目录> --source <资料�
 按阶段生成、验证和推进；任何命令返回 `blocked` 时停止，不得绕过：
 
 ```powershell
-python scripts/pipeline.py audit-data --run-dir <运行目录> --data <sav或csv> --spec <审计规格json>
+python scripts/pipeline.py audit-data --run-dir <运行目录> --data <sav或csv> --spec <审计规格json> [--private-register <本地私密jsonl>]
 python scripts/pipeline.py freeze-data --run-dir <运行目录> --data <数据> --spec <规格> [--decisions <逐项决策json>]
 python scripts/pipeline.py dedupe-evidence --run-dir <运行目录> --input <候选文献csv>
 python scripts/pipeline.py generate-analysis --run-dir <运行目录> --data <冻结数据> --spec <分析规格json>
+python scripts/pipeline.py run-analysis --run-dir <运行目录> --manifest <代码清单json> [--rscript <Rscript路径>]
 python scripts/pipeline.py validate-results --run-dir <运行目录> --input <模型输出json>
 python scripts/pipeline.py render-manuscript --run-dir <运行目录> --template <正文模板> --results <已验证结果json> --claims <主张表csv> --references <bib>
 python scripts/pipeline.py build-submission --run-dir <运行目录> --journal-policy <实时核查json> --manuscript <正文> --numeric-audit <数字审计json> --claim-audit <主张审计md>
 ```
 
-`generate-analysis` 生成测量不变性、RI-CLPM、直接组间约束检验、零值密集两部分敏感性和模拟检验力 R 代码，但不把“已生成”写成“已执行”。`validate-results` 只接受收敛、post-check 通过且估计—区间—p 值内部一致的机器可读输出。`freeze-data` 对每个审计 flag 要求与当前审计哈希绑定的逐项决策。
+`generate-analysis` 生成测量不变性、RI-CLPM、直接组间约束检验、零值密集两部分敏感性和模拟检验力 R 代码，但不把“已生成”写成“已执行”。`run-analysis` 核验代码哈希、真实调用 R、保存逐脚本日志并检查预期输出；仍须经 `validate-results` 才能进入正文。`freeze-data` 对每个结构化 issue 要求与当前审计哈希绑定的允许处置；ID 错配和计分错误不得用“分析适配”绕过。
+
+私密问题登记必须位于 `.private/` 或其他不会提交的位置，只保存伪匿名标识与定位信息；不得进入文件清单、论文或投稿包。期刊政策必须来自声明的官方域名，并保存核查日期、页面快照与 SHA-256。
 
 检查单阶段或自动推进所有已满足阶段：
 
@@ -111,7 +114,8 @@ python scripts/pipeline.py autopilot --run-dir <运行目录>
 - 纵向面板、RI-CLPM、自伤和性别差异：读取 `references/longitudinal-panel-nssi.md`。
 - 报告规范选择：读取 `references/psychology-standards.md`。
 - 文献与 Zotero 工具路线：读取 `references/tool-routing.md`。
-- 当前课题变量与风险：读取 `references/project-profile.md`。
+- 特定课题变量、数据规格与风险：仅在该课题运行时读取相应 `project-packs/<id>/`。
+- JSON 机器契约：按输入类型读取 `schemas/` 中对应 schema。
 - 运行模板由 `scripts/pipeline_schema.py` 生成；顶层 `templates/` 仅提供可复用工作表，不定义运行目录。
 
 ## 强制停止条件

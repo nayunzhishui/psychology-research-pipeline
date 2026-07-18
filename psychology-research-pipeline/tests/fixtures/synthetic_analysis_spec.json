@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "profile": "ci-syntax-smoke",
+  "waves": ["T1", "T2", "T3"],
+  "constructs": {
+    "conflict": {"variables": {"T1": "conflict_t1", "T2": "conflict_t2", "T3": "conflict_t3"}, "distribution": "continuous"},
+    "depression": {"variables": {"T1": "depression_t1", "T2": "depression_t2", "T3": "depression_t3"}, "distribution": "continuous"},
+    "nssi": {"variables": {"T1": "nssi_t1", "T2": "nssi_t2", "T3": "nssi_t3"}, "distribution": "zero-heavy"}
+  },
+  "group_variable": "sex",
+  "cluster_variable": "school",
+  "estimator": "MLR",
+  "missing": "FIML",
+  "measurement_mode": "score-comparability"
+}

@@ -19,7 +19,7 @@ def finite_number(value) -> bool:
 
 
 def validate(payload: dict) -> list[str]:
-    required = {"schema_version", "analysis_id", "sample_n", "primary_model", "estimator", "converged", "post_check", "fit", "parameters", "deviations"}
+    required = {"schema_version", "analysis_id", "sample_n", "primary_model", "estimator", "converged", "post_check", "fit", "parameters", "deviations", "diagnostics"}
     errors = [f"model output fields missing: {sorted(required - set(payload))}"] if required - set(payload) else []
     if errors:
         return errors
@@ -34,6 +34,14 @@ def validate(payload: dict) -> list[str]:
     for name, value in payload.get("fit", {}).items():
         if not finite_number(value):
             errors.append(f"fit value is not finite: {name}")
+    missing_fit = {"cfi", "rmsea", "srmr"} - set(payload.get("fit", {}))
+    if missing_fit:
+        errors.append(f"required fit indices missing: {sorted(missing_fit)}")
+    diagnostics = payload.get("diagnostics", {})
+    if diagnostics.get("negative_variances") != 0:
+        errors.append(f"model diagnostics report negative variances: {diagnostics.get('negative_variances')}")
+    if diagnostics.get("inadmissible_standardized") != 0:
+        errors.append(f"model diagnostics report inadmissible standardized estimates: {diagnostics.get('inadmissible_standardized')}")
     if not payload.get("parameters"):
         errors.append("no model parameters supplied")
     seen = set()
@@ -55,6 +63,8 @@ def validate(payload: dict) -> list[str]:
             errors.append(f"parameter {result_id or index} p_value is outside [0, 1]")
         if item.get("role") not in {"primary", "secondary", "exploratory", "robustness"}:
             errors.append(f"parameter {result_id or index} has invalid role")
+        if "standardized" in item and not finite_number(item.get("standardized")):
+            errors.append(f"parameter {result_id or index} has non-finite standardized estimate")
     return errors
 
 

@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import unicodedata
 from datetime import datetime
 from pathlib import Path
@@ -57,11 +58,35 @@ def main() -> int:
     parser.add_argument("--mode", choices=["lite", "standard", "strict", "top-journal-prep"], default="standard")
     parser.add_argument("--run-id", help="Stable run id; generated when omitted")
     parser.add_argument("--resume", action="store_true", help="Return an existing run without overwriting it")
+    parser.add_argument("--project-pack", help="Versioned project-pack directory with pack.json")
     args = parser.parse_args()
 
     project = Path(args.project).expanduser().resolve()
     if not project.is_dir():
         parser.error(f"Project root does not exist: {project}")
+
+    pack_root = None
+    pack_manifest = None
+    pack = None
+    pack_sources: list[tuple[Path, str]] = []
+    if args.project_pack:
+        pack_root = Path(args.project_pack).expanduser().resolve()
+        pack_manifest = pack_root / "pack.json"
+        if not pack_manifest.is_file():
+            parser.error(f"project pack manifest missing: {pack_manifest}")
+        pack = json.loads(pack_manifest.read_text(encoding="utf-8"))
+        required = {"schema_version", "id", "title", "profile", "data_audit_spec", "analysis_spec"}
+        if pack.get("schema_version") != 1 or required - set(pack):
+            parser.error(f"invalid project pack; missing fields: {sorted(required - set(pack))}")
+        for source_name, output_name in [
+            ("pack.json", "pack.json"), (pack["profile"], "project-profile.md"),
+            (pack["data_audit_spec"], "data-audit-spec.json"),
+            (pack["analysis_spec"], "analysis-spec.example.json"),
+        ]:
+            source = (pack_root / source_name).resolve()
+            if pack_root not in source.parents or not source.is_file():
+                parser.error(f"project pack file is missing or escaped the pack: {source_name}")
+            pack_sources.append((source, output_name))
 
     run_id = args.run_id or f"{datetime.now().astimezone():%Y%m%d_%H%M%S}_{slugify(args.title)}"
     if not safe_run_id(run_id):
@@ -90,6 +115,20 @@ def main() -> int:
         path = run_dir / relative
         path.write_text(template_text(path.name), encoding="utf-8", newline="\n")
 
+    project_pack = None
+    if pack_root and pack_manifest and pack:
+        pack_output = run_dir / "00_项目定标" / "课题包_project_pack"
+        pack_output.mkdir()
+        copied = []
+        for source, output_name in pack_sources:
+            destination = pack_output / output_name
+            shutil.copy2(source, destination)
+            copied.append({"name": output_name, "sha256": sha256(destination)})
+        project_pack = {
+            "id": pack["id"], "title": pack["title"], "source": str(pack_root),
+            "manifest_sha256": sha256(pack_manifest), "files": copied,
+        }
+
     created_at = now()
     state = {
         "schema_version": SCHEMA_VERSION,
@@ -104,6 +143,7 @@ def main() -> int:
         "current_stage": STAGES[0]["id"],
         "completed_stages": [],
         "blocked_stages": [],
+        "project_pack": project_pack,
     }
     atomic_json(state_path, state)
 

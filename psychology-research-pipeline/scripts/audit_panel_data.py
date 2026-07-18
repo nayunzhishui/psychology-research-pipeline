@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import math
+import secrets
 from datetime import datetime
 from pathlib import Path
 
@@ -46,6 +47,36 @@ def load_frame(path: Path, usecols: list[str]):
 def finite_or_none(value):
     value = float(value)
     return value if math.isfinite(value) else None
+
+
+ISSUE_RULES = {
+    "linkage": ("critical", ["source-verified", "rematched", "excluded"]),
+    "duplicate-id": ("critical", ["source-verified", "deduplicated", "excluded"]),
+    "sex-code": ("major", ["source-verified", "corrected", "excluded"]),
+    "score-range": ("major", ["source-verified", "corrected", "excluded"]),
+    "distribution": ("major", ["analysis-accommodation", "not-applicable"]),
+    "extreme-value": ("major", ["source-verified", "corrected", "excluded"]),
+    "scoring-formula": ("critical", ["corrected", "rescored", "excluded"]),
+}
+
+
+def make_issue(category: str, message: str) -> dict:
+    severity, allowed = ISSUE_RULES[category]
+    stable = hashlib.sha256(f"{category}|{message}".encode("utf-8")).hexdigest()[:12]
+    return {
+        "issue_id": f"issue-{stable}", "category": category, "severity": severity,
+        "message": message, "allowed_resolutions": allowed,
+    }
+
+
+def private_record(issue: dict, row_index: int, identifiers: list[object], salt: str, variable: str) -> dict:
+    normalized = f"row={row_index}|" + "|".join("" if value is None else str(value) for value in identifiers)
+    pseudonym = hashlib.sha256(f"{salt}|{normalized}".encode("utf-8")).hexdigest()[:20]
+    return {
+        "type": "row-issue", "issue_id": issue["issue_id"], "category": issue["category"],
+        "row_index": int(row_index) + 2, "pseudonym": pseudonym, "variable": variable,
+        "raw_identifiers_included": False,
+    }
 
 
 def measure_summary(series, spec: dict) -> dict:
@@ -164,6 +195,7 @@ def main() -> int:
     parser.add_argument("--spec", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--fail-on-flags", action="store_true")
+    parser.add_argument("--private-register", help="Local ignored JSONL row-issue register")
     args = parser.parse_args()
 
     data_path = Path(args.data).expanduser().resolve()
@@ -183,32 +215,108 @@ def main() -> int:
     sex = audit_sex(frame, spec)
     measures = [measure_summary(frame[item["variable"]], item) for item in spec.get("measures", [])]
     relations = [audit_relation(frame, item) for item in spec.get("score_relations", [])]
-    flags = []
+    issues = []
+    private_records = []
+    salt = secrets.token_hex(32)
+    id_variables = list(spec.get("id_by_wave", {}).values())
     for pair, item in ids["rowwise_mismatch"].items():
         if item["mismatch"]:
-            flags.append(f"{pair} 存在 {item['mismatch']} 行 ID 不一致，需核验合并。")
+            message = f"{pair} 存在 {item['mismatch']} 行 ID 不一致，需核验合并。"
+            issue = make_issue("linkage", message)
+            issues.append(issue)
+            left_wave, right_wave = pair.split("-")
+            left_var, right_var = spec["id_by_wave"][left_wave], spec["id_by_wave"][right_wave]
+            comparable = frame[left_var].notna() & frame[right_var].notna()
+            mismatch = comparable & frame[left_var].astype(str).ne(frame[right_var].astype(str))
+            for row_index in frame.index[mismatch]:
+                private_records.append(private_record(
+                    issue, row_index, [frame.at[row_index, variable] for variable in id_variables],
+                    salt, f"{left_var}|{right_var}",
+                ))
     for wave, item in ids["by_wave"].items():
         if item["duplicate_rows"]:
-            flags.append(f"{wave} 存在 {item['duplicate_rows']} 个重复 ID 行。")
+            message = f"{wave} 存在 {item['duplicate_rows']} 个重复 ID 行。"
+            issue = make_issue("duplicate-id", message)
+            issues.append(issue)
+            variable = item["variable"]
+            duplicated = frame[variable].notna() & frame[variable].astype(str).duplicated(keep=False)
+            for row_index in frame.index[duplicated]:
+                private_records.append(private_record(
+                    issue, row_index, [frame.at[row_index, value] for value in id_variables], salt, variable,
+                ))
     for wave, item in sex.items():
         if item["invalid_count"]:
-            flags.append(f"{wave} 存在 {item['invalid_count']} 个异常性别编码。")
+            issue = make_issue("sex-code", f"{wave} 存在 {item['invalid_count']} 个异常性别编码。")
+            issues.append(issue)
+            variable = item["variable"]
+            invalid = frame[variable].notna() & ~frame[variable].isin(set(spec.get("allowed_sex_values", [])))
+            for row_index in frame.index[invalid]:
+                private_records.append(private_record(
+                    issue, row_index, [frame.at[row_index, value] for value in id_variables], salt, variable,
+                ))
     for item in measures:
         if item["flag"]:
-            flags.append(f"{item['wave']} `{item['variable']}` 有 {item['below_expected']} 个低值和 {item['above_expected']} 个高值超出预设范围。")
+            issue = make_issue("score-range", f"{item['wave']} `{item['variable']}` 有 {item['below_expected']} 个低值和 {item['above_expected']} 个高值超出预设范围。")
+            issues.append(issue)
+            measure_spec = next(value for value in spec["measures"] if value["variable"] == item["variable"])
+            numeric = __import__("pandas").to_numeric(frame[item["variable"]], errors="coerce")
+            invalid = numeric.notna() & (
+                numeric.lt(measure_spec.get("expected_min", -math.inf)) |
+                numeric.gt(measure_spec.get("expected_max", math.inf))
+            )
+            for row_index in frame.index[invalid]:
+                private_records.append(private_record(
+                    issue, row_index, [frame.at[row_index, value] for value in id_variables], salt, item["variable"],
+                ))
         if item["construct"].startswith("self_harm") and item["zero_heavy"]:
-            flags.append(f"{item['wave']} `{item['variable']}` 零值比例为 {item['zero_percent']:.1f}%，需预设非正态/两部分等分布方案。")
+            issues.append(make_issue("distribution", f"{item['wave']} `{item['variable']}` 零值比例为 {item['zero_percent']:.1f}%，需预设非正态/两部分等分布方案。"))
         if item["extreme_high_count"]:
-            flags.append(f"{item['wave']} `{item['variable']}` 有 {item['extreme_high_count']} 个基于宽松 IQR 规则的极端高值，需回查原始题项。")
+            issue = make_issue("extreme-value", f"{item['wave']} `{item['variable']}` 有 {item['extreme_high_count']} 个基于宽松 IQR 规则的极端高值，需回查原始题项。")
+            issues.append(issue)
+            numeric = __import__("pandas").to_numeric(frame[item["variable"]], errors="coerce")
+            q1, q3 = numeric.quantile(0.25), numeric.quantile(0.75)
+            extreme = numeric.notna() & numeric.gt(q3 + 10 * (q3 - q1))
+            for row_index in frame.index[extreme]:
+                private_records.append(private_record(
+                    issue, row_index, [frame.at[row_index, value] for value in id_variables], salt, item["variable"],
+                ))
     for item in relations:
         if item["flag"]:
-            flags.append(f"{item['name']} 有 {item['mismatch_count']} 行不符合预设公式。")
+            issue = make_issue("scoring-formula", f"{item['name']} 有 {item['mismatch_count']} 行不符合预设公式。")
+            issues.append(issue)
+            relation = next(value for value in spec.get("score_relations", []) if value["name"] == item["name"])
+            pd = __import__("pandas")
+            columns = [relation["target"], *relation["coefficients"]]
+            comparable = frame[columns].apply(pd.to_numeric, errors="coerce").dropna()
+            predicted = relation.get("intercept", 0)
+            for variable, coefficient in relation["coefficients"].items():
+                predicted = predicted + coefficient * comparable[variable]
+            mismatch = (comparable[relation["target"]] - predicted).abs().gt(relation.get("tolerance", 1e-6))
+            for row_index in comparable.index[mismatch]:
+                private_records.append(private_record(
+                    issue, row_index, [frame.at[row_index, value] for value in id_variables], salt, relation["target"],
+                ))
+
+    flags = [item["message"] for item in issues]
+    private_path = None
+    if args.private_register:
+        private_path = Path(args.private_register).expanduser().resolve()
+        private_path.parent.mkdir(parents=True, exist_ok=True)
+        header = {
+            "type": "metadata", "schema_version": 1, "data_sha256": sha256(data_path),
+            "salt_sha256": hashlib.sha256(salt.encode("utf-8")).hexdigest(),
+            "privacy": "local-only; pseudonymized identifiers; never submit or commit",
+        }
+        with private_path.open("w", encoding="utf-8", newline="\n") as handle:
+            for record in [header, *private_records]:
+                handle.write(json.dumps(record, ensure_ascii=False) + "\n")
 
     report = {
         "schema_version": 1, "profile": spec.get("profile"), "generated_at": now(),
         "data_file": str(data_path), "sha256": sha256(data_path),
         "spec_file": str(spec_path), "spec_sha256": sha256(spec_path), "shape": shape,
         "ids": ids, "sex": sex, "measures": measures, "score_relations": relations,
+        "issues": issues, "private_register": str(private_path) if private_path else None,
         "flags": flags, "privacy": "aggregate-only; no participant IDs or row-level self-harm records",
     }
     output_dir.mkdir(parents=True, exist_ok=True)

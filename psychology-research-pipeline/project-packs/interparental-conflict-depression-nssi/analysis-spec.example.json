@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "profile": "three-wave-interparental-conflict-depression-self-harm",
+  "waves": ["T1", "T2", "T3"],
+  "constructs": {},
+  "group_variable": null,
+  "cluster_variable": null,
+  "estimator": "MLR",
+  "missing": "FIML",
+  "measurement_mode": "item-level",
+  "status": "blocked-until-item-mapping-and-scoring-are-verified"
+}

@@ -9,6 +9,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from jsonschema import Draft202012Validator
+
 
 SKILL = Path(__file__).resolve().parents[1]
 SCRIPTS = SKILL / "scripts"
@@ -33,6 +35,26 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual("11_review", STAGE_IDS[-1])
         self.assertTrue(all("_" in stage["dir"] for stage in STAGES))
         self.assertNotIn("01_scope", {stage["dir"] for stage in STAGES})
+
+    def test_machine_contracts_and_project_pack_are_versioned(self) -> None:
+        expected = {
+            "project-pack.schema.json", "data-decisions.schema.json", "analysis-spec.schema.json",
+            "analysis-output.schema.json", "journal-policy.schema.json",
+        }
+        schema_dir = SKILL / "schemas"
+        self.assertEqual(expected, {path.name for path in schema_dir.glob("*.json")})
+        for path in schema_dir.glob("*.json"):
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual("https://json-schema.org/draft/2020-12/schema", payload["$schema"])
+            self.assertTrue(payload["title"])
+            Draft202012Validator.check_schema(payload)
+        pack = json.loads((
+            SKILL / "project-packs" / "interparental-conflict-depression-nssi" / "pack.json"
+        ).read_text(encoding="utf-8"))
+        self.assertEqual(1, pack["schema_version"])
+        self.assertEqual("interparental-conflict-depression-nssi", pack["id"])
+        pack_schema = json.loads((schema_dir / "project-pack.schema.json").read_text(encoding="utf-8"))
+        Draft202012Validator(pack_schema).validate(pack)
 
     def test_init_creates_canonical_run_and_gate_advances(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

@@ -53,6 +53,22 @@ class PipelineCliTests(unittest.TestCase):
             self.assertEqual(3, autopilot.returncode)
             self.assertEqual("00_scope", json.loads(autopilot.stdout)["blocked_stage"])
 
+    def test_user_can_attach_a_versioned_project_pack_without_polluting_generic_references(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            pack = SKILL / "project-packs" / "interparental-conflict-depression-nssi"
+            result = json.loads(self.invoke(
+                "init", "--project", str(project), "--title", "project pack",
+                "--run-id", "pack-run", "--project-pack", str(pack),
+            ).stdout)
+            run_dir = Path(result["run_dir"])
+            self.assertEqual("interparental-conflict-depression-nssi", result["project_pack"]["id"])
+            copied = run_dir / "00_项目定标" / "课题包_project_pack"
+            self.assertTrue((copied / "pack.json").is_file())
+            self.assertTrue((copied / "project-profile.md").is_file())
+            self.assertTrue((copied / "data-audit-spec.json").is_file())
+            self.assertFalse((SKILL / "references" / "project-profile.md").exists())
+
     def test_source_inventory_hashes_files_without_reading_sensitive_rows(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             project = Path(temp)
@@ -159,6 +175,7 @@ class PipelineCliTests(unittest.TestCase):
             blocked_payload = json.loads(blocked.stdout)
             self.assertEqual("blocked", blocked_payload["status"])
             flag = blocked_payload["flags"][0]
+            issue = blocked_payload["issues"][0]
             audit = run_dir / "06_数据管理" / "数据质量审计_data_audit.json"
             import hashlib
             decisions = project / "decisions.json"
@@ -166,7 +183,7 @@ class PipelineCliTests(unittest.TestCase):
                 "schema_version": 1,
                 "audit_sha256": hashlib.sha256(audit.read_bytes()).hexdigest(),
                 "decisions": [{
-                    "flag": flag, "status": "resolved", "resolution": "verified-valid",
+                    "issue_id": issue["issue_id"], "flag": flag, "status": "resolved", "resolution": "source-verified",
                     "rationale": "源问卷显示该值为经核验的特殊有效编码。",
                     "evidence": "source-form-page-1", "approved_by": "researcher",
                     "decided_at": date.today().isoformat(),
@@ -179,6 +196,53 @@ class PipelineCliTests(unittest.TestCase):
             self.assertEqual("frozen", frozen["status"])
             self.assertEqual(1, len(frozen["resolved_flags"]))
             self.assertTrue(Path(frozen["decision_log"]).is_file())
+
+    def test_linkage_issue_rejects_analysis_accommodation_and_private_register_hides_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            run_dir = Path(json.loads(self.invoke(
+                "init", "--project", str(project), "--title", "private repair",
+                "--run-id", "private-run",
+            ).stdout)["run_dir"])
+            data = project / "panel.csv"
+            data.write_text("id1,id2,y1\nsecret-A,secret-B,2\n", encoding="utf-8")
+            spec = project / "spec.json"
+            spec.write_text(json.dumps({
+                "profile": "private-test", "id_by_wave": {"T1": "id1", "T2": "id2"},
+                "sex_by_wave": {}, "measures": [{
+                    "construct": "outcome", "wave": "T1", "variable": "y1",
+                    "expected_min": 0, "expected_max": 10,
+                }], "score_relations": [],
+            }), encoding="utf-8")
+            private_register = run_dir / "06_数据管理" / ".private" / "issues.jsonl"
+            audit = json.loads(self.invoke(
+                "audit-data", "--run-dir", str(run_dir), "--data", str(data), "--spec", str(spec),
+                "--private-register", str(private_register),
+            ).stdout)
+            self.assertEqual("linkage", audit["issues"][0]["category"])
+            private_text = private_register.read_text(encoding="utf-8")
+            self.assertIn("pseudonym", private_text)
+            self.assertNotIn("secret-A", private_text)
+            self.assertNotIn("secret-B", private_text)
+
+            import hashlib
+            decisions = project / "bad-decisions.json"
+            audit_path = run_dir / "06_数据管理" / "数据质量审计_data_audit.json"
+            decisions.write_text(json.dumps({
+                "schema_version": 1, "audit_sha256": hashlib.sha256(audit_path.read_bytes()).hexdigest(),
+                "decisions": [{
+                    "issue_id": audit["issues"][0]["issue_id"], "flag": audit["flags"][0],
+                    "status": "resolved", "resolution": "analysis-accommodation",
+                    "rationale": "adjust model", "evidence": "plan", "approved_by": "researcher",
+                    "decided_at": date.today().isoformat(),
+                }],
+            }), encoding="utf-8")
+            blocked = self.invoke(
+                "freeze-data", "--run-dir", str(run_dir), "--data", str(data), "--spec", str(spec),
+                "--decisions", str(decisions), check=False,
+            )
+            self.assertEqual(3, blocked.returncode)
+            self.assertIn("resolution is not allowed", blocked.stdout)
 
     def test_user_can_generate_auditable_longitudinal_analysis_code(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -220,8 +284,34 @@ class PipelineCliTests(unittest.TestCase):
             self.assertGreaterEqual(len(generated["code_files"]), 6)
             model_text = Path(generated["code_files"][2]).read_text(encoding="utf-8")
             self.assertIn("RI_conflict", model_text)
+            self.assertIn("RI_conflict ~~ 0*w_depression_T1", model_text)
+            self.assertIn("RI_conflict ~~ 0*w_nssi_T3", model_text)
             self.assertIn("group.equal", Path(generated["code_files"][3]).read_text(encoding="utf-8"))
             self.assertIn("zero-heavy", Path(generated["code_files"][4]).read_text(encoding="utf-8"))
+
+            fake_rscript = project / "fake-rscript.cmd"
+            fake_rscript.write_text(
+                "@echo off\n"
+                "if \"%1\"==\"--version\" (echo R version 4.5.0 & exit /b 0)\n"
+                "for %%F in (\"%1\") do set base=%%~nF\n"
+                "if \"%base%\"==\"01_measurement_gate\" echo ok>..\\measurement_score_summary.csv\n"
+                "if \"%base%\"==\"02_ri_clpm\" (echo ok>..\\ri_clpm_parameters.csv & echo ok>..\\ri_clpm_fit.csv & echo ok>..\\ri_clpm_fit.rds)\n"
+                "if \"%base%\"==\"03_sex_group_comparison\" echo ok>..\\sex_group_constraint_test.txt\n"
+                "if \"%base%\"==\"04_distribution_sensitivity\" echo ok>..\\distribution_sensitivity_fits.rds\n"
+                "if \"%base%\"==\"05_power_simulation\" echo ok>..\\power_simulation_plan.rds\n"
+                "if \"%base%\"==\"06_descriptives_missingness\" (echo ok>..\\descriptives.csv & echo ok>..\\missingness.csv)\n"
+                "if \"%base%\"==\"07_export_machine_output\" echo {}>..\\model_output.json\n"
+                "exit /b 0\n",
+                encoding="utf-8",
+            )
+            executed = json.loads(self.invoke(
+                "run-analysis", "--run-dir", str(run_dir), "--manifest", generated["manifest"],
+                "--rscript", str(fake_rscript),
+            ).stdout)
+            self.assertEqual("executed", executed["status"])
+            self.assertEqual("requires-result-validation", executed["validation_status"])
+            self.assertTrue(Path(executed["execution_manifest"]).is_file())
+            self.assertTrue(Path(executed["model_output"]).is_file())
 
     def test_item_level_spec_generates_configural_metric_scalar_gate(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -257,6 +347,7 @@ class PipelineCliTests(unittest.TestCase):
             self.assertIn("metric_model", measurement)
             self.assertIn("scalar_model", measurement)
             self.assertIn("delta_cfi", measurement)
+            self.assertIn("x1_t1 ~~ x1_t2", measurement)
 
     def test_verified_model_output_becomes_machine_readable_results(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -274,7 +365,9 @@ class PipelineCliTests(unittest.TestCase):
                     "result_id": "conflict_to_depression", "term": "T1 conflict -> T2 depression",
                     "role": "primary", "estimate": 0.12, "se": 0.04, "ci_low": 0.04,
                     "ci_high": 0.20, "p_value": 0.003, "standardized": 0.10,
-                }], "deviations": [], "robustness": [{"name": "free-lag", "conclusion": "direction consistent"}],
+                }], "deviations": [],
+                "diagnostics": {"negative_variances": 0, "inadmissible_standardized": 0, "warnings": []},
+                "robustness": [{"name": "free-lag", "conclusion": "direction consistent"}],
             }), encoding="utf-8")
             verified = json.loads(self.invoke(
                 "validate-results", "--run-dir", str(run_dir), "--input", str(model_output),
@@ -288,14 +381,22 @@ class PipelineCliTests(unittest.TestCase):
             invalid = project / "invalid-output.json"
             invalid.write_text(json.dumps({
                 "schema_version": 1, "analysis_id": "bad", "sample_n": 10,
-                "primary_model": "RI-CLPM", "estimator": "MLR", "converged": False,
-                "post_check": False, "fit": {}, "parameters": [], "deviations": [],
+                "primary_model": "RI-CLPM", "estimator": "MLR", "converged": True,
+                "post_check": True, "fit": {"cfi": 0.95, "rmsea": 0.05, "srmr": 0.05},
+                "parameters": [{
+                    "result_id": "bad-variance", "term": "x -> y", "role": "primary",
+                    "estimate": 0.1, "se": 0.1, "ci_low": -0.1, "ci_high": 0.3,
+                    "p_value": 0.2, "standardized": 0.1,
+                }], "deviations": [],
+                "diagnostics": {"negative_variances": 1, "inadmissible_standardized": 0, "warnings": ["Heywood case"]},
             }), encoding="utf-8")
             blocked = self.invoke(
                 "validate-results", "--run-dir", str(run_dir), "--input", str(invalid), check=False,
             )
             self.assertEqual(3, blocked.returncode)
-            self.assertEqual("blocked", json.loads(blocked.stdout)["status"])
+            blocked_payload = json.loads(blocked.stdout)
+            self.assertEqual("blocked", blocked_payload["status"])
+            self.assertIn("negative variances", " ".join(blocked_payload["errors"]))
 
     def test_user_can_deduplicate_evidence_with_stable_ids(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -364,13 +465,22 @@ class PipelineCliTests(unittest.TestCase):
             self.assertTrue(Path(rendered["numeric_audit"]).is_file())
 
             policy = project / "journal-policy.json"
+            policy_snapshot = project / "journal-author-guide.html"
+            policy_snapshot.write_text("<html><body>Original Article author requirements</body></html>", encoding="utf-8")
+            import hashlib
+            snapshot_hash = hashlib.sha256(policy_snapshot.read_bytes()).hexdigest()
             policy.write_text(json.dumps({
                 "journal": "Test Journal of Psychology", "article_type": "Original Article",
                 "checked_at": date.today().isoformat(), "scope_fit": "longitudinal developmental psychology",
                 "word_limit": 8000, "ai_policy": "disclose language and coding assistance",
                 "data_policy": "restricted adolescent data allowed with a justified statement",
-                "submission_url": "https://example.org/submit",
-                "source_urls": ["https://example.org/authors"]
+                "official_domains": ["journal.example.edu"],
+                "submission_url": "https://journal.example.edu/submit",
+                "source_urls": ["https://journal.example.edu/authors"],
+                "source_snapshots": [{
+                    "url": "https://journal.example.edu/authors", "retrieved_at": date.today().isoformat(),
+                    "file": str(policy_snapshot), "sha256": snapshot_hash,
+                }]
             }), encoding="utf-8")
             package = json.loads(self.invoke(
                 "build-submission", "--run-dir", str(run_dir), "--journal-policy", str(policy),
@@ -381,6 +491,17 @@ class PipelineCliTests(unittest.TestCase):
             self.assertTrue(Path(package["package_dir"]).is_dir())
             self.assertNotIn(".sav", " ".join(package["files"]).lower())
             self.assertTrue(Path(package["simulated_reviews"]).is_file())
+
+            tampered_policy = json.loads(policy.read_text(encoding="utf-8"))
+            tampered_policy["source_snapshots"][0]["sha256"] = "0" * 64
+            policy.write_text(json.dumps(tampered_policy), encoding="utf-8")
+            blocked = self.invoke(
+                "build-submission", "--run-dir", str(run_dir), "--journal-policy", str(policy),
+                "--manuscript", rendered["manuscript"], "--numeric-audit", rendered["numeric_audit"],
+                "--claim-audit", rendered["claim_audit"], check=False,
+            )
+            self.assertEqual(3, blocked.returncode)
+            self.assertIn("snapshot hash mismatch", blocked.stdout)
 
 
 if __name__ == "__main__":

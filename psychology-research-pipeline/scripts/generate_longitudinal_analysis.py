@@ -74,6 +74,16 @@ def invariance_syntax(spec: dict) -> tuple[str, str, str]:
             metric.append(f"{factor} =~ " + " + ".join(labelled))
             scalar.append(f"{factor} =~ " + " + ".join(labelled))
             scalar.extend(f"{item} ~ i_{construct}_{index + 1}*1" for index, item in enumerate(items))
+        waves = spec["waves"]
+        indicator_count = len(config["indicators"][waves[0]])
+        for item_index in range(indicator_count):
+            for wave_index in range(1, len(waves)):
+                previous = config["indicators"][waves[wave_index - 1]][item_index]
+                current = config["indicators"][waves[wave_index]][item_index]
+                residual = f"{previous} ~~ {current}"
+                configural.append(residual)
+                metric.append(residual)
+                scalar.append(residual)
     return "\n".join(configural), "\n".join(metric), "\n".join(scalar)
 
 
@@ -114,7 +124,9 @@ def model_syntax(spec: dict) -> str:
     for left_index, left in enumerate(names):
         for right in names[left_index + 1:]:
             lines.append(f"RI_{left} ~~ RI_{right}")
-        lines.append(f"RI_{left} ~~ 0*w_{left}_{waves[0]}")
+        for within_construct in names:
+            for wave in waves:
+                lines.append(f"RI_{left} ~~ 0*w_{within_construct}_{wave}")
     return "\n".join(lines)
 
 
@@ -145,7 +157,7 @@ def generate(data: Path, spec_path: Path, output_dir: Path) -> dict:
     ]
 
     environment = f'''# Generated; do not edit results by hand.
-required_packages <- c("readr", "dplyr", "psych", "lavaan", "semTools", "simsem")
+required_packages <- c("readr", "dplyr", "psych", "lavaan", "semTools", "simsem", "jsonlite")
 missing_packages <- required_packages[!vapply(required_packages, requireNamespace, logical(1), quietly = TRUE)]
 if (length(missing_packages)) stop("Install required R packages: ", paste(missing_packages, collapse = ", "))
 dat <- readr::read_csv("{data_ref}", show_col_types = FALSE)
@@ -259,6 +271,35 @@ write.csv(descriptives, "../descriptives.csv")
 missingness <- data.frame(variable = names(dat), missing_n = colSums(is.na(dat)), missing_percent = colMeans(is.na(dat)) * 100)
 write.csv(missingness, "../missingness.csv", row.names = FALSE)
 '''
+    export_output = f'''source("00_environment.R")
+fit_riclpm <- readRDS("../ri_clpm_fit.rds")
+parameter_table <- lavaan::parameterEstimates(fit_riclpm, standardized = TRUE, ci = TRUE)
+regressions <- parameter_table[parameter_table$op == "~", , drop = FALSE]
+parameters <- lapply(seq_len(nrow(regressions)), function(index) {{
+  row <- regressions[index, ]
+  list(
+    result_id = paste0(row$lhs, "_on_", row$rhs), term = paste(row$rhs, "->", row$lhs),
+    role = "primary", estimate = unname(row$est), se = unname(row$se),
+    ci_low = unname(row$ci.lower), ci_high = unname(row$ci.upper),
+    p_value = unname(row$pvalue), standardized = unname(row$std.all)
+  )
+}})
+variances <- parameter_table[parameter_table$op == "~~" & parameter_table$lhs == parameter_table$rhs, , drop = FALSE]
+inadmissible <- sum(!is.na(parameter_table$std.all) & abs(parameter_table$std.all) > 1)
+fit_values <- lavaan::fitMeasures(fit_riclpm, c("cfi", "rmsea", "srmr"))
+model_output <- list(
+  schema_version = 1, analysis_id = "{spec.get('analysis_id', 'model-primary')}",
+  sample_n = lavaan::lavInspect(fit_riclpm, "nobs"), primary_model = "RI-CLPM",
+  estimator = "{estimator}", converged = isTRUE(lavaan::lavInspect(fit_riclpm, "converged")),
+  post_check = isTRUE(lavaan::lavInspect(fit_riclpm, "post.check")),
+  fit = as.list(fit_values), parameters = parameters, deviations = list(),
+  diagnostics = list(
+    negative_variances = sum(variances$est < 0, na.rm = TRUE),
+    inadmissible_standardized = inadmissible, warnings = list()
+  )
+)
+jsonlite::write_json(model_output, "../model_output.json", auto_unbox = TRUE, pretty = TRUE, null = "null")
+'''
     code_files = [
         write(code_dir / "00_environment.R", environment),
         write(code_dir / "01_measurement_gate.R", measurement),
@@ -267,7 +308,19 @@ write.csv(missingness, "../missingness.csv", row.names = FALSE)
         write(code_dir / "04_distribution_sensitivity.R", distribution),
         write(code_dir / "05_power_simulation.R", power),
         write(code_dir / "06_descriptives_missingness.R", descriptives),
+        write(code_dir / "07_export_machine_output.R", export_output),
     ]
+    expected_outputs = [
+        output_dir / ("measurement_invariance_fit.csv" if spec.get("measurement_mode") == "item-level" else "measurement_score_summary.csv"),
+        output_dir / "ri_clpm_parameters.csv", output_dir / "ri_clpm_fit.csv", output_dir / "ri_clpm_fit.rds",
+        output_dir / "distribution_sensitivity_fits.rds", output_dir / "power_simulation_plan.rds",
+        output_dir / "descriptives.csv", output_dir / "missingness.csv",
+        output_dir / "model_output.json",
+    ]
+    if spec.get("measurement_mode") == "item-level":
+        expected_outputs.append(output_dir / "measurement_invariance_lrt.txt")
+    if group:
+        expected_outputs.append(output_dir / "sex_group_constraint_test.txt")
     manifest = {
         "schema_version": 1, "status": "ready", "profile": spec.get("profile"),
         "data": str(data.resolve()), "data_sha256": sha256(data),
@@ -276,6 +329,7 @@ write.csv(missingness, "../missingness.csv", row.names = FALSE)
         "estimator": estimator, "missing": spec.get("missing", "FIML"),
         "group_variable": group, "cluster_variable": cluster,
         "measurement_gate": spec.get("measurement_mode", "score-comparability"),
+        "expected_outputs": [str(path.resolve()) for path in expected_outputs],
         "execution_status": "not-run", "blocked_reasons": [],
     }
     manifest_path = output_dir / "分析代码清单_analysis_code_manifest.json"
