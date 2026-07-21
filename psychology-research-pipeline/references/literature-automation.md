@@ -4,9 +4,13 @@
 
 `plan-search` → 在数据库实际执行并填写 `检索记录_search_log.csv` → `import-evidence` → `dedupe-evidence` → `cluster-studies` → 人工筛选与证据标注 → `audit-evidence-coverage` → `build-retrieval-queue`。定稿前用 `refresh-search` 比较更新导出。
 
+顺序开始前必须先通过 `prepare-presearch`；其 `ready_for_search=false` 时只允许完善协议、环境和目标集合，不得运行数据库检索或把题录写入正式候选集。
+
 自动化只处理检索计划、已有合法导出、元数据和审计文件；不代替数据库登录、权限判断、人工纳排、全文判断或方法质量评价。
 
 Chrome用于依赖现有登录态或Connector的可见页面操作；CLI负责队列、哈希和产物合同。`sync-zotero` 先核验本地API，再导出BibTeX、规范化题录并核验本地PDF头与哈希；Zotero未运行时必须返回明确阻断，不得伪造同步成功。
+
+Zotero 同步只允许一个已核验的精确集合。记录 collection name/key、目标配置来源、集合题录数和导出哈希；禁止使用全库导出填充正式候选表。空集合预检应返回 `ready-empty`，不得覆盖已有候选记录。
 
 正式纳排使用两个独立reviewer；分歧必须由第三位裁决者处理。`audit-screening` 输出双人一致/分歧/裁决依据、PRISMA计数和按研究设计选择工具的偏倚风险待评表，缺任一独立判断或裁决时返回`blocked`。
 

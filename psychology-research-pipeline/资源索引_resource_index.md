@@ -5,10 +5,11 @@
 | 任务 | 必读资源 |
 |---|---|
 | 初始化、推进和 gate | `references/stage-contracts.md`、`scripts/pipeline_schema.py` |
+| 检索前定标、协议草案和准备度审计 | `scripts/prepare_presearch.py`、`schemas/presearch-protocol.schema.json` |
 | 本课题定标与数据审计 | `project-packs/interparental-conflict-depression-nssi/` |
 | 三波 RI-CLPM、自伤、性别差异 | `references/longitudinal-panel-nssi.md` |
 | APA JARS、STROBE、SAGER | `references/psychology-standards.md` |
-| 文献获取与 Chrome/Zotero | `references/tool-routing.md`、`scripts/zotero_bridge.py` |
+| 检索前环境与 Chrome/Zotero | `scripts/environment_preflight.py`、`references/tool-routing.md`、`scripts/zotero_bridge.py`、`schemas/zotero-target.schema.json` |
 | 自动生成运行目录 | `scripts/init_research_run.py` |
 | 阶段验收 | `scripts/pipeline_gate.py` |
 | SPSS/CSV 面板结构审计 | `scripts/audit_panel_data.py` |

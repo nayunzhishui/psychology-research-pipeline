@@ -1,5 +1,7 @@
 {
   "schema_version": 1,
+  "status": "frozen",
+  "blocking_items": [],
   "profile": "ci-syntax-smoke",
   "waves": ["T1", "T2", "T3"],
   "constructs": {

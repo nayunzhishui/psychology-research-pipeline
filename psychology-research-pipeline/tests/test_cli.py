@@ -3,11 +3,14 @@ from __future__ import annotations
 import json
 import os
 import csv
+import hashlib
 from datetime import date
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 
@@ -66,6 +69,8 @@ class PipelineCliTests(unittest.TestCase):
             copied = run_dir / "00_项目定标" / "课题包_project_pack"
             self.assertTrue((copied / "pack.json").is_file())
             self.assertTrue((copied / "project-profile.md").is_file())
+            self.assertTrue((copied / "presearch-protocol.json").is_file())
+            self.assertTrue((copied / "zotero-target.json").is_file())
             self.assertTrue((copied / "data-audit-spec.json").is_file())
             self.assertTrue((copied / "search-plan.json").is_file())
             self.assertTrue((copied / "evidence-coverage.json").is_file())
@@ -369,24 +374,44 @@ class PipelineCliTests(unittest.TestCase):
                 "--run-id", "zotero-run",
             ).stdout)["run_dir"])
             helper = project / "fake_zotero.py"
+            class ZoteroHandler(BaseHTTPRequestHandler):
+                def do_GET(self) -> None:
+                    body = b"@article{x, title={Test paper}, author={Li}, year={2024}, doi={10.1/test}}"
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/x-bibtex")
+                    self.send_header("Total-Results", "1")
+                    self.end_headers()
+                    self.wfile.write(body)
+
+                def log_message(self, *_args) -> None:
+                    return
+
+            server = ThreadingHTTPServer(("127.0.0.1", 0), ZoteroHandler)
+            server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+            server_thread.start()
             helper.write_text(
                 "import json, pathlib, sys\n"
-                "if sys.argv[1] == 'status': print(json.dumps({'api_running': True, 'connector_running': True}))\n"
-                "elif sys.argv[1] == 'export-bibtex':\n"
-                " p=pathlib.Path(sys.argv[sys.argv.index('--out')+1]); p.write_text('@article{x, title={Test paper}, author={Li}, year={2024}, doi={10.1/test}}', encoding='utf-8'); print(p)\n",
+                f"if sys.argv[1] == 'status': print(json.dumps({{'api_running': True, 'connector_running': True, 'base_url': 'http://127.0.0.1:{server.server_port}'}}))\n"
+                "elif sys.argv[1] == 'collections': print(json.dumps([{'key': 'TESTKEY', 'name': 'Test Collection'}]))\n",
                 encoding="utf-8",
             )
             pdf_dir = run_dir / "文献" / "02_全文PDF"
             (pdf_dir / "paper.pdf").write_bytes(b"%PDF-1.4\n%%EOF")
 
-            result = json.loads(self.invoke(
-                "sync-zotero", "--run-dir", str(run_dir), "--helper", str(helper),
-            ).stdout)
-            self.assertEqual("complete", result["status"])
-            self.assertEqual(1, result["imported_records"])
-            self.assertEqual(1, result["pdf_count"])
-            self.assertTrue(Path(result["zotero_manifest"]).is_file())
-            self.assertTrue(Path(result["pdf_manifest"]).is_file())
+            try:
+                result = json.loads(self.invoke(
+                    "sync-zotero", "--run-dir", str(run_dir), "--helper", str(helper),
+                    "--collection-name", "Test Collection", "--collection-key", "TESTKEY",
+                ).stdout)
+                self.assertEqual("complete", result["status"])
+                self.assertEqual(1, result["imported_records"])
+                self.assertEqual(1, result["pdf_count"])
+                self.assertTrue(Path(result["zotero_manifest"]).is_file())
+                self.assertTrue(Path(result["pdf_manifest"]).is_file())
+            finally:
+                server.shutdown()
+                server.server_close()
+                server_thread.join(timeout=5)
 
     def test_export_publication_files_builds_docx_pdf_and_submission_manifests(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -426,6 +451,9 @@ class PipelineCliTests(unittest.TestCase):
                 writer.writerow({name: 1 for name in columns})
             spec = project / "analysis-spec.json"
             spec.write_text(json.dumps({
+                "schema_version": 1,
+                "status": "frozen",
+                "blocking_items": [],
                 "profile": "three-construct-panel",
                 "waves": ["T1", "T2", "T3"],
                 "constructs": {
@@ -457,10 +485,22 @@ class PipelineCliTests(unittest.TestCase):
                 fake_rscript.write_text(
                     "@echo off\n"
                     "if \"%1\"==\"--version\" (echo R version 4.5.0 & exit /b 0)\n"
+                    "if \"%1\"==\"-e\" (\n"
+                    "echo dplyr 1.0.0\n"
+                    "echo jsonlite 1.0.0\n"
+                    "echo lavaan 1.0.0\n"
+                    "echo psych 1.0.0\n"
+                    "echo readr 1.0.0\n"
+                    "echo semTools 1.0.0\n"
+                    "echo simsem 1.0.0\n"
+                    "echo stats 1.0.0\n"
+                    "exit /b 0\n"
+                    ")\n"
+                    "if \"%1\"==\"-e\" (echo dplyr 1.1.4& echo jsonlite 2.0.0& echo lavaan 0.6.20& echo psych 2.5.6& echo readr 2.1.5& echo semTools 0.5.7& echo simsem 0.5.17& echo stats 4.5.0& exit /b 0)\n"
                     "for %%F in (\"%1\") do set base=%%~nF\n"
-                    "if \"%base%\"==\"01_measurement_gate\" echo ok>..\\measurement_score_summary.csv\n"
+                    "if \"%base%\"==\"01_measurement_gate\" (echo ok>..\\measurement_score_summary.csv & echo {}>..\\sex_measurement_gate.json)\n"
                     "if \"%base%\"==\"02_ri_clpm\" (echo ok>..\\ri_clpm_parameters.csv & echo ok>..\\ri_clpm_fit.csv & echo ok>..\\ri_clpm_fit.rds)\n"
-                    "if \"%base%\"==\"03_sex_group_comparison\" echo ok>..\\sex_group_constraint_test.txt\n"
+                    "if \"%base%\"==\"03_sex_group_comparison\" (echo ok>..\\sex_group_constraint_test.txt & echo {}>..\\sex_group_comparison.json)\n"
                     "if \"%base%\"==\"04_distribution_sensitivity\" echo ok>..\\distribution_sensitivity_fits.rds\n"
                     "if \"%base%\"==\"05_power_simulation\" echo ok>..\\power_simulation_plan.rds\n"
                     "if \"%base%\"==\"06_descriptives_missingness\" (echo ok>..\\descriptives.csv & echo ok>..\\missingness.csv)\n"
@@ -473,10 +513,12 @@ class PipelineCliTests(unittest.TestCase):
                 fake_rscript.write_text(
                     "#!/bin/sh\n"
                     "[ \"$1\" = \"--version\" ] && { echo 'R version 4.5.0'; exit 0; }\n"
+                    "[ \"$1\" = \"-e\" ] && { for p in dplyr jsonlite lavaan psych readr semTools simsem stats; do echo \"$p 1.0.0\"; done; exit 0; }\n"
+                    "[ \"$1\" = \"-e\" ] && { printf 'dplyr 1.1.4\\njsonlite 2.0.0\\nlavaan 0.6.20\\npsych 2.5.6\\nreadr 2.1.5\\nsemTools 0.5.7\\nsimsem 0.5.17\\nstats 4.5.0\\n'; exit 0; }\n"
                     "base=$(basename \"$1\" .R)\n"
-                    "[ \"$base\" = \"01_measurement_gate\" ] && echo ok > ../measurement_score_summary.csv\n"
+                    "[ \"$base\" = \"01_measurement_gate\" ] && { echo ok > ../measurement_score_summary.csv; echo '{}' > ../sex_measurement_gate.json; }\n"
                     "[ \"$base\" = \"02_ri_clpm\" ] && { echo ok > ../ri_clpm_parameters.csv; echo ok > ../ri_clpm_fit.csv; echo ok > ../ri_clpm_fit.rds; }\n"
-                    "[ \"$base\" = \"03_sex_group_comparison\" ] && echo ok > ../sex_group_constraint_test.txt\n"
+                    "[ \"$base\" = \"03_sex_group_comparison\" ] && { echo ok > ../sex_group_constraint_test.txt; echo '{}' > ../sex_group_comparison.json; }\n"
                     "[ \"$base\" = \"04_distribution_sensitivity\" ] && echo ok > ../distribution_sensitivity_fits.rds\n"
                     "[ \"$base\" = \"05_power_simulation\" ] && echo ok > ../power_simulation_plan.rds\n"
                     "[ \"$base\" = \"06_descriptives_missingness\" ] && { echo ok > ../descriptives.csv; echo ok > ../missingness.csv; }\n"
@@ -485,14 +527,145 @@ class PipelineCliTests(unittest.TestCase):
                     encoding="utf-8",
                 )
                 fake_rscript.chmod(0o755)
-            executed = json.loads(self.invoke(
+            execution = self.invoke(
                 "run-analysis", "--run-dir", str(run_dir), "--manifest", generated["manifest"],
-                "--rscript", str(fake_rscript),
-            ).stdout)
+                "--rscript", str(fake_rscript), check=False,
+            )
+            self.assertEqual(0, execution.returncode, execution.stdout + execution.stderr)
+            executed = json.loads(execution.stdout)
             self.assertEqual("executed", executed["status"])
             self.assertEqual("requires-result-validation", executed["validation_status"])
             self.assertTrue(Path(executed["execution_manifest"]).is_file())
             self.assertTrue(Path(executed["model_output"]).is_file())
+
+    def test_generate_analysis_blocks_unfrozen_or_unresolved_spec(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            run_dir = Path(json.loads(self.invoke(
+                "init", "--project", str(project), "--title", "analysis readiness",
+                "--run-id", "analysis-readiness-run",
+            ).stdout)["run_dir"])
+            data = project / "frozen.csv"
+            data.write_text(
+                "x_t1,x_t2,x_t3,y_t1,y_t2,y_t3\n1,1,1,1,1,1\n",
+                encoding="utf-8",
+            )
+            base_spec = {
+                "schema_version": 1,
+                "waves": ["T1", "T2", "T3"],
+                "measurement_mode": "score-comparability",
+                "constructs": {
+                    "x": {"variables": {"T1": "x_t1", "T2": "x_t2", "T3": "x_t3"}},
+                    "y": {"variables": {"T1": "y_t1", "T2": "y_t2", "T3": "y_t3"}},
+                },
+            }
+            cases = [
+                ({**base_spec, "status": "draft", "blocking_items": []}, "not frozen"),
+                ({**base_spec, "status": "frozen", "blocking_items": ["wave dates unresolved"]}, "blocking_items"),
+            ]
+            for index, (payload, expected_error) in enumerate(cases):
+                spec = project / f"spec-{index}.json"
+                spec.write_text(json.dumps(payload), encoding="utf-8")
+                result = self.invoke(
+                    "generate-analysis", "--run-dir", str(run_dir),
+                    "--data", str(data), "--spec", str(spec), check=False,
+                )
+                self.assertEqual(3, result.returncode)
+                blocked = json.loads(result.stdout)
+                self.assertEqual("blocked", blocked["status"])
+                self.assertTrue(any(expected_error in error for error in blocked["errors"]))
+                self.assertEqual([], blocked["code_files"])
+
+    def test_sex_group_free_model_has_group_specific_labels_and_real_equal_constraints(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            run_dir = Path(json.loads(self.invoke(
+                "init", "--project", str(project), "--title", "group constraints",
+                "--run-id", "group-constraints-run",
+            ).stdout)["run_dir"])
+            data = project / "frozen.csv"
+            data.write_text(
+                "x_t1,x_t2,x_t3,y_t1,y_t2,y_t3,sex\n1,1,1,1,1,1,1\n",
+                encoding="utf-8",
+            )
+            spec = project / "spec.json"
+            spec.write_text(json.dumps({
+                "schema_version": 1,
+                "status": "frozen",
+                "blocking_items": [],
+                "waves": ["T1", "T2", "T3"],
+                "measurement_mode": "score-comparability",
+                "constructs": {
+                    "x": {"variables": {"T1": "x_t1", "T2": "x_t2", "T3": "x_t3"}},
+                    "y": {"variables": {"T1": "y_t1", "T2": "y_t2", "T3": "y_t3"}},
+                },
+                "group_variable": "sex",
+                "group_labels": {"1": "male", "2": "female"},
+            }), encoding="utf-8")
+            generated = json.loads(self.invoke(
+                "generate-analysis", "--run-dir", str(run_dir),
+                "--data", str(data), "--spec", str(spec),
+            ).stdout)
+            comparison = Path(generated["code_files"][3]).read_text(encoding="utf-8")
+            self.assertIn("riclpm_group_free_model", comparison)
+            self.assertIn("c(ar_x_g1, ar_x_g2)*w_x_T1", comparison)
+            self.assertIn("riclpm_group_equal_model", comparison)
+            self.assertIn("ar_x*w_x_T1", comparison)
+            self.assertIn('group.equal = c("regressions")', comparison)
+            self.assertIn('fitMeasures(fit_group_free, "npar")', comparison)
+            self.assertIn("free_npar <= equal_npar", comparison)
+            self.assertIn("sex_group_comparison.json", comparison)
+
+    def test_failed_measurement_invariance_blocks_structural_sex_comparison_with_json_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            run_dir = Path(json.loads(self.invoke(
+                "init", "--project", str(project), "--title", "measurement gate",
+                "--run-id", "measurement-gate-run",
+            ).stdout)["run_dir"])
+            waves = ["T1", "T2", "T3"]
+            columns = [f"{construct}_{wave.lower()}" for construct in ["x", "y"] for wave in waves]
+            columns += [f"{construct}{item}_{wave.lower()}" for construct in ["x", "y"] for item in [1, 2] for wave in waves]
+            columns.append("sex")
+            data = project / "frozen.csv"
+            data.write_text(",".join(columns) + "\n" + ",".join("1" for _ in columns) + "\n", encoding="utf-8")
+            spec = project / "spec.json"
+            spec.write_text(json.dumps({
+                "schema_version": 1,
+                "status": "frozen",
+                "blocking_items": [],
+                "waves": waves,
+                "measurement_mode": "item-level",
+                "constructs": {
+                    construct: {
+                        "variables": {wave: f"{construct}_{wave.lower()}" for wave in waves},
+                        "indicators": {wave: [f"{construct}{item}_{wave.lower()}" for item in [1, 2]] for wave in waves},
+                    } for construct in ["x", "y"]
+                },
+                "group_variable": "sex",
+                "group_labels": {"1": "male", "2": "female"},
+                "sex_measurement_invariance": {
+                    "required_level": "metric",
+                    "max_abs_delta_cfi": 0.01,
+                    "max_increase_rmsea": 0.015,
+                    "max_increase_srmr": 0.03,
+                },
+            }), encoding="utf-8")
+            generated = json.loads(self.invoke(
+                "generate-analysis", "--run-dir", str(run_dir),
+                "--data", str(data), "--spec", str(spec),
+            ).stdout)
+            measurement = Path(generated["code_files"][1]).read_text(encoding="utf-8")
+            comparison = Path(generated["code_files"][3]).read_text(encoding="utf-8")
+            self.assertIn("sex_measurement_gate.json", measurement)
+            self.assertIn('required_level <- "metric"', measurement)
+            self.assertIn('status = if (sex_gate_passed) "passed" else "blocked"', measurement)
+            self.assertIn('read_json("../sex_measurement_gate.json"', comparison)
+            self.assertIn('!identical(sex_measurement_gate$status, "passed")', comparison)
+            self.assertIn(
+                str((run_dir / "07_统计分析" / "sex_measurement_gate.json").resolve()),
+                generated["expected_outputs"],
+            )
 
     def test_item_level_spec_generates_configural_metric_scalar_gate(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -511,6 +684,7 @@ class PipelineCliTests(unittest.TestCase):
                 writer.writerow({name: 1 for name in columns})
             spec = project / "spec.json"
             spec.write_text(json.dumps({
+                "schema_version": 1, "status": "frozen", "blocking_items": [],
                 "waves": waves, "measurement_mode": "item-level",
                 "constructs": {
                     construct: {
@@ -537,8 +711,7 @@ class PipelineCliTests(unittest.TestCase):
                 "init", "--project", str(project), "--title", "results",
                 "--run-id", "results-run",
             ).stdout)["run_dir"])
-            model_output = project / "model-output.json"
-            model_output.write_text(json.dumps({
+            model_payload = {
                 "schema_version": 1, "analysis_id": "model-primary", "sample_n": 882,
                 "primary_model": "RI-CLPM", "estimator": "MLR", "converged": True,
                 "post_check": True, "fit": {"cfi": 0.96, "rmsea": 0.04, "srmr": 0.05},
@@ -549,15 +722,66 @@ class PipelineCliTests(unittest.TestCase):
                 }], "deviations": [],
                 "diagnostics": {"negative_variances": 0, "inadmissible_standardized": 0, "warnings": []},
                 "robustness": [{"name": "free-lag", "conclusion": "direction consistent"}],
+            }
+            model_output = project / "handmade-model-output.json"
+            model_output.write_text(json.dumps(model_payload), encoding="utf-8")
+            handmade = self.invoke(
+                "validate-results", "--run-dir", str(run_dir), "--input", str(model_output), check=False,
+            )
+            self.assertEqual(3, handmade.returncode)
+            self.assertIn("execution manifest missing", " ".join(json.loads(handmade.stdout)["errors"]))
+
+            data = project / "frozen.csv"
+            data.write_text("x\n1\n", encoding="utf-8")
+            spec = project / "analysis-spec.json"
+            spec.write_text(json.dumps({"random_seed": 20260718}), encoding="utf-8")
+            code = project / "analysis.R"
+            code.write_text('required_packages <- c("jsonlite")\nset.seed(20260718)\n', encoding="utf-8")
+            executed_output = run_dir / "07_统计分析" / "model_output.json"
+            code_manifest = project / "analysis-code-manifest.json"
+            code_manifest.write_text(json.dumps({
+                "schema_version": 1, "status": "ready",
+                "data": str(data.resolve()), "data_sha256": hashlib.sha256(data.read_bytes()).hexdigest(),
+                "spec": str(spec.resolve()), "spec_sha256": hashlib.sha256(spec.read_bytes()).hexdigest(),
+                "code_files": [str(code.resolve())],
+                "code_hashes": {str(code.resolve()): hashlib.sha256(code.read_bytes()).hexdigest()},
+                "expected_outputs": [str(executed_output.resolve())],
             }), encoding="utf-8")
+            if os.name == "nt":
+                fake_rscript = project / "fake-rscript.cmd"
+                fake_rscript.write_text(
+                    "@echo off\n"
+                    "if \"%1\"==\"--version\" (echo R version 4.5.0 & exit /b 0)\n"
+                    "if \"%1\"==\"-e\" (echo jsonlite 2.0.0 & exit /b 0)\n"
+                    f'copy /Y "{model_output}" "{executed_output}" >nul\n'
+                    "exit /b 0\n",
+                    encoding="utf-8",
+                )
+            else:
+                fake_rscript = project / "fake-rscript"
+                fake_rscript.write_text(
+                    "#!/bin/sh\n"
+                    "[ \"$1\" = \"--version\" ] && { echo 'R version 4.5.0'; exit 0; }\n"
+                    "[ \"$1\" = \"-e\" ] && { echo 'jsonlite 2.0.0'; exit 0; }\n"
+                    f'cp "{model_output}" "{executed_output}"\n',
+                    encoding="utf-8",
+                )
+                fake_rscript.chmod(0o755)
+            executed = json.loads(self.invoke(
+                "run-analysis", "--run-dir", str(run_dir), "--manifest", str(code_manifest),
+                "--rscript", str(fake_rscript),
+            ).stdout)
+            self.assertEqual("executed", executed["status"])
             verified = json.loads(self.invoke(
-                "validate-results", "--run-dir", str(run_dir), "--input", str(model_output),
+                "validate-results", "--run-dir", str(run_dir), "--input", str(executed_output),
             ).stdout)
             self.assertEqual("verified", verified["status"])
             verified_results = json.loads(Path(verified["verified_results"]).read_text(encoding="utf-8"))
             self.assertEqual(882, verified_results["sample_n"])
             self.assertEqual(0.12, verified_results["conflict_to_depression.estimate"])
             self.assertTrue(Path(verified["analysis_manifest"]).is_file())
+            gate = self.invoke("gate", "--run-dir", str(run_dir), "--stage", "07_analysis")
+            self.assertIn("GATE PASSED", gate.stdout)
 
             invalid = project / "invalid-output.json"
             invalid.write_text(json.dumps({
@@ -578,6 +802,15 @@ class PipelineCliTests(unittest.TestCase):
             blocked_payload = json.loads(blocked.stdout)
             self.assertEqual("blocked", blocked_payload["status"])
             self.assertIn("negative variances", " ".join(blocked_payload["errors"]))
+
+            Path(executed["executions"][0]["log"]).write_text("tampered\n", encoding="utf-8")
+            executed_output.write_text(json.dumps(model_payload | {"sample_n": 999}), encoding="utf-8")
+            tampered_gate = self.invoke(
+                "gate", "--run-dir", str(run_dir), "--stage", "07_analysis", check=False,
+            )
+            self.assertEqual(1, tampered_gate.returncode)
+            self.assertIn("execution log hash mismatch", tampered_gate.stdout)
+            self.assertIn("analysis output hash mismatch", tampered_gate.stdout)
 
     def test_user_can_deduplicate_evidence_with_stable_ids(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

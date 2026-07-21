@@ -10,6 +10,7 @@ description: End-to-end, Chinese-first workflow for auditable empirical psycholo
 ## 核心规则
 
 - 先冻结问题、估计对象、变量、计分和分析计划，再查看主结果。
+- 把“准备”与“正式开始”分开：检索前可生成草案、环境检查和阻断清单；只有准备度审计为 `ready` 才执行数据库检索或题录入库。
 - 区分主要、次要和探索性分析；所有偏离均进入偏离记录。
 - 不伪造文献、量表来源、伦理信息、数据、统计量或期刊反馈。
 - 不从观察性关联推出因果；不以“一组显著、另一组不显著”证明组间差异。
@@ -27,6 +28,17 @@ description: End-to-end, Chinese-first workflow for auditable empirical psycholo
 python scripts/pipeline.py init --project <项目目录> --title <题目> --mode strict
 python scripts/pipeline.py inventory --run-dir <运行目录> --source <资料目录>
 ```
+
+在文献检索前，用结构化协议生成 00/01 草案并进行机器审计；命令返回 `prepared-blocked` 表示产物已生成但关键事实或审批仍未完成，不得绕过：
+
+```powershell
+python scripts/pipeline.py preflight-environment --run-dir <运行目录> --helper <Zotero助手> [--rscript <Rscript路径>]
+python scripts/pipeline.py prepare-presearch --run-dir <运行目录> --spec <presearch-protocol.json>
+python scripts/pipeline.py plan-search --run-dir <运行目录> --spec <search-plan.json>
+python scripts/pipeline.py sync-zotero --run-dir <运行目录> --helper <Zotero助手> --collection-name <精确名称> --collection-key <精确key> --allow-empty
+```
+
+`preflight-environment` 自动定位 Rscript、核验核心 R 包及 Zotero API/Connector/精确集合，并把结果写入 00 阶段。`prepare-presearch` 生成项目定标、研究问题/假设、构念映射、协议、报告规范、伦理开放科学和检索前准备度审计。`plan-search` 只冻结检索方案，不代表执行过检索。`sync-zotero --allow-empty` 只核验空的精确项目集合；禁止回退到 Zotero 全库导出。
 
 通用工作流不得硬编码单一课题。特定研究通过 `--project-pack <课题包目录>` 附加版本化 profile、数据审计规格和分析规格；初始化时复制并哈希到运行目录。旧版十阶段运行仅通过 `pipeline.py migrate` 迁移已识别文本产物；未映射文件只记哈希、不复制，迁移后仍必须通过十二阶段 gate。
 
@@ -88,7 +100,7 @@ python scripts/pipeline.py prepare-analysis-data --run-dir <运行目录> --data
 python scripts/pipeline.py freeze-data --run-dir <运行目录> --data <数据> --spec <规格> [--decisions <逐项决策json>]
 python scripts/pipeline.py plan-search --run-dir <运行目录> --spec <search-plan.json>
 python scripts/pipeline.py import-evidence --run-dir <运行目录> --search-id <search-id> --input <导出文件> [--input <导出文件> ...]
-python scripts/pipeline.py sync-zotero --run-dir <运行目录> --helper <Zotero助手脚本>
+python scripts/pipeline.py sync-zotero --run-dir <运行目录> --helper <Zotero助手脚本> --collection-name <精确名称> --collection-key <精确key>
 python scripts/pipeline.py dedupe-evidence --run-dir <运行目录> --input <候选文献csv>
 python scripts/pipeline.py cluster-studies --run-dir <运行目录> --input <去重后csv>
 python scripts/pipeline.py audit-screening --run-dir <运行目录> --input <独立筛选csv> --reviewers <A> <B> --adjudicator <C>
@@ -104,6 +116,8 @@ python scripts/pipeline.py build-submission --run-dir <运行目录> --journal-p
 ```
 
 `generate-analysis` 生成测量不变性、RI-CLPM、直接组间约束检验、零值密集两部分敏感性和模拟检验力 R 代码，但不把“已生成”写成“已执行”。`run-analysis` 核验代码哈希、真实调用 R、保存逐脚本日志并检查预期输出；仍须经 `validate-results` 才能进入正文。`freeze-data` 对每个结构化 issue 要求与当前审计哈希绑定的允许处置；ID 错配和计分错误不得用“分析适配”绕过。
+
+分析规格只有在 `status=frozen` 且 `blocking_items=[]` 时才能生成主分析代码。Windows 上 `run-analysis` 依次从显式路径、PATH、`R_HOME` 和 R 注册表定位 `Rscript.exe`；找到 R 不等于包环境通过，仍必须执行生成的环境检查脚本。
 
 私密问题登记必须位于 `.private/` 或其他不会提交的位置，只保存伪匿名标识与定位信息；不得进入文件清单、论文或投稿包。期刊政策必须来自声明的官方域名，并保存核查日期、页面快照与 SHA-256。
 
@@ -132,9 +146,12 @@ python scripts/pipeline.py autopilot --run-dir <运行目录>
 ## 强制停止条件
 
 - ID、波次连接或量表计分规则无法确认。
+- 检索前准备度不是 `ready`，或 scope/protocol 未批准与冻结。
+- Zotero 目标集合名称/key 未精确核验，或命令试图导出全库。
 - 没有数据却要求写结果，或没有输出却要求写统计量。
 - 核心变量跨波不可比且无法修复。
 - 关键自伤变量存在无法解释的负值、极端值或编码混合。
+- 未从工具来源核实排除自杀意图时，不得把“自伤指标”改称 NSSI。
 - 没有全文却要求页码级强引用。
 - 没有伦理材料却要求声称伦理合规。
 - 没有来源对齐或期刊官网核查却要求“可投稿”。

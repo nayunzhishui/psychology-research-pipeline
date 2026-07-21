@@ -7,8 +7,61 @@
     "depression": ["depress*", "depressive symptoms", "抑郁", "抑郁症状"],
     "self_harm": ["nonsuicidal self-injury", "NSSI", "self-harm", "self-injur*", "自伤", "非自杀性自伤"],
     "longitudinal": ["longitudinal", "prospective", "cross-lagged", "random intercept cross-lagged", "纵向", "交叉滞后"],
-    "gender": ["gender", "sex differences", "male", "female", "性别差异"],
+    "sex": ["sex", "sex differences", "gender differences", "male", "female", "性别差异"],
     "measurement": ["scale", "measure", "validation", "psychometric", "量表", "信效度"]
+  },
+  "database_protocols": {
+    "PubMed": {
+      "platform": "PubMed.gov",
+      "access_status": "available",
+      "export_format": "PubMed XML or NBIB with exact query history",
+      "syntax_status": "draft"
+    },
+    "Web of Science": {
+      "platform": "Web of Science Core Collection",
+      "access_status": "institutional-login-required",
+      "export_format": "Full Record and Cited References in plain text or RIS",
+      "syntax_status": "draft"
+    },
+    "PsycINFO": {
+      "platform": "APA PsycINFO provider must be confirmed before execution",
+      "access_status": "unverified",
+      "export_format": "RIS with provider, query history, thesaurus terms and filters",
+      "syntax_status": "draft"
+    },
+    "CNKI": {
+      "platform": "中国知网高级检索",
+      "access_status": "institutional-login-required",
+      "export_format": "Refworks/RIS or EndNote export plus search screenshot/log",
+      "syntax_status": "draft"
+    }
+  },
+  "eligibility": {
+    "date_range": "database inception to actual search date",
+    "publication_types": ["peer-reviewed empirical study", "systematic review or meta-analysis", "measurement validation", "seminal method paper"],
+    "population": "adolescents or studies with separately extractable adolescent results",
+    "include": [
+      "at least two focal constructs for direct empirical evidence",
+      "longitudinal, prospective, cross-lagged or RI-CLPM evidence for dynamic claims",
+      "measurement or method evidence assigned to a predefined evidence slot",
+      "Chinese or English records with verifiable metadata"
+    ],
+    "exclude": [
+      "adult-only results that cannot be separated",
+      "suicidal behavior and NSSI not distinguishable for a claim specifically about NSSI",
+      "retracted records as supporting evidence",
+      "exclusion based on significance or direction of findings"
+    ]
+  },
+  "zotero_target": {
+    "collection_name": "早期",
+    "collection_key": "S2I8LT6I"
+  },
+  "quality_assurance": {
+    "deduplication": "DOI, PMID, OpenAlex ID, then normalized title plus first author plus year; retain immutable source exports",
+    "screening": "two independent reviewers with third-reviewer adjudication; pilot calibration before formal screening",
+    "retraction_check": "verify correction, expression-of-concern and retraction status before an item satisfies a core slot",
+    "supplemental_search": "backward and forward citation chasing from seed and included studies; refresh within 30 days before submission"
   },
   "query_families": [
     {
@@ -42,13 +95,23 @@
       }
     },
     {
-      "family_id": "joint-model-gender",
-      "purpose": "joint developmental model and direct sex or gender comparison",
-      "blocks": ["population", "conflict", "depression", "self_harm", "longitudinal", "gender"],
+      "family_id": "joint-development-model",
+      "purpose": "joint developmental model covering all three focal constructs",
+      "blocks": ["population", "conflict", "depression", "self_harm", "longitudinal"],
       "queries": {
-        "Web of Science": "TS=((adolescen* OR youth) AND (interparental conflict OR marital conflict) AND depress* AND (NSSI OR self-harm) AND (longitudinal OR cross-lagged) AND (gender OR sex differences))",
-        "PsycINFO": "(adolescen* OR youth) AND (interparental conflict OR marital conflict) AND depress* AND (NSSI OR self-harm) AND (longitudinal OR cross-lagged) AND (gender OR sex differences)",
-        "CNKI": "(青少年 OR 初中生) AND (父母冲突 OR 婚姻冲突) AND 抑郁 AND (自伤 OR 非自杀性自伤) AND (纵向 OR 交叉滞后) AND 性别"
+        "Web of Science": "TS=((adolescen* OR youth) AND (interparental conflict OR marital conflict OR parental conflict) AND depress* AND (NSSI OR self-harm OR self-injur*) AND (longitudinal OR prospective OR cross-lagged))",
+        "PsycINFO": "(adolescen* OR youth) AND (interparental conflict OR marital conflict OR parental conflict) AND depress* AND (NSSI OR self-harm OR self-injur*) AND (longitudinal OR prospective OR cross-lagged)",
+        "CNKI": "(青少年 OR 初中生) AND (父母冲突 OR 婚姻冲突) AND 抑郁 AND (自伤 OR 非自杀性自伤) AND (纵向 OR 交叉滞后)"
+      }
+    },
+    {
+      "family_id": "sex-structural-differences",
+      "purpose": "direct tests of sex differences in focal longitudinal paths",
+      "blocks": ["population", "conflict", "depression", "self_harm", "longitudinal", "sex"],
+      "queries": {
+        "Web of Science": "TS=((adolescen* OR youth) AND (interparental conflict OR marital conflict OR parental conflict) AND (depress* OR NSSI OR self-harm) AND (longitudinal OR cross-lagged) AND (sex difference* OR gender difference* OR multi-group OR moderation))",
+        "PsycINFO": "(adolescen* OR youth) AND (interparental conflict OR marital conflict OR parental conflict) AND (depress* OR NSSI OR self-harm) AND (longitudinal OR cross-lagged) AND (sex differences OR gender differences OR multi-group OR moderation)",
+        "CNKI": "(青少年 OR 初中生) AND (父母冲突 OR 婚姻冲突 OR 抑郁 OR 自伤) AND (纵向 OR 交叉滞后) AND (性别差异 OR 多组分析 OR 调节)"
       }
     },
     {
@@ -59,6 +122,16 @@
         "Web of Science": "TS=((random intercept cross-lagged OR RI-CLPM OR longitudinal measurement invariance) AND (psycholog* OR adolescen*))",
         "PsycINFO": "(random intercept cross-lagged OR RI-CLPM OR longitudinal measurement invariance) AND (psycholog* OR adolescen*)",
         "CNKI": "(随机截距交叉滞后 OR 纵向测量不变性) AND (心理 OR 青少年)"
+      }
+    },
+    {
+      "family_id": "instrument-provenance",
+      "purpose": "original and Chinese validation evidence for the administered instruments",
+      "blocks": ["population", "conflict", "depression", "self_harm", "measurement"],
+      "queries": {
+        "Web of Science": "TS=((adolescen* OR youth) AND ((interparental conflict AND scale) OR (CES-D AND validation) OR (nonsuicidal self-injury AND measure*)) AND (valid* OR psychometric OR reliability))",
+        "PsycINFO": "(adolescen* OR youth) AND ((interparental conflict AND scale) OR (CES-D AND validation) OR (nonsuicidal self-injury AND measure*)) AND (valid* OR psychometric OR reliability)",
+        "CNKI": "(青少年 OR 初中生) AND ((父母冲突 AND 量表) OR (流调中心抑郁量表 AND 信效度) OR (非自杀性自伤 AND 测量))"
       }
     }
   ],

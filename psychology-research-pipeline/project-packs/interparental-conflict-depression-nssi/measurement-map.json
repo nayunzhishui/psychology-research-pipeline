@@ -31,7 +31,7 @@
       "decision": "Recompute from valid raw items. T1/T2 legacy totals reproduce exactly; T3 contains raw-range and legacy-total discrepancies."
     },
     "nssi": {
-      "instrument": "18-method adolescent non-suicidal self-injury checklist as administered",
+      "instrument": "18-method adolescent self-harm checklist as administered; NSSI naming is prohibited until exclusion of suicidal intent is source-verified",
       "frequency_range": [0, 3],
       "severity_range": [0, 4],
       "score_rule": "For each method multiply frequency by severity, then sum the 18 products; also retain occurrence and positive-part outcomes for sensitivity analysis.",
@@ -86,9 +86,10 @@
     "school_policy": "Use anonymized school code only. Nine schools are insufficient for routine cluster-robust inference; prefer school fixed effects or a sensitivity analysis."
   },
   "unresolved_blockers": [
-    "Verify the four T1-T3 ID disagreements against the source linkage record.",
-    "Approve a documented rule for invalid or missing sex values before multi-group analysis.",
+    "Verify the eleven normalized T1-T3 ID disagreements against the source linkage record.",
+    "Approve the proposed T1-only rule for 13 missing T1 sex codes and 41 cross-wave inconsistencies before multi-group analysis.",
     "Recover exact wave dates or intervals from administration records.",
+    "Verify from the instrument source that the self-harm items explicitly exclude suicidal intent before using the NSSI label.",
     "Locate original SPSS scoring syntax if available; it is corroborating evidence, not a substitute for raw-item reconstruction."
   ]
 }

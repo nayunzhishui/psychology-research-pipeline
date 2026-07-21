@@ -10,6 +10,8 @@
     "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
     "title": {"type": "string", "minLength": 1},
     "profile": {"type": "string"},
+    "presearch_protocol": {"type": "string"},
+    "zotero_target": {"type": "string"},
     "data_audit_spec": {"type": "string"},
     "measurement_map": {"type": "string"},
     "analysis_spec": {"type": "string"},

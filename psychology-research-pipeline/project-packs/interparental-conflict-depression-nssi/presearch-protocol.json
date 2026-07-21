@@ -1,0 +1,292 @@
+{
+  "$schema": "../../schemas/presearch-protocol.schema.json",
+  "schema_version": 1,
+  "protocol_id": "interparental-conflict-depression-nssi-presearch",
+  "title": "早期青少年父母冲突、抑郁与自伤之间的动态发展关系及性别差异",
+  "purpose": "journal-article",
+  "study": {
+    "design": "三波学校样本观察性纵向面板研究",
+    "population": "早期青少年；具体年龄、年级范围及基线总体待原始招募材料核实",
+    "setting": "中国学校情境；地区与学校抽样框待原始方案核实",
+    "waves": ["T1", "T2", "T3"],
+    "wave_timing": {
+      "status": "unverified",
+      "value": "数据文件名提示2018、2019、2020，但不能替代准确施测日期与间隔",
+      "source": "2018、2019和2020怀化和韶山数据全.sav 文件名"
+    },
+    "sample": {
+      "observed_rows": 882,
+      "interpretation": "合并数据行数，不等同于受邀样本、任一波有效样本或最终分析样本",
+      "recruitment": "学校、班级、招募方式和原始受邀人数尚未核实",
+      "inclusion": [
+        "存在可核验的参与者标识并至少具有一个研究波次资料",
+        "核心构念是否进入特定模型按冻结后的模型级有效性规则判断"
+      ],
+      "exclusion": [
+        "无法解决的重复或跨波错配记录不得进入纵向主模型",
+        "不以结果显著性、极端但有效的观察值或主观模型拟合为排除依据"
+      ],
+      "status": "provisional"
+    }
+  },
+  "estimands": [
+    {
+      "id": "E1",
+      "tier": "primary",
+      "text": "父母冲突、抑郁症状与NSSI相对个体自身稳定水平的波动之间的滞后预测关联",
+      "status": "provisional"
+    },
+    {
+      "id": "E2",
+      "tier": "secondary",
+      "text": "三个构念稳定个体间差异的相关，而非时间因果效应",
+      "status": "provisional"
+    },
+    {
+      "id": "E3",
+      "tier": "secondary",
+      "text": "在测量可比且检验力充分时，结构路径在记录的sex组之间的直接约束差异",
+      "status": "provisional"
+    }
+  ],
+  "research_questions": [
+    {
+      "id": "RQ1",
+      "tier": "primary",
+      "text": "个体某波父母冲突高于其自身稳定水平时，是否预测下一波抑郁症状或NSSI也高于其自身稳定水平？",
+      "status": "provisional"
+    },
+    {
+      "id": "RQ2",
+      "tier": "primary",
+      "text": "个体某波抑郁症状或NSSI偏离自身稳定水平时，是否存在后续的双向预测关联？",
+      "status": "provisional"
+    },
+    {
+      "id": "RQ3",
+      "tier": "secondary",
+      "text": "冲突到抑郁再到NSSI的跨波间接关联是否可识别且对分布与模型设定稳健？",
+      "status": "provisional"
+    },
+    {
+      "id": "RQ4",
+      "tier": "exploratory",
+      "text": "在跨时间和跨sex测量可比后，预设结构路径是否存在直接组间差异？",
+      "status": "provisional"
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "H1",
+      "tier": "primary",
+      "text": "较高的个体内父母冲突偏离将正向预测下一波抑郁症状偏离。",
+      "status": "provisional"
+    },
+    {
+      "id": "H2",
+      "tier": "primary",
+      "text": "较高的个体内抑郁症状偏离将正向预测下一波NSSI偏离。",
+      "status": "provisional"
+    },
+    {
+      "id": "H3",
+      "tier": "secondary",
+      "text": "父母冲突对后续NSSI存在直接的正向个体内预测关联。",
+      "status": "provisional"
+    },
+    {
+      "id": "H4",
+      "tier": "exploratory",
+      "text": "反向路径及sex差异不预设方向，须在证据检索后决定是否升级为验证性假设。",
+      "status": "provisional"
+    }
+  ],
+  "constructs": [
+    {
+      "construct_id": "interparental-conflict",
+      "label": "父母冲突",
+      "role": "时间变化预测变量与内生变量",
+      "waves": ["T1", "T2", "T3"],
+      "variables": {"T1": "conflict_score_t1", "T2": "conflict_score_t2", "T3": "conflict_score_t3"},
+      "instrument": "施测问卷中的18题父母冲突量表；正式名称与中文版来源待核实",
+      "scoring": "五点评分，题1/3/4/5/7/9/13/16反向后求18题高冲突方向总分，理论范围18–90",
+      "status": "provisional"
+    },
+    {
+      "construct_id": "depressive-symptoms",
+      "label": "抑郁症状",
+      "role": "时间变化中介候选与内生变量",
+      "waves": ["T1", "T2", "T3"],
+      "variables": {"T1": "depression_score_t1", "T2": "depression_score_t2", "T3": "depression_score_t3"},
+      "instrument": "施测版本CES-D 20题；中文版来源与授权待核实",
+      "scoring": "1–4评分，题4/8/12/16反向后求和，理论范围20–80",
+      "status": "provisional"
+    },
+    {
+      "construct_id": "nssi",
+      "label": "非自杀性自伤候选指标",
+      "role": "主要结局与内生变量",
+      "waves": ["T1", "T2", "T3"],
+      "variables": {"T1": "nssi_level_t1", "T2": "nssi_level_t2", "T3": "nssi_level_t3"},
+      "instrument": "18种自伤方式的次数与程度条目；正式工具来源及是否明确排除自杀意图待核实",
+      "scoring": "逐项次数0–3乘程度0–4后求和，理论范围0–216；同时保留发生与正值部分作为敏感性结局",
+      "status": "provisional"
+    },
+    {
+      "construct_id": "recorded-sex",
+      "label": "记录的sex",
+      "role": "候选多组比较变量，不称为gender",
+      "waves": ["T1", "T2", "T3"],
+      "variables": {"analysis": "sex_analysis"},
+      "instrument": "问卷二元sex条目，编码1男、2女",
+      "scoring": "主分析候选采用经核验的T1有效编码；不以其他波异常值强制覆盖",
+      "status": "provisional"
+    }
+  ],
+  "analysis_families": {
+    "primary": [
+      "题项层面纵向测量不变性通过后运行三构念RI-CLPM",
+      "报告个体内滞后路径、同波关联与随机截距相关"
+    ],
+    "secondary": [
+      "冲突T1到抑郁T2再到NSSI T3的时间排序间接关联，仅在识别与检验力允许时",
+      "跨sex结构路径的受约束与自由模型直接比较"
+    ],
+    "sensitivity": [
+      "传统CLPM仅作为不同估计对象的对照",
+      "NSSI发生与正值部分的两部分分析",
+      "学校固定效应或学校敏感性分析",
+      "平稳性约束、缺失假设与计分选择敏感性"
+    ],
+    "exploratory": [
+      "反向路径、未预设协变量与非平稳路径必须明确标记并记录偏离"
+    ],
+    "multiplicity": "主路径数量在冻结时限定；次要与探索性检验采用区间、效应大小和适当的多重性控制或明确说明。"
+  },
+  "inference_boundaries": [
+    "观察性面板只支持条件性时间预测关联，不声称父母冲突、抑郁或NSSI之间的因果效应。",
+    "RI-CLPM随机截距相关是稳定个体间关联，不是时间效应。",
+    "一组显著而另一组不显著不构成sex差异，必须报告直接约束检验。",
+    "未核实自杀意图排除前，只能称为自伤指标或NSSI候选指标。",
+    "模型拟合不能证明理论，零结果、反向结果和不收敛均须保留。"
+  ],
+  "reporting": {
+    "study_class": "观察性纵向学校队列/面板研究",
+    "standards": ["APA JARS-Quant", "STROBE cohort items", "SAGER sex/gender reporting principles"],
+    "target_journal": "未选择",
+    "policy_status": "pending-live-verification"
+  },
+  "ethics": {
+    "approval_status": "unverified",
+    "approval_id": "unknown",
+    "consent_status": "unverified",
+    "assent_status": "unverified",
+    "risk_protocol_status": "unverified",
+    "known_facts": [
+      "数据涉及未成年人、抑郁与自伤，必须限制行级数据、学校标识和小单元组合暴露。"
+    ],
+    "unknowns": [
+      "伦理委员会名称、批准号和批准日期",
+      "学校许可、监护人知情同意及青少年同意程序",
+      "数据收集时的自伤风险识别、转介或应急流程",
+      "当前二次分析和发表授权范围"
+    ]
+  },
+  "open_science": {
+    "preregistration": "这是既有数据的后设协议；须在查看本轮主模型结果前冻结，并披露数据已存在及此前接触程度。",
+    "data_sharing": "不公开可识别或可重识别的未成年人自伤行级数据；可在审批允许时共享去标识汇总或受控访问说明。",
+    "code_sharing": "计划共享不含本地绝对路径、标识符或敏感输出的分析代码、环境清单与模拟材料。",
+    "materials_sharing": "量表与问卷仅在版权、授权和伦理允许范围内说明或共享。",
+    "deviation_policy": "冻结后任何结局、路径、协变量、计分、排除、估计量或稳健性变更均进入带时间戳偏离记录。"
+  },
+  "search_protocol": {
+    "databases": ["PubMed", "Web of Science Core Collection", "APA PsycINFO", "CNKI"],
+    "languages": ["English", "Chinese"],
+    "date_range": "建库至实际检索日；各数据库记录精确检索日与覆盖范围",
+    "include": [
+      "青少年或可单独提取青少年结果的研究",
+      "至少覆盖父母冲突、抑郁、自伤中的两个构念，或提供RI-CLPM/测量方法证据",
+      "核心动态证据优先纵向、前瞻或交叉滞后设计",
+      "量表、方法和系统综述按预设证据角色单独纳入"
+    ],
+    "exclude": [
+      "成人结果无法与青少年分离",
+      "自杀行为与NSSI无法区分且不能作为广义自伤背景证据",
+      "没有可核验题录或撤回状态不清的关键证据",
+      "仅凭显著性、语言偏好或与预期方向不一致而排除"
+    ],
+    "supplemental_methods": ["种子文献前向与后向引文追踪", "核心综述参考文献追踪", "检索更新与撤稿/更正核验"],
+    "screening_plan": "正式纳排采用两个独立reviewer；分歧由第三位裁决者处理并保留理由。"
+  },
+  "unresolved_items": [
+    {
+      "id": "U01",
+      "category": "wave-timing",
+      "severity": "blocking",
+      "status": "open",
+      "blocking_stages": ["00_scope", "01_protocol", "05_methods"],
+      "question": "三次施测的准确日期、间隔和年级分别是什么？",
+      "resolution_evidence": "施测记录、原始研究方案或带日期的学校/调查记录"
+    },
+    {
+      "id": "U02",
+      "category": "sampling",
+      "severity": "blocking",
+      "status": "open",
+      "blocking_stages": ["00_scope", "01_protocol", "09_manuscript"],
+      "question": "招募地区、学校/班级抽样框、受邀人数、纳排规则及882行的样本流含义是什么？",
+      "resolution_evidence": "招募方案、样本流程表、原研究报告或数据管理记录"
+    },
+    {
+      "id": "U03",
+      "category": "ethics",
+      "severity": "blocking",
+      "status": "open",
+      "blocking_stages": ["01_protocol", "09_manuscript", "11_review"],
+      "question": "伦理批准、监护人同意、青少年同意、自伤风险处置和二次分析授权如何记录？",
+      "resolution_evidence": "伦理批件、同意书模板、学校许可、风险转介方案和数据使用授权"
+    },
+    {
+      "id": "U04",
+      "category": "measurement-provenance",
+      "severity": "major",
+      "status": "open",
+      "blocking_stages": ["01_protocol", "05_methods", "09_manuscript"],
+      "question": "三套工具的正式名称、中文版来源、授权、时间框架及NSSI是否明确排除自杀意图？",
+      "resolution_evidence": "原问卷说明、量表论文/手册、授权信息或原研究方案"
+    },
+    {
+      "id": "U05",
+      "category": "analysis-freeze",
+      "severity": "blocking",
+      "status": "open",
+      "blocking_stages": ["00_scope", "01_protocol", "05_methods"],
+      "question": "用户是否批准当前主要估计对象、主路径、次要间接关联和探索性sex差异划分？",
+      "resolution_evidence": "带日期的用户/研究团队确认及冻结记录"
+    },
+    {
+      "id": "U06",
+      "category": "data-linkage",
+      "severity": "blocking",
+      "status": "open",
+      "blocking_stages": ["06_data", "07_analysis"],
+      "question": "跨波ID不一致、sex异常与原始计分语法是否已由来源记录裁决？",
+      "resolution_evidence": "私密链接核对表、源数据说明和原始SPSS语法"
+    },
+    {
+      "id": "U07",
+      "category": "journal",
+      "severity": "minor",
+      "status": "open",
+      "blocking_stages": ["11_review"],
+      "question": "目标期刊和文章类型是什么？",
+      "resolution_evidence": "用户选择及期刊官网文章类型/作者指南实时快照"
+    }
+  ],
+  "approval": {
+    "scope_status": "draft",
+    "protocol_status": "draft",
+    "approved_by": "unknown",
+    "approved_at": "unknown"
+  }
+}

@@ -44,6 +44,16 @@ def indicators_for(config: dict, wave: str) -> list[str]:
     return expand_selector(selector) if selector else []
 
 
+def validate_analysis_readiness(spec: dict) -> list[str]:
+    errors = []
+    if spec.get("status") != "frozen":
+        errors.append("analysis specification status is not frozen")
+    blocking_items = spec.get("blocking_items", [])
+    if blocking_items:
+        errors.append(f"analysis specification has unresolved blocking_items: {blocking_items}")
+    return errors
+
+
 def validate_spec(spec: dict, columns: list[str]) -> list[str]:
     errors = []
     waves = spec.get("waves", [])
@@ -106,7 +116,7 @@ def r_path(path: Path) -> str:
     return str(path).replace("\\", "/").replace('"', '\\"')
 
 
-def model_syntax(spec: dict) -> str:
+def model_syntax(spec: dict, group_specific_regressions: int | None = None) -> str:
     waves = spec["waves"]
     constructs = spec["constructs"]
     lines = ["# Random intercepts"]
@@ -120,12 +130,19 @@ def model_syntax(spec: dict) -> str:
             lines.append(f"w_{name}_{wave} =~ 1*{variable}")
             lines.append(f"{variable} ~~ 0*{variable}")
     lines.append("\n# Stationary autoregressive and cross-lagged paths")
+
+    def regression_label(label: str) -> str:
+        if group_specific_regressions is None:
+            return label
+        labels = ", ".join(f"{label}_g{index}" for index in range(1, group_specific_regressions + 1))
+        return f"c({labels})"
+
     for index in range(1, len(waves)):
         current, previous = waves[index], waves[index - 1]
         for target in constructs:
-            predictors = [f"ar_{target}*w_{target}_{previous}"]
+            predictors = [f"{regression_label(f'ar_{target}')}*w_{target}_{previous}"]
             predictors.extend(
-                f"cl_{target}_from_{source}*w_{source}_{previous}"
+                f"{regression_label(f'cl_{target}_from_{source}')}*w_{source}_{previous}"
                 for source in constructs if source != target
             )
             lines.append(f"w_{target}_{current} ~ " + " + ".join(predictors))
@@ -152,6 +169,9 @@ def write(path: Path, text: str) -> str:
 
 def generate(data: Path, spec_path: Path, output_dir: Path) -> dict:
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    readiness_errors = validate_analysis_readiness(spec)
+    if readiness_errors:
+        return {"status": "blocked", "errors": readiness_errors, "code_files": []}
     columns = data_columns(data)
     errors = validate_spec(spec, columns)
     if errors:
@@ -165,12 +185,19 @@ def generate(data: Path, spec_path: Path, output_dir: Path) -> dict:
     missing = spec.get("missing", "FIML").lower()
     cluster = spec.get("cluster_variable")
     group = spec.get("group_variable")
+    configured_group_labels = spec.get("group_labels", {})
+    expected_group_count = len(configured_group_labels) if configured_group_labels else 2
     fixed_effects = spec.get("fixed_effect_variables", [])
     construct_vars = [variable for config in spec["constructs"].values() for variable in config["variables"].values()]
     indicator_vars = [
         item for config in spec["constructs"].values()
         for wave in spec["waves"] for item in indicators_for(config, wave)
     ]
+    sex_invariance = spec.get("sex_measurement_invariance", {})
+    required_sex_level = sex_invariance.get("required_level", "metric")
+    max_abs_delta_cfi = float(sex_invariance.get("max_abs_delta_cfi", 0.010))
+    max_increase_rmsea = float(sex_invariance.get("max_increase_rmsea", 0.015))
+    max_increase_srmr = float(sex_invariance.get("max_increase_srmr", 0.030))
 
     environment = f'''# Generated; do not edit results by hand.
 required_packages <- c("readr", "dplyr", "psych", "lavaan", "semTools", "simsem", "jsonlite")
@@ -192,7 +219,39 @@ sex_fits <- list(configural = fit_sex_configural, metric = fit_sex_metric, scala
 sex_fit_table <- do.call(rbind, lapply(names(sex_fits), function(name) cbind(model = name, as.data.frame(t(fitMeasures(sex_fits[[name]], c("cfi", "rmsea", "srmr")))))))
 sex_fit_table$delta_cfi <- c(NA, diff(sex_fit_table$cfi))
 sex_fit_table$delta_rmsea <- c(NA, diff(sex_fit_table$rmsea))
+sex_fit_table$delta_srmr <- c(NA, diff(sex_fit_table$srmr))
 write.csv(sex_fit_table, "../sex_measurement_invariance_fit.csv", row.names = FALSE)
+required_level <- {json.dumps(required_sex_level)}
+max_abs_delta_cfi <- {max_abs_delta_cfi}
+max_increase_rmsea <- {max_increase_rmsea}
+max_increase_srmr <- {max_increase_srmr}
+sex_converged <- vapply(sex_fits, lavaan::lavInspect, logical(1), "converged")
+transition_passes <- function(row_index) {{
+  values <- unlist(sex_fit_table[row_index, c("delta_cfi", "delta_rmsea", "delta_srmr")], use.names = FALSE)
+  all(is.finite(values)) && abs(values[[1]]) <= max_abs_delta_cfi &&
+    values[[2]] <= max_increase_rmsea && values[[3]] <= max_increase_srmr
+}}
+metric_passed <- all(sex_converged[c("configural", "metric")]) && transition_passes(2)
+scalar_passed <- metric_passed && isTRUE(sex_converged[["scalar"]]) && transition_passes(3)
+sex_gate_passed <- if (required_level == "scalar") scalar_passed else metric_passed
+sex_gate_reasons <- character()
+if (!all(sex_converged)) sex_gate_reasons <- c(sex_gate_reasons, "one or more sex-group CFA models did not converge")
+if (!metric_passed) sex_gate_reasons <- c(sex_gate_reasons, "metric invariance criteria were not met")
+if (required_level == "scalar" && !scalar_passed) sex_gate_reasons <- c(sex_gate_reasons, "scalar invariance criteria were not met")
+jsonlite::write_json(list(
+  schema_version = 1,
+  status = if (sex_gate_passed) "passed" else "blocked",
+  required_level = required_level,
+  criteria = list(
+    max_abs_delta_cfi = max_abs_delta_cfi,
+    max_increase_rmsea = max_increase_rmsea,
+    max_increase_srmr = max_increase_srmr
+  ),
+  convergence = as.list(sex_converged),
+  metric_passed = metric_passed,
+  scalar_passed = scalar_passed,
+  reasons = as.list(sex_gate_reasons)
+), "../sex_measurement_gate.json", auto_unbox = TRUE, pretty = TRUE)
 ''' if group else ""
         measurement = f'''source("00_environment.R")
 # Longitudinal measurement-invariance sequence; equality labels link item positions across waves.
@@ -209,7 +268,6 @@ fit_configural <- lavaan::cfa(configural_model, data = dat, estimator = "{estima
 fit_metric <- lavaan::cfa(metric_model, data = dat, estimator = "{estimator}", missing = "{missing}", std.lv = TRUE)
 fit_scalar <- lavaan::cfa(scalar_model, data = dat, estimator = "{estimator}", missing = "{missing}", std.lv = TRUE)
 fits <- list(configural = fit_configural, metric = fit_metric, scalar = fit_scalar)
-if (any(!vapply(fits, lavInspect, logical(1), "converged"))) stop("A measurement-invariance model did not converge")
 fit_table <- do.call(rbind, lapply(names(fits), function(name) cbind(model = name, as.data.frame(t(fitMeasures(fits[[name]], c("cfi", "rmsea", "srmr")))))))
 fit_table$delta_cfi <- c(NA, diff(fit_table$cfi))
 fit_table$delta_rmsea <- c(NA, diff(fit_table$rmsea))
@@ -219,6 +277,12 @@ capture.output(lavaan::lavTestLRT(fit_configural, fit_metric, fit_scalar), file 
 {sex_measurement}
 '''
     else:
+        score_sex_gate = f'''
+jsonlite::write_json(list(
+  schema_version = 1, status = "blocked", required_level = {json.dumps(required_sex_level)},
+  reasons = list("item-level sex measurement invariance is required before structural group comparison")
+), "../sex_measurement_gate.json", auto_unbox = TRUE, pretty = TRUE)
+''' if group else ""
         measurement = f'''source("00_environment.R")
 # Measurement gate. Use item-level invariance when indicator mappings are available;
 # otherwise document score comparability before structural analysis.
@@ -226,6 +290,7 @@ measurement_mode <- {json.dumps(spec.get('measurement_mode', 'score-comparabilit
 score_summary <- psych::describe(dat[c({', '.join(json.dumps(name) for name in construct_vars)})])
 write.csv(score_summary, "../measurement_score_summary.csv")
 # A documented score-comparability decision is required before structural interpretation.
+{score_sex_gate}
 '''
     cluster_arg = f', cluster = "{cluster}"' if cluster else ""
     ri = f'''source("00_environment.R")
@@ -240,13 +305,35 @@ write.csv(as.data.frame(t(fitMeasures(fit_riclpm))), "../ri_clpm_fit.csv", row.n
 saveRDS(fit_riclpm, "../ri_clpm_fit.rds")
 '''
     if group:
+        group_free_model = model_syntax(spec, group_specific_regressions=expected_group_count)
+        group_equal_model = model_syntax(spec)
         group_code = f'''source("01_measurement_gate.R")
-if (!file.exists("../sex_measurement_invariance_fit.csv")) stop("Sex-group measurement gate is missing")
+if (!file.exists("../sex_measurement_gate.json")) stop("Sex-group measurement gate is missing")
+sex_measurement_gate <- jsonlite::read_json("../sex_measurement_gate.json", simplifyVector = TRUE)
+if (!identical(sex_measurement_gate$status, "passed")) stop(
+  "Sex-group structural comparison blocked by measurement gate: ",
+  paste(unlist(sex_measurement_gate$reasons), collapse = "; ")
+)
 source("02_ri_clpm.R")
-fit_group_free <- lavaan::sem(riclpm_model, data = dat, group = "{group}", estimator = "{estimator}", missing = "{missing}"{cluster_arg})
-fit_group_equal <- lavaan::sem(riclpm_model, data = dat, group = "{group}", group.equal = c("regressions"), estimator = "{estimator}", missing = "{missing}"{cluster_arg})
+observed_groups <- unique(dat[["{group}"]][!is.na(dat[["{group}"]])])
+if (length(observed_groups) != {expected_group_count}) stop("Expected {expected_group_count} analysis groups but found ", length(observed_groups))
+riclpm_group_free_model <- '
+{group_free_model}
+'
+riclpm_group_equal_model <- '
+{group_equal_model}
+'
+fit_group_free <- lavaan::sem(riclpm_group_free_model, data = dat, group = "{group}", estimator = "{estimator}", missing = "{missing}"{cluster_arg})
+fit_group_equal <- lavaan::sem(riclpm_group_equal_model, data = dat, group = "{group}", group.equal = c("regressions"), estimator = "{estimator}", missing = "{missing}"{cluster_arg})
+free_npar <- as.integer(lavaan::fitMeasures(fit_group_free, "npar"))
+equal_npar <- as.integer(lavaan::fitMeasures(fit_group_equal, "npar"))
+if (free_npar <= equal_npar) stop("Sex-group equality model did not reduce the free parameter count")
 comparison <- lavaan::lavTestLRT(fit_group_equal, fit_group_free)
 capture.output(comparison, file = "../sex_group_constraint_test.txt")
+jsonlite::write_json(list(
+  schema_version = 1, status = "complete", free_parameters = free_npar,
+  equal_parameters = equal_npar, constrained_parameters = free_npar - equal_npar
+), "../sex_group_comparison.json", auto_unbox = TRUE, pretty = TRUE)
 # Interpret the constrained-vs-free test; never compare separate group p-values.
 # Structural interpretation remains blocked until the preregistered sex-measurement criteria are met.
 '''
@@ -368,7 +455,8 @@ jsonlite::write_json(model_output, "../model_output.json", auto_unbox = TRUE, pr
     if spec.get("measurement_mode") == "item-level":
         expected_outputs.append(output_dir / "measurement_invariance_lrt.txt")
     if group:
-        expected_outputs.append(output_dir / "sex_group_constraint_test.txt")
+        expected_outputs.extend([output_dir / "sex_group_constraint_test.txt", output_dir / "sex_group_comparison.json"])
+        expected_outputs.append(output_dir / "sex_measurement_gate.json")
         if spec.get("measurement_mode") == "item-level":
             expected_outputs.append(output_dir / "sex_measurement_invariance_fit.csv")
     if fixed_effects:

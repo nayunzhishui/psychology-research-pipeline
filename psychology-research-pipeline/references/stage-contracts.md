@@ -14,11 +14,15 @@
 
 通过条件：主要问题、目标人群、波次、构念、观察变量、主要估计对象和推论边界明确；数据能回答问题；关键未知项已解决或阻断。
 
+`strict` 与 `top-journal-prep` 还必须有 `01_标准与协议/检索前准备审计_presearch_readiness.json`：协议源文件存在且哈希一致，`scope_status=approved`、`protocol_status=frozen`、审批者与时间已记录，`ready_for_search=true`，且阻断 00/01/02 的未决项为空。关键词出现或篇幅充足不能替代此机器契约。
+
 ### 01_protocol — `01_标准与协议`
 
 必需：`实证研究协议_empirical_protocol.md`、`报告规范计划_reporting_plan.md`、`伦理与开放科学_ethics_open_science.md`。
 
 通过条件：假设、主要/次要结局、纳排、分析族、偏离政策、伦理事实、数据共享限制和适用规范冻结。不得伪造伦理审批号。
+
+伦理、监护人同意、青少年同意、自伤风险处置和二次分析授权逐项使用 `verified`、`not-applicable` 或 `unverified`；任一应核实项为 `unverified` 时，不得推进到正式检索。
 
 ### 02_search — `02_证据检索`
 
@@ -27,6 +31,8 @@
 检索表至少包含 `search_id,database,platform,query,filters,run_at,result_count,export_file,notes`；候选表使用 `schemas/evidence-record.schema.json` 的规范字段，并增加用于筛选的 `constructs,design,cohort_name,sample_country,sample_size,recruitment_years`。
 
 `strict` 与 `top-journal-prep` 还必须有 `检索计划_search_plan.json` 和 `题录导入清单_evidence_import_manifest.json`；候选表哈希须与导入清单一致，原始导出文件只读且逐文件记录 SHA-256。
+
+全 Zotero 库导出的 `zotero-library.bib` 只可作为连接测试，不能作为课题证据源；发现后 gate 失败。Zotero 来源必须记录精确集合名称与 key。
 
 ### 03_library — `03_Zotero与全文获取`
 

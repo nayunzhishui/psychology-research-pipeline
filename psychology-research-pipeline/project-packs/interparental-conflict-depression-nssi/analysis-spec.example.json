@@ -44,14 +44,20 @@
   "estimator": "MLR",
   "missing": "FIML",
   "measurement_mode": "item-level",
+  "sex_measurement_invariance": {
+    "required_level": "metric",
+    "max_abs_delta_cfi": 0.01,
+    "max_increase_rmsea": 0.015,
+    "max_increase_srmr": 0.03
+  },
   "random_seed": 20260718,
   "sample_size": 882,
   "power_replications": 1000,
-  "status": "blocked-until-private-id-sex-and-invalid-cell-decisions-are-approved",
+  "status": "blocked",
   "blocking_items": [
-    "four T1-T3 ID disagreements",
-    "invalid and missing cross-wave sex codes",
-    "invalid T1/T3 raw item cells",
+    "eleven normalized T1-T3 ID disagreements require source-linkage adjudication",
+    "T1 has 13 missing sex codes and 41 rows are inconsistent across valid wave-specific sex codes; the proposed T1-only policy is not frozen",
+    "invalid raw item cells require hash-bound derived-data decisions",
     "exact wave dates or intervals"
   ]
 }

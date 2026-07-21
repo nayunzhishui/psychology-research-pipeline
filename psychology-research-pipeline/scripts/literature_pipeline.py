@@ -533,6 +533,7 @@ def plan_search(run_dir: Path, spec_path: Path) -> dict:
                 "purpose": family.get("purpose", "unspecified"), "database": database,
                 "query": normalized, "query_sha256": sha256_bytes(normalized.encode("utf-8")),
                 "blocks": family.get("blocks", []), "syntax_status": "provided-exact-not-live-verified",
+                "database_protocol": spec.get("database_protocols", {}).get(database, {}),
             })
     if errors:
         return {"status": "blocked", "errors": errors}
@@ -543,6 +544,10 @@ def plan_search(run_dir: Path, spec_path: Path) -> dict:
         "created_at": now(), "spec": str(spec_path.resolve()), "spec_sha256": sha256_file(spec_path),
         "languages": spec["languages"], "search_update_days": spec["search_update_days"],
         "concept_blocks": blocks, "queries": queries,
+        "database_protocols": spec.get("database_protocols", {}),
+        "eligibility": spec.get("eligibility", {}),
+        "zotero_target": spec.get("zotero_target", {}),
+        "quality_assurance": spec.get("quality_assurance", {}),
     }
     plan_path = output_dir / "检索计划_search_plan.json"
     write_json(plan_path, payload)
@@ -553,6 +558,23 @@ def plan_search(run_dir: Path, spec_path: Path) -> dict:
     ]
     for name, terms in blocks.items():
         lines.append(f"- **{name}**：{'；'.join(terms)}")
+    if spec.get("eligibility"):
+        eligibility = spec["eligibility"]
+        lines.extend([
+            "", "## 纳入与排除协议", "",
+            f"- 日期范围：{eligibility['date_range']}",
+            f"- 人群：{eligibility['population']}",
+            f"- 文献类型：{'；'.join(eligibility['publication_types'])}",
+            f"- 纳入：{'；'.join(eligibility['include'])}",
+            f"- 排除：{'；'.join(eligibility['exclude'])}",
+        ])
+    if spec.get("zotero_target"):
+        target = spec["zotero_target"]
+        lines.extend([
+            "", "## Zotero精确目标", "",
+            f"- 集合：{target['collection_name']} (`{target['collection_key']}`)",
+            "- 禁止回退到全库导出。",
+        ])
     for query in queries:
         lines.extend([
             "", f"## {query['family_id']} / {query['database']}", "",

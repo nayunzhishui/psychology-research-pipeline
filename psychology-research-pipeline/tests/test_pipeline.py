@@ -41,6 +41,7 @@ class PipelineTests(unittest.TestCase):
             "project-pack.schema.json", "data-decisions.schema.json", "analysis-spec.schema.json",
             "analysis-output.schema.json", "journal-policy.schema.json", "search-plan.schema.json",
             "evidence-record.schema.json", "evidence-coverage.schema.json",
+            "presearch-protocol.schema.json", "zotero-target.schema.json",
         }
         schema_dir = SKILL / "schemas"
         self.assertEqual(expected, {path.name for path in schema_dir.glob("*.json")})
@@ -58,6 +59,8 @@ class PipelineTests(unittest.TestCase):
         Draft202012Validator(pack_schema).validate(pack)
         pack_dir = SKILL / "project-packs" / "interparental-conflict-depression-nssi"
         for file_name, schema_name in [
+            (pack["presearch_protocol"], "presearch-protocol.schema.json"),
+            (pack["zotero_target"], "zotero-target.schema.json"),
             (pack["search_plan"], "search-plan.schema.json"),
             (pack["evidence_coverage"], "evidence-coverage.schema.json"),
         ]:
@@ -70,14 +73,14 @@ class PipelineTests(unittest.TestCase):
             project = Path(temp)
             result = self.run_script(
                 "init_research_run.py", "--project", str(project), "--title", "青少年纵向研究",
-                "--mode", "strict", "--run-id", "test-run",
+                "--mode", "standard", "--run-id", "test-run",
             )
             run_dir = Path(result.stdout.strip())
             self.assertEqual(project / RUN_ROOT / "test-run", run_dir)
             self.assertFalse((project / "research-pipeline").exists())
             state = json.loads((run_dir / "状态记录_state.json").read_text(encoding="utf-8"))
             self.assertEqual(SCHEMA_VERSION, state["schema_version"])
-            self.assertEqual("strict", state["mode"])
+            self.assertEqual("standard", state["mode"])
             self.assertEqual("00_scope", state["current_stage"])
             self.assertTrue((run_dir / "日志" / "决策记录_decisions.md").is_file())
 

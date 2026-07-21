@@ -100,11 +100,25 @@ def validate_analysis_manifest(path: Path) -> list[str]:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return errors
-    required = {"schema_version", "data_files", "file_hashes", "software", "packages", "code_files", "random_seed", "analysis_plan", "deviations", "outputs"}
+    required = {
+        "schema_version", "data_files", "file_hashes", "software", "packages", "code_files",
+        "code_hashes", "random_seed", "analysis_plan", "deviations", "outputs", "output_hashes",
+        "executions", "execution_manifest", "execution_manifest_sha256", "model_output",
+        "model_output_sha256", "execution_status",
+    }
     missing = required - set(payload)
     if missing:
         errors.append(f"analysis manifest keys missing: {sorted(missing)}")
         return errors
+    if payload.get("schema_version") != 2 or payload.get("execution_status") != "verified":
+        errors.append("analysis manifest is not a verified schema-v2 manifest")
+    for key in ["data_files", "software", "packages", "code_files", "executions", "outputs"]:
+        if not isinstance(payload.get(key), list) or not payload[key]:
+            errors.append(f"analysis manifest has no {key}")
+    if payload.get("random_seed") in {None, "", "not-reported"}:
+        errors.append("analysis manifest has no random seed")
+    if not str(payload.get("analysis_plan", "")).strip():
+        errors.append("analysis manifest has no frozen analysis plan")
     for raw_path in payload.get("data_files", []):
         source = Path(raw_path).expanduser()
         if not source.is_absolute():
@@ -112,8 +126,8 @@ def validate_analysis_manifest(path: Path) -> list[str]:
         if not source.is_file():
             errors.append(f"analysis source missing: {raw_path}")
             continue
-        expected_hash = payload.get("file_hashes", {}).get(raw_path)
-        if expected_hash and expected_hash != sha256(source):
+        expected_hash = payload.get("file_hashes", {}).get(str(source), payload.get("file_hashes", {}).get(raw_path))
+        if not expected_hash or expected_hash != sha256(source):
             errors.append(f"analysis source hash mismatch: {raw_path}")
     for raw_path in payload.get("code_files", []):
         code_path = Path(raw_path).expanduser()
@@ -121,6 +135,108 @@ def validate_analysis_manifest(path: Path) -> list[str]:
             code_path = (path.parent / code_path).resolve()
         if not code_path.is_file():
             errors.append(f"analysis code missing: {raw_path}")
+        elif payload.get("code_hashes", {}).get(str(code_path), payload.get("code_hashes", {}).get(raw_path)) != sha256(code_path):
+            errors.append(f"analysis code hash mismatch: {raw_path}")
+    for raw_path in payload.get("outputs", []):
+        output_path = Path(raw_path).expanduser()
+        if not output_path.is_absolute():
+            output_path = (path.parent / output_path).resolve()
+        if not output_path.is_file() or output_path.stat().st_size == 0:
+            errors.append(f"analysis output missing or empty: {raw_path}")
+        elif payload.get("output_hashes", {}).get(str(output_path), payload.get("output_hashes", {}).get(raw_path)) != sha256(output_path):
+            errors.append(f"analysis output hash mismatch: {raw_path}")
+
+    execution_path = Path(payload.get("execution_manifest", "")).expanduser()
+    if not execution_path.is_absolute():
+        execution_path = (path.parent / execution_path).resolve()
+    expected_execution_path = path.parent / "分析执行清单_analysis_execution_manifest.json"
+    if execution_path != expected_execution_path.resolve():
+        errors.append("analysis manifest does not reference the canonical execution manifest")
+    if not execution_path.is_file():
+        errors.append(f"analysis execution manifest missing: {execution_path}")
+        return errors
+    if payload.get("execution_manifest_sha256") != sha256(execution_path):
+        errors.append("analysis execution manifest hash mismatch")
+        return errors
+    try:
+        execution = json.loads(execution_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        errors.append(f"invalid analysis execution manifest: {exc}")
+        return errors
+    if execution.get("schema_version") != 2 or execution.get("status") != "executed" or execution.get("executor") != "analysis_runner.py":
+        errors.append("analysis execution manifest is not a completed runner execution")
+    for key in ["inputs", "software", "packages", "code_files", "executions", "outputs"]:
+        if not isinstance(execution.get(key), list) or not execution[key]:
+            errors.append(f"analysis execution manifest has no {key}")
+    if payload.get("software") != execution.get("software") or payload.get("packages") != execution.get("packages"):
+        errors.append("analysis software/package provenance differs from execution manifest")
+    if payload.get("code_files") != execution.get("code_files") or payload.get("code_hashes") != execution.get("code_hashes"):
+        errors.append("analysis code provenance differs from execution manifest")
+    if payload.get("executions") != execution.get("executions"):
+        errors.append("analysis execution records differ from execution manifest")
+    if payload.get("random_seed") != execution.get("random_seed"):
+        errors.append("analysis random seed differs from execution manifest")
+
+    code_manifest = Path(str(execution.get("code_manifest", ""))).expanduser().resolve()
+    if not code_manifest.is_file() or execution.get("code_manifest_sha256") != sha256(code_manifest):
+        errors.append("analysis code manifest provenance mismatch")
+    for index, item in enumerate(execution.get("inputs", []), 1):
+        if not isinstance(item, dict):
+            errors.append(f"analysis input record {index} is not an object")
+            continue
+        input_path = Path(str(item.get("path", ""))).expanduser().resolve()
+        if not input_path.is_file() or input_path.stat().st_size == 0:
+            errors.append(f"analysis execution input missing or empty: {input_path}")
+        elif not item.get("sha256") or item["sha256"] != sha256(input_path) or item.get("bytes") != input_path.stat().st_size:
+            errors.append(f"analysis execution input provenance mismatch: {input_path}")
+    for index, item in enumerate(execution.get("packages", []), 1):
+        if not isinstance(item, dict) or not str(item.get("name", "")).strip() or str(item.get("version", "")).strip() in {"", "NA", "<NA>"}:
+            errors.append(f"analysis package provenance incomplete at record {index}")
+    for index, item in enumerate(execution.get("software", []), 1):
+        if not isinstance(item, dict) or not str(item.get("name", "")).strip() or not str(item.get("version", "")).strip():
+            errors.append(f"analysis software provenance incomplete at record {index}")
+            continue
+        executable = Path(str(item.get("executable", ""))).expanduser().resolve()
+        if not executable.is_file() or not item.get("executable_sha256") or item["executable_sha256"] != sha256(executable):
+            errors.append(f"analysis software executable provenance mismatch: {executable}")
+
+    code_paths = {Path(value).expanduser().resolve() for value in execution.get("code_files", [])}
+    executed_paths: set[Path] = set()
+    for index, item in enumerate(execution.get("executions", []), 1):
+        if not isinstance(item, dict):
+            errors.append(f"execution record {index} is not an object")
+            continue
+        code_path = Path(str(item.get("code_file", ""))).expanduser().resolve()
+        executed_paths.add(code_path)
+        if item.get("exit_code") != 0:
+            errors.append(f"execution record has nonzero exit code: {code_path}")
+        if not code_path.is_file() or item.get("code_sha256") != sha256(code_path):
+            errors.append(f"execution code hash mismatch: {code_path}")
+        log_path = Path(str(item.get("log", ""))).expanduser().resolve()
+        if not log_path.is_file() or log_path.stat().st_size == 0:
+            errors.append(f"execution log missing or empty: {log_path}")
+        elif not item.get("log_sha256") or item["log_sha256"] != sha256(log_path):
+            errors.append(f"execution log hash mismatch: {log_path}")
+    if code_paths and executed_paths != code_paths:
+        errors.append("execution records do not cover exactly the declared code files")
+
+    execution_outputs: dict[Path, dict] = {}
+    for index, item in enumerate(execution.get("outputs", []), 1):
+        if not isinstance(item, dict):
+            errors.append(f"execution output record {index} is not an object")
+            continue
+        output_path = Path(str(item.get("path", ""))).expanduser().resolve()
+        execution_outputs[output_path] = item
+        if not output_path.is_file() or output_path.stat().st_size == 0:
+            errors.append(f"executed output missing or empty: {output_path}")
+        elif not item.get("sha256") or item["sha256"] != sha256(output_path) or item.get("bytes") != output_path.stat().st_size:
+            errors.append(f"executed output provenance mismatch: {output_path}")
+    model_output = Path(payload.get("model_output", "")).expanduser().resolve()
+    declared_model_output = Path(execution.get("model_output", "")).expanduser().resolve()
+    if model_output != declared_model_output or model_output not in execution_outputs:
+        errors.append("model output is not bound to an execution output record")
+    elif payload.get("model_output_sha256") != sha256(model_output) or execution.get("model_output_sha256") != sha256(model_output):
+        errors.append("model output hash mismatch across analysis provenance")
     return errors
 
 
@@ -169,6 +285,11 @@ def validate_literature_controls(run_dir: Path, stage_id: str, strict: bool) -> 
                     errors.append("candidate records hash differs from evidence import manifest")
                 if not payload.get("source_exports"):
                     errors.append("evidence import manifest contains no immutable source exports")
+                if payload.get("search_id") == "zotero-library" or any(
+                    Path(item.get("path", "")).name == "zotero-library.bib"
+                    for item in payload.get("source_exports", [])
+                ):
+                    errors.append("whole-library Zotero integration export is not admissible project evidence")
             except json.JSONDecodeError:
                 errors.append(f"invalid JSON {ingest.name}")
     elif stage_id == "04_synthesis":
@@ -200,6 +321,34 @@ def validate_literature_controls(run_dir: Path, stage_id: str, strict: bool) -> 
                     errors.append("coverage requirements hash mismatch")
                 if payload.get("status") != "ready" or payload.get("missing_core_slots"):
                     errors.append(f"core evidence coverage is blocked: {payload.get('missing_core_slots', [])}")
+    return errors
+
+
+def validate_presearch_controls(run_dir: Path, stage_id: str, strict: bool) -> list[str]:
+    if not strict or stage_id not in {"00_scope", "01_protocol"}:
+        return []
+    path = run_dir / "01_标准与协议" / "检索前准备审计_presearch_readiness.json"
+    if not path.is_file():
+        return [f"strict pre-search control missing: {path.name}"]
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return [f"invalid JSON {path.name}: {exc}"]
+    errors = []
+    source = Path(payload.get("protocol_source", ""))
+    if not source.is_file():
+        errors.append(f"pre-search protocol source missing: {source}")
+    elif payload.get("protocol_sha256") != sha256(source):
+        errors.append("pre-search protocol hash mismatch")
+    if not payload.get("ready_for_search") or payload.get("status") != "ready":
+        errors.append("pre-search readiness is blocked")
+    if payload.get("blocking_items"):
+        errors.append(f"unresolved pre-search blockers: {[item.get('id') for item in payload['blocking_items']]}")
+    approval = payload.get("approval", {})
+    if approval.get("scope_status") != "approved" or approval.get("protocol_status") != "frozen":
+        errors.append("scope/protocol approval is not frozen")
+    if payload.get("approval_errors") or payload.get("ethics_errors"):
+        errors.append("approval or ethics verification remains unresolved")
     return errors
 
 
@@ -240,6 +389,7 @@ def main() -> int:
     errors = [error for path in paths for error in validate_file(path)]
     strict = state.get("mode") in {"strict", "top-journal-prep"}
     errors.extend(validate_semantics(args.stage, paths, strict))
+    errors.extend(validate_presearch_controls(run_dir, args.stage, strict))
     errors.extend(validate_literature_controls(run_dir, args.stage, strict))
     if args.stage == "07_analysis":
         errors.extend(validate_analysis_manifest(run_dir / stage["dir"] / "分析清单_analysis_manifest.json"))

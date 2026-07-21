@@ -129,6 +129,37 @@ def command_inventory(args: argparse.Namespace) -> int:
     return result.returncode
 
 
+def command_prepare_presearch(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("prepare_presearch.py", [
+        "--run-dir", str(run_dir), "--spec", args.spec,
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_preflight_environment(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    child_args = [
+        "--run-dir", str(run_dir), "--helper", args.helper, "--rscript", args.rscript,
+    ]
+    if args.collection_name:
+        child_args.extend(["--collection-name", args.collection_name])
+    if args.collection_key:
+        child_args.extend(["--collection-key", args.collection_key])
+    result = run_child("environment_preflight.py", child_args)
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
 def command_gate(args: argparse.Namespace) -> int:
     run_dir = Path(args.run_dir).expanduser().resolve()
     load_state(run_dir)
@@ -387,7 +418,14 @@ def command_import_evidence(args: argparse.Namespace) -> int:
 def command_sync_zotero(args: argparse.Namespace) -> int:
     run_dir = Path(args.run_dir).expanduser().resolve()
     load_state(run_dir)
-    result = run_child("zotero_bridge.py", ["--run-dir", str(run_dir), "--helper", args.helper])
+    child_args = ["--run-dir", str(run_dir), "--helper", args.helper]
+    if args.collection_name:
+        child_args.extend(["--collection-name", args.collection_name])
+    if args.collection_key:
+        child_args.extend(["--collection-key", args.collection_key])
+    if args.allow_empty:
+        child_args.append("--allow-empty")
+    result = run_child("zotero_bridge.py", child_args)
     if result.stdout:
         sys.stdout.write(result.stdout)
     if result.stderr:
@@ -511,6 +549,19 @@ def build_parser() -> argparse.ArgumentParser:
     inventory.add_argument("--source", action="append", required=True)
     inventory.set_defaults(handler=command_inventory)
 
+    presearch = subparsers.add_parser("prepare-presearch", help="render scope/protocol drafts and audit readiness before searching")
+    presearch.add_argument("--run-dir", required=True)
+    presearch.add_argument("--spec", required=True, help="structured pre-search protocol JSON")
+    presearch.set_defaults(handler=command_prepare_presearch)
+
+    environment = subparsers.add_parser("preflight-environment", help="audit R packages and one exact Zotero collection before searching")
+    environment.add_argument("--run-dir", required=True)
+    environment.add_argument("--helper", required=True, help="path to the installed Zotero helper")
+    environment.add_argument("--rscript", default="Rscript")
+    environment.add_argument("--collection-name", help="exact collection name; may come from the attached project pack")
+    environment.add_argument("--collection-key", help="exact collection key; may come from the attached project pack")
+    environment.set_defaults(handler=command_preflight_environment)
+
     gate = subparsers.add_parser("gate", help="check or advance one canonical stage")
     gate.add_argument("--run-dir", required=True)
     gate.add_argument("--stage", choices=STAGE_IDS, required=True)
@@ -578,9 +629,12 @@ def build_parser() -> argparse.ArgumentParser:
     evidence_import.add_argument("--search-id", required=True)
     evidence_import.set_defaults(handler=command_import_evidence)
 
-    zotero_sync = subparsers.add_parser("sync-zotero", help="export Zotero, import records, and audit local PDFs")
+    zotero_sync = subparsers.add_parser("sync-zotero", help="export one exact Zotero collection, import records, and audit local PDFs")
     zotero_sync.add_argument("--run-dir", required=True)
     zotero_sync.add_argument("--helper", required=True, help="path to the installed Zotero helper")
+    zotero_sync.add_argument("--collection-name", help="exact collection name; may come from the attached project pack")
+    zotero_sync.add_argument("--collection-key", help="exact Zotero collection key; may come from the attached project pack")
+    zotero_sync.add_argument("--allow-empty", action="store_true", help="preflight an empty verified collection without importing evidence")
     zotero_sync.set_defaults(handler=command_sync_zotero)
 
     study_clusters = subparsers.add_parser("cluster-studies", help="flag possible multi-report study families for review")
