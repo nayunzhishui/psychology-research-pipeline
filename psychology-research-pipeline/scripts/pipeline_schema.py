@@ -52,7 +52,14 @@ STAGE_IDS = [stage["id"] for stage in STAGES]
 CSV_HEADERS = {
     "构念变量关系表_construct_variable_map.csv": ["construct_id", "构念", "变量角色", "波次", "变量名", "工具", "计分", "估计对象", "理论依据", "状态", "备注"],
     "检索记录_search_log.csv": ["search_id", "database", "platform", "query", "filters", "run_at", "result_count", "export_file", "notes"],
-    "候选文献表_candidate_records.csv": ["candidate_id", "title", "authors", "year", "doi", "pmid", "source", "abstract", "landing_url", "database", "search_id", "dedup_status"],
+    "候选文献表_candidate_records.csv": [
+        "candidate_id", "title", "authors", "year", "doi", "pmid", "openalex_id",
+        "source_record_id", "source", "abstract", "landing_url", "database", "search_id",
+        "publication_type", "evidence_role", "constructs", "design", "cohort_name", "sample_country",
+        "sample_size", "recruitment_years", "correction_status", "retraction_status", "open_access_status",
+        "fulltext_status", "metadata_verified_at", "metadata_source", "raw_export_file", "raw_export_sha256",
+        "dedup_status",
+    ],
     "Zotero入库清单_zotero_manifest.csv": ["candidate_id", "zotero_item_key", "title", "year", "doi", "collection", "attachment_key", "attachment_status", "validation_status", "source_url", "notes"],
     "PDF全文清单_pdf_manifest.csv": ["candidate_id", "file_name", "sha256", "page_count", "signature_valid", "metadata_match", "status", "notes"],
     "文献筛选表_literature_screening.csv": ["candidate_id", "stage", "decision", "reason", "reviewer_basis", "full_text_available", "decided_at"],

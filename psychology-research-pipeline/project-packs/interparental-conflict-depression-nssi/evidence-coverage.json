@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "requirements": [
+    {"slot_id": "conflict-depression-direct", "core": true, "minimum": 2, "criteria": {"evidence_role": ["direct-empirical"], "constructs_all": ["conflict", "depression"], "design_any": ["longitudinal", "prospective", "cross-lagged"], "retraction_status": ["clear"], "fulltext_status": ["verified"]}},
+    {"slot_id": "conflict-self-harm-direct", "core": true, "minimum": 2, "criteria": {"evidence_role": ["direct-empirical"], "constructs_all": ["conflict", "self-harm"], "design_any": ["longitudinal", "prospective", "cross-lagged"], "retraction_status": ["clear"], "fulltext_status": ["verified"]}},
+    {"slot_id": "depression-self-harm-direct", "core": true, "minimum": 2, "criteria": {"evidence_role": ["direct-empirical"], "constructs_all": ["depression", "self-harm"], "design_any": ["longitudinal", "prospective", "cross-lagged"], "retraction_status": ["clear"], "fulltext_status": ["verified"]}},
+    {"slot_id": "joint-development-model", "core": true, "minimum": 1, "criteria": {"evidence_role": ["direct-empirical"], "constructs_all": ["conflict", "depression", "self-harm"], "design_any": ["longitudinal", "cross-lagged"], "retraction_status": ["clear"], "fulltext_status": ["verified"]}},
+    {"slot_id": "gender-comparison", "core": true, "minimum": 1, "criteria": {"evidence_role": ["direct-empirical"], "constructs_all": ["gender"], "design_any": ["multi-group", "interaction", "stratified"], "retraction_status": ["clear"], "fulltext_status": ["verified"]}},
+    {"slot_id": "ri-clpm-method", "core": true, "minimum": 1, "criteria": {"evidence_role": ["method"], "constructs_all": ["ri-clpm"], "design_any": ["longitudinal"], "retraction_status": ["clear"], "fulltext_status": ["verified"]}},
+    {"slot_id": "measurement-evidence", "core": true, "minimum": 3, "criteria": {"evidence_role": ["measurement"], "constructs_all": [], "design_any": ["validation", "psychometric"], "retraction_status": ["clear"], "fulltext_status": ["verified"]}},
+    {"slot_id": "systematic-context", "core": false, "minimum": 2, "criteria": {"evidence_role": ["systematic-review"], "constructs_all": [], "design_any": [], "retraction_status": ["clear"], "fulltext_status": ["verified"]}}
+  ]
+}

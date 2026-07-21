@@ -82,6 +82,8 @@ def main() -> int:
             ("pack.json", "pack.json"), (pack["profile"], "project-profile.md"),
             (pack["data_audit_spec"], "data-audit-spec.json"),
             (pack["analysis_spec"], "analysis-spec.example.json"),
+            *([(pack["search_plan"], "search-plan.json")] if pack.get("search_plan") else []),
+            *([(pack["evidence_coverage"], "evidence-coverage.json")] if pack.get("evidence_coverage") else []),
         ]:
             source = (pack_root / source_name).resolve()
             if pack_root not in source.parents or not source.is_file():

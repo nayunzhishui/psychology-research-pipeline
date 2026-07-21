@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "review_id": "interparental-conflict-depression-nssi",
+  "concept_blocks": {
+    "population": ["adolescen*", "youth", "early adolescence", "青少年", "初中生"],
+    "conflict": ["interparental conflict", "marital conflict", "parental conflict", "父母冲突", "婚姻冲突"],
+    "depression": ["depress*", "depressive symptoms", "抑郁", "抑郁症状"],
+    "self_harm": ["nonsuicidal self-injury", "NSSI", "self-harm", "self-injur*", "自伤", "非自杀性自伤"],
+    "longitudinal": ["longitudinal", "prospective", "cross-lagged", "random intercept cross-lagged", "纵向", "交叉滞后"],
+    "gender": ["gender", "sex differences", "male", "female", "性别差异"],
+    "measurement": ["scale", "measure", "validation", "psychometric", "量表", "信效度"]
+  },
+  "query_families": [
+    {
+      "family_id": "conflict-depression-longitudinal",
+      "purpose": "direct empirical evidence for conflict-depression dynamics",
+      "blocks": ["population", "conflict", "depression", "longitudinal"],
+      "queries": {
+        "PubMed": "(adolescen*[Title/Abstract] OR youth[Title/Abstract]) AND (interparental conflict[Title/Abstract] OR marital conflict[Title/Abstract] OR parental conflict[Title/Abstract]) AND (depress*[Title/Abstract] OR depressive symptoms[Title/Abstract]) AND (longitudinal[Title/Abstract] OR prospective[Title/Abstract] OR cross-lagged[Title/Abstract])",
+        "Web of Science": "TS=((adolescen* OR youth) AND (interparental conflict OR marital conflict OR parental conflict) AND (depress* OR depressive symptoms) AND (longitudinal OR prospective OR cross-lagged))",
+        "PsycINFO": "(adolescen* OR youth) AND (interparental conflict OR marital conflict OR parental conflict) AND (depress* OR depressive symptoms) AND (longitudinal OR prospective OR cross-lagged)"
+      }
+    },
+    {
+      "family_id": "conflict-self-harm-longitudinal",
+      "purpose": "direct empirical evidence for conflict-self-harm dynamics",
+      "blocks": ["population", "conflict", "self_harm", "longitudinal"],
+      "queries": {
+        "PubMed": "(adolescen*[Title/Abstract] OR youth[Title/Abstract]) AND (interparental conflict[Title/Abstract] OR marital conflict[Title/Abstract]) AND (nonsuicidal self-injury[Title/Abstract] OR NSSI[Title/Abstract] OR self-harm[Title/Abstract]) AND (longitudinal[Title/Abstract] OR prospective[Title/Abstract])",
+        "Web of Science": "TS=((adolescen* OR youth) AND (interparental conflict OR marital conflict) AND (nonsuicidal self-injury OR NSSI OR self-harm) AND (longitudinal OR prospective))",
+        "PsycINFO": "(adolescen* OR youth) AND (interparental conflict OR marital conflict) AND (nonsuicidal self-injury OR NSSI OR self-harm) AND (longitudinal OR prospective)"
+      }
+    },
+    {
+      "family_id": "depression-self-harm-longitudinal",
+      "purpose": "direct empirical evidence for depression-self-harm dynamics",
+      "blocks": ["population", "depression", "self_harm", "longitudinal"],
+      "queries": {
+        "PubMed": "(adolescen*[Title/Abstract] OR youth[Title/Abstract]) AND (depress*[Title/Abstract] OR depressive symptoms[Title/Abstract]) AND (nonsuicidal self-injury[Title/Abstract] OR NSSI[Title/Abstract] OR self-harm[Title/Abstract]) AND (longitudinal[Title/Abstract] OR prospective[Title/Abstract])",
+        "Web of Science": "TS=((adolescen* OR youth) AND (depress* OR depressive symptoms) AND (nonsuicidal self-injury OR NSSI OR self-harm) AND (longitudinal OR prospective))",
+        "PsycINFO": "(adolescen* OR youth) AND (depress* OR depressive symptoms) AND (nonsuicidal self-injury OR NSSI OR self-harm) AND (longitudinal OR prospective)"
+      }
+    },
+    {
+      "family_id": "joint-model-gender",
+      "purpose": "joint developmental model and direct sex or gender comparison",
+      "blocks": ["population", "conflict", "depression", "self_harm", "longitudinal", "gender"],
+      "queries": {
+        "Web of Science": "TS=((adolescen* OR youth) AND (interparental conflict OR marital conflict) AND depress* AND (NSSI OR self-harm) AND (longitudinal OR cross-lagged) AND (gender OR sex differences))",
+        "PsycINFO": "(adolescen* OR youth) AND (interparental conflict OR marital conflict) AND depress* AND (NSSI OR self-harm) AND (longitudinal OR cross-lagged) AND (gender OR sex differences)",
+        "CNKI": "(青少年 OR 初中生) AND (父母冲突 OR 婚姻冲突) AND 抑郁 AND (自伤 OR 非自杀性自伤) AND (纵向 OR 交叉滞后) AND 性别"
+      }
+    },
+    {
+      "family_id": "methods-and-measures",
+      "purpose": "RI-CLPM, longitudinal measurement, and validated instruments",
+      "blocks": ["longitudinal", "measurement"],
+      "queries": {
+        "Web of Science": "TS=((random intercept cross-lagged OR RI-CLPM OR longitudinal measurement invariance) AND (psycholog* OR adolescen*))",
+        "PsycINFO": "(random intercept cross-lagged OR RI-CLPM OR longitudinal measurement invariance) AND (psycholog* OR adolescen*)",
+        "CNKI": "(随机截距交叉滞后 OR 纵向测量不变性) AND (心理 OR 青少年)"
+      }
+    }
+  ],
+  "languages": ["en", "zh"],
+  "search_update_days": 30
+}

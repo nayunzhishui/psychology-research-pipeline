@@ -11,7 +11,7 @@
 
 ## Route order
 
-Prefer structured scholarly APIs, publisher metadata, and purpose-built connectors for discovery and metadata. Use Chrome only when the user's existing session, institutional access, or Zotero Connector is needed. Use Computer Use only for a desktop action the Zotero helper/connector cannot perform.
+Prefer structured scholarly APIs, publisher metadata, and purpose-built connectors for discovery and metadata. PubMed/PsycINFO/Web of Science/CNKI exports are core-search evidence when used; Crossref resolves DOI metadata, and OpenAlex expands citation discovery but is not a substitute for a database search. Use Chrome only when the user's existing session, institutional access, or Zotero Connector is needed. Use Computer Use only for a desktop action the Zotero helper/connector cannot perform.
 
 Before controlling a tool, load and follow its installed skill: `control-chrome`, `Zotero`, `computer-use`, and `literature-to-zotero`. Their current instructions override duplicated operational detail here.
 

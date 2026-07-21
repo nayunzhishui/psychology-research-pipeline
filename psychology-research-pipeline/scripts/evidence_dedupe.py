@@ -23,14 +23,28 @@ def normalize_text(value: str) -> str:
     return "".join(char for char in value if char.isalnum())
 
 
-def canonical_key(row: dict[str, str]) -> str:
+def canonical_identity(row: dict[str, str]) -> tuple[str, str]:
     doi = normalize_doi(row.get("doi", ""))
     if doi:
-        return f"doi:{doi}"
+        return "doi", doi
+    pmid = normalize_text(row.get("pmid", ""))
+    if pmid:
+        return "pmid", pmid
+    openalex_id = normalize_text(row.get("openalex_id", "").rsplit("/", 1)[-1])
+    if openalex_id:
+        return "openalex_id", openalex_id
     author = re.split(r"[,;]", row.get("authors", ""), maxsplit=1)[0]
-    return "meta:" + "|".join([
-        normalize_text(row.get("title", "")), normalize_text(author), row.get("year", "").strip(),
+    title = normalize_text(row.get("title", ""))
+    if not title:
+        return "insufficient_metadata", normalize_text(row.get("candidate_id", ""))
+    return "title_author_year", "|".join([
+        title, normalize_text(author), row.get("year", "").strip(),
     ])
+
+
+def canonical_key(row: dict[str, str]) -> str:
+    field, value = canonical_identity(row)
+    return f"{field}:{value}"
 
 
 def file_hash(path: Path) -> str:
@@ -48,23 +62,28 @@ def dedupe(source: Path, output_dir: Path) -> dict:
         return {"status": "blocked", "errors": [f"missing columns: {sorted(missing)}"]}
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_fields = fields + [name for name in ["study_id", "canonical_key", "duplicate_of", "dedup_status"] if name not in fields]
+    output_fields = fields + [name for name in [
+        "study_id", "canonical_key", "duplicate_of", "duplicate_match_field", "dedup_status",
+    ] if name not in fields]
     unique_rows = []
     duplicate_rows = []
     seen: dict[str, dict[str, str]] = {}
     for row in rows:
         row = dict(row)
         row["doi"] = normalize_doi(row.get("doi", ""))
-        key = canonical_key(row)
+        match_field, match_value = canonical_identity(row)
+        key = f"{match_field}:{match_value}"
         row["canonical_key"] = key
         if key in seen:
             row["study_id"] = seen[key]["study_id"]
             row["duplicate_of"] = seen[key]["candidate_id"]
+            row["duplicate_match_field"] = match_field
             row["dedup_status"] = "duplicate"
             duplicate_rows.append(row)
         else:
             row["study_id"] = f"study-{len(unique_rows) + 1:04d}"
             row["duplicate_of"] = ""
+            row["duplicate_match_field"] = ""
             row["dedup_status"] = "unique"
             seen[key] = row
             unique_rows.append(row)

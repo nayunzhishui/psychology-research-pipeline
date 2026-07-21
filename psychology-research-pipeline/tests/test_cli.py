@@ -67,6 +67,8 @@ class PipelineCliTests(unittest.TestCase):
             self.assertTrue((copied / "pack.json").is_file())
             self.assertTrue((copied / "project-profile.md").is_file())
             self.assertTrue((copied / "data-audit-spec.json").is_file())
+            self.assertTrue((copied / "search-plan.json").is_file())
+            self.assertTrue((copied / "evidence-coverage.json").is_file())
             self.assertFalse((SKILL / "references" / "project-profile.md").exists())
 
     def test_source_inventory_hashes_files_without_reading_sensitive_rows(self) -> None:

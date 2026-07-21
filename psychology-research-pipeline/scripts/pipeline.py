@@ -339,6 +339,62 @@ def command_dedupe_evidence(args: argparse.Namespace) -> int:
     return result.returncode
 
 
+def command_plan_search(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("literature_pipeline.py", [
+        "plan-search", "--run-dir", str(run_dir), "--spec", args.spec,
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_import_evidence(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    child_args = ["import-evidence", "--run-dir", str(run_dir), "--search-id", args.search_id]
+    for source in args.input:
+        child_args.extend(["--input", source])
+    result = run_child("literature_pipeline.py", child_args)
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_cluster_studies(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("literature_pipeline.py", [
+        "cluster-studies", "--run-dir", str(run_dir), "--input", args.input,
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_literature_action(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    child_args = [args.command, "--run-dir", str(run_dir)]
+    for name in ["input", "requirements", "baseline", "current"]:
+        value = getattr(args, name, None)
+        if value:
+            child_args.extend([f"--{name}", value])
+    result = run_child("literature_pipeline.py", child_args)
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
 def command_render_manuscript(args: argparse.Namespace) -> int:
     run_dir = Path(args.run_dir).expanduser().resolve()
     load_state(run_dir)
@@ -447,6 +503,39 @@ def build_parser() -> argparse.ArgumentParser:
     evidence.add_argument("--run-dir", required=True)
     evidence.add_argument("--input", required=True)
     evidence.set_defaults(handler=command_dedupe_evidence)
+
+    search_plan = subparsers.add_parser("plan-search", help="freeze modular database-specific query families")
+    search_plan.add_argument("--run-dir", required=True)
+    search_plan.add_argument("--spec", required=True)
+    search_plan.set_defaults(handler=command_plan_search)
+
+    evidence_import = subparsers.add_parser("import-evidence", help="normalize heterogeneous evidence exports")
+    evidence_import.add_argument("--run-dir", required=True)
+    evidence_import.add_argument("--input", action="append", required=True)
+    evidence_import.add_argument("--search-id", required=True)
+    evidence_import.set_defaults(handler=command_import_evidence)
+
+    study_clusters = subparsers.add_parser("cluster-studies", help="flag possible multi-report study families for review")
+    study_clusters.add_argument("--run-dir", required=True)
+    study_clusters.add_argument("--input", required=True)
+    study_clusters.set_defaults(handler=command_cluster_studies)
+
+    coverage = subparsers.add_parser("audit-evidence-coverage", help="gate synthesis on explicit evidence slots")
+    coverage.add_argument("--run-dir", required=True)
+    coverage.add_argument("--input", required=True)
+    coverage.add_argument("--requirements", required=True)
+    coverage.set_defaults(handler=command_literature_action)
+
+    retrieval = subparsers.add_parser("build-retrieval-queue", help="prioritize authorized full-text acquisition")
+    retrieval.add_argument("--run-dir", required=True)
+    retrieval.add_argument("--input", required=True)
+    retrieval.set_defaults(handler=command_literature_action)
+
+    refresh = subparsers.add_parser("refresh-search", help="compare a search refresh without deleting prior evidence")
+    refresh.add_argument("--run-dir", required=True)
+    refresh.add_argument("--baseline", required=True)
+    refresh.add_argument("--current", required=True)
+    refresh.set_defaults(handler=command_literature_action)
 
     manuscript = subparsers.add_parser("render-manuscript", help="render only verified result and claim placeholders")
     manuscript.add_argument("--run-dir", required=True)

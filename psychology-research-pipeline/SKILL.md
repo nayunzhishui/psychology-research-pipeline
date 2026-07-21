@@ -85,7 +85,13 @@ python scripts/pipeline.py inventory --run-dir <运行目录> --source <资料�
 ```powershell
 python scripts/pipeline.py audit-data --run-dir <运行目录> --data <sav或csv> --spec <审计规格json> [--private-register <本地私密jsonl>]
 python scripts/pipeline.py freeze-data --run-dir <运行目录> --data <数据> --spec <规格> [--decisions <逐项决策json>]
+python scripts/pipeline.py plan-search --run-dir <运行目录> --spec <search-plan.json>
+python scripts/pipeline.py import-evidence --run-dir <运行目录> --search-id <search-id> --input <导出文件> [--input <导出文件> ...]
 python scripts/pipeline.py dedupe-evidence --run-dir <运行目录> --input <候选文献csv>
+python scripts/pipeline.py cluster-studies --run-dir <运行目录> --input <去重后csv>
+python scripts/pipeline.py audit-evidence-coverage --run-dir <运行目录> --input <已标注证据csv> --requirements <coverage.json>
+python scripts/pipeline.py build-retrieval-queue --run-dir <运行目录> --input <已标注证据csv>
+python scripts/pipeline.py refresh-search --run-dir <运行目录> --baseline <旧候选csv> --current <新候选csv>
 python scripts/pipeline.py generate-analysis --run-dir <运行目录> --data <冻结数据> --spec <分析规格json>
 python scripts/pipeline.py run-analysis --run-dir <运行目录> --manifest <代码清单json> [--rscript <Rscript路径>]
 python scripts/pipeline.py validate-results --run-dir <运行目录> --input <模型输出json>
@@ -114,6 +120,7 @@ python scripts/pipeline.py autopilot --run-dir <运行目录>
 - 纵向面板、RI-CLPM、自伤和性别差异：读取 `references/longitudinal-panel-nssi.md`。
 - 报告规范选择：读取 `references/psychology-standards.md`。
 - 文献与 Zotero 工具路线：读取 `references/tool-routing.md`。
+- 文献自动化命令、题录字段、去重和覆盖 gate：读取 `references/literature-automation.md`。
 - 特定课题变量、数据规格与风险：仅在该课题运行时读取相应 `project-packs/<id>/`。
 - JSON 机器契约：按输入类型读取 `schemas/` 中对应 schema。
 - 运行模板由 `scripts/pipeline_schema.py` 生成；顶层 `templates/` 仅提供可复用工作表，不定义运行目录。

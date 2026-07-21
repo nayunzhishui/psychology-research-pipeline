@@ -150,6 +150,59 @@ def validate_review(path: Path) -> list[str]:
     return errors
 
 
+def validate_literature_controls(run_dir: Path, stage_id: str, strict: bool) -> list[str]:
+    if not strict:
+        return []
+    errors = []
+    if stage_id == "02_search":
+        search_dir = run_dir / "02_证据检索"
+        plan = search_dir / "检索计划_search_plan.json"
+        ingest = search_dir / "题录导入清单_evidence_import_manifest.json"
+        candidates = search_dir / "候选文献表_candidate_records.csv"
+        for path in [plan, ingest]:
+            if not path.is_file():
+                errors.append(f"strict literature control missing: {path.name}")
+        if ingest.is_file():
+            try:
+                payload = json.loads(ingest.read_text(encoding="utf-8"))
+                if payload.get("candidate_records_sha256") != sha256(candidates):
+                    errors.append("candidate records hash differs from evidence import manifest")
+                if not payload.get("source_exports"):
+                    errors.append("evidence import manifest contains no immutable source exports")
+            except json.JSONDecodeError:
+                errors.append(f"invalid JSON {ingest.name}")
+    elif stage_id == "04_synthesis":
+        synthesis_dir = run_dir / "04_文献筛选与小综述"
+        coverage = synthesis_dir / "证据覆盖审计_evidence_coverage_audit.json"
+        dedupe = synthesis_dir / "文献去重清单_evidence_dedupe_manifest.json"
+        family = synthesis_dir / "研究家族识别清单_study_family_manifest.json"
+        for path in [coverage, dedupe, family]:
+            if not path.is_file():
+                errors.append(f"strict literature control missing: {path.name}")
+        for path in [coverage, dedupe, family]:
+            if not path.is_file():
+                continue
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                errors.append(f"invalid JSON {path.name}")
+                continue
+            source = Path(payload.get("source", ""))
+            if not source.is_file():
+                errors.append(f"literature manifest source missing for {path.name}: {source}")
+            elif payload.get("source_sha256") != sha256(source):
+                errors.append(f"literature manifest source hash mismatch: {path.name}")
+            if path == coverage:
+                requirements = Path(payload.get("requirements", ""))
+                if not requirements.is_file():
+                    errors.append(f"coverage requirements missing: {requirements}")
+                elif payload.get("requirements_sha256") != sha256(requirements):
+                    errors.append("coverage requirements hash mismatch")
+                if payload.get("status") != "ready" or payload.get("missing_core_slots"):
+                    errors.append(f"core evidence coverage is blocked: {payload.get('missing_core_slots', [])}")
+    return errors
+
+
 def append_gate_event(run_dir: Path, state: dict, stage_id: str, passed: bool, errors: list[str]) -> None:
     event = {
         "timestamp": now(), "run_id": state["run_id"], "stage": stage_id,
@@ -187,6 +240,7 @@ def main() -> int:
     errors = [error for path in paths for error in validate_file(path)]
     strict = state.get("mode") in {"strict", "top-journal-prep"}
     errors.extend(validate_semantics(args.stage, paths, strict))
+    errors.extend(validate_literature_controls(run_dir, args.stage, strict))
     if args.stage == "07_analysis":
         errors.extend(validate_analysis_manifest(run_dir / stage["dir"] / "分析清单_analysis_manifest.json"))
     elif args.stage == "10_alignment":

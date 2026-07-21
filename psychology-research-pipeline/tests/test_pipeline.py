@@ -39,7 +39,8 @@ class PipelineTests(unittest.TestCase):
     def test_machine_contracts_and_project_pack_are_versioned(self) -> None:
         expected = {
             "project-pack.schema.json", "data-decisions.schema.json", "analysis-spec.schema.json",
-            "analysis-output.schema.json", "journal-policy.schema.json",
+            "analysis-output.schema.json", "journal-policy.schema.json", "search-plan.schema.json",
+            "evidence-record.schema.json", "evidence-coverage.schema.json",
         }
         schema_dir = SKILL / "schemas"
         self.assertEqual(expected, {path.name for path in schema_dir.glob("*.json")})
@@ -55,6 +56,14 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual("interparental-conflict-depression-nssi", pack["id"])
         pack_schema = json.loads((schema_dir / "project-pack.schema.json").read_text(encoding="utf-8"))
         Draft202012Validator(pack_schema).validate(pack)
+        pack_dir = SKILL / "project-packs" / "interparental-conflict-depression-nssi"
+        for file_name, schema_name in [
+            (pack["search_plan"], "search-plan.schema.json"),
+            (pack["evidence_coverage"], "evidence-coverage.schema.json"),
+        ]:
+            instance = json.loads((pack_dir / file_name).read_text(encoding="utf-8"))
+            schema = json.loads((schema_dir / schema_name).read_text(encoding="utf-8"))
+            Draft202012Validator(schema).validate(instance)
 
     def test_init_creates_canonical_run_and_gate_advances(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

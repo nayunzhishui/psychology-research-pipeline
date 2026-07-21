@@ -24,7 +24,9 @@
 
 必需：`检索式记录_queries.md`、`检索记录_search_log.csv`、`候选文献表_candidate_records.csv`。
 
-检索表至少包含 `search_id,database,platform,query,filters,run_at,result_count,export_file,notes`；候选表至少包含 `candidate_id,title,authors,year,doi,pmid,source,abstract,landing_url,database,search_id,dedup_status`。
+检索表至少包含 `search_id,database,platform,query,filters,run_at,result_count,export_file,notes`；候选表使用 `schemas/evidence-record.schema.json` 的规范字段，并增加用于筛选的 `constructs,design,cohort_name,sample_country,sample_size,recruitment_years`。
+
+`strict` 与 `top-journal-prep` 还必须有 `检索计划_search_plan.json` 和 `题录导入清单_evidence_import_manifest.json`；候选表哈希须与导入清单一致，原始导出文件只读且逐文件记录 SHA-256。
 
 ### 03_library — `03_Zotero与全文获取`
 
@@ -36,7 +38,7 @@
 
 必需：`文献筛选表_literature_screening.csv`、`文献阅读矩阵_literature_matrix.csv`、`小综述_mini_review.md`、`主张证据对应表_claim_evidence_map.csv`。
 
-通过条件：纳排理由、同一研究多报告关联、证据位置、相关性与方法质量分开记录；矛盾和零结果未被删除；关键主张可追溯。
+通过条件：纳排理由、同一研究多报告关联、证据位置、相关性与方法质量分开记录；矛盾和零结果未被删除；关键主张可追溯。`strict` 与 `top-journal-prep` 必须存在去重清单、研究家族识别清单和状态为 `ready` 的证据覆盖审计；任一核心 slot 缺口均阻断。
 
 ### 05_methods — `05_方法设计`
 

@@ -11,7 +11,9 @@
     "title": {"type": "string", "minLength": 1},
     "profile": {"type": "string"},
     "data_audit_spec": {"type": "string"},
-    "analysis_spec": {"type": "string"}
+    "analysis_spec": {"type": "string"},
+    "search_plan": {"type": "string"},
+    "evidence_coverage": {"type": "string"}
   },
   "additionalProperties": false
 }
