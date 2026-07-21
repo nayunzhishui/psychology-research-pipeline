@@ -71,18 +71,22 @@ def parse_csv(path: Path) -> list[dict]:
 
 
 def parse_ris(path: Path) -> list[dict]:
-    records, record = [], {}
+    records, record, last_tag = [], {}, None
     for raw_line in path.read_text(encoding="utf-8-sig").splitlines():
         match = re.match(r"^([A-Z0-9]{2})\s{0,2}-\s?(.*)$", raw_line)
         if not match:
+            if last_tag and raw_line.strip() and record.get(last_tag):
+                record[last_tag][-1] += " " + raw_line.strip()
             continue
         tag, value = match.groups()
         if tag == "ER":
             if record:
                 records.append(record)
             record = {}
+            last_tag = None
             continue
         record.setdefault(tag, []).append(value.strip())
+        last_tag = tag
     if record:
         records.append(record)
     return [{

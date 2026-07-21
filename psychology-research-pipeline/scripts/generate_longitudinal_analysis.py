@@ -28,6 +28,22 @@ def data_columns(path: Path) -> list[str]:
     raise SystemExit(f"Unsupported analysis data type: {path.suffix}")
 
 
+def expand_selector(selector: dict) -> list[str]:
+    width = int(selector.get("width", 0))
+    prefix = selector.get("prefix", "")
+    return [
+        selector["template"].format(item=f"{prefix}{str(index).zfill(width) if width else index}")
+        for index in range(int(selector["start"]), int(selector["end"]) + 1)
+    ]
+
+
+def indicators_for(config: dict, wave: str) -> list[str]:
+    if wave in config.get("indicators", {}):
+        return config["indicators"][wave]
+    selector = config.get("indicator_selectors", {}).get(wave)
+    return expand_selector(selector) if selector else []
+
+
 def validate_spec(spec: dict, columns: list[str]) -> list[str]:
     errors = []
     waves = spec.get("waves", [])
@@ -44,13 +60,12 @@ def validate_spec(spec: dict, columns: list[str]) -> list[str]:
             errors.append(f"{name} missing wave variables: {missing_waves}")
         required.extend(variables.values())
         if spec.get("measurement_mode", "score-comparability") == "item-level":
-            indicators = config.get("indicators", {})
             for wave in waves:
-                wave_indicators = indicators.get(wave, [])
+                wave_indicators = indicators_for(config, wave)
                 if len(wave_indicators) < 2:
                     errors.append(f"{name} requires at least two item indicators at {wave}")
                 required.extend(wave_indicators)
-    for optional in [spec.get("group_variable"), spec.get("cluster_variable")]:
+    for optional in [spec.get("group_variable"), spec.get("cluster_variable"), *spec.get("fixed_effect_variables", [])]:
         if optional:
             required.append(optional)
     missing_columns = sorted(set(required) - set(columns))
@@ -67,7 +82,7 @@ def invariance_syntax(spec: dict) -> tuple[str, str, str]:
     scalar: list[str] = []
     for construct, config in spec["constructs"].items():
         for wave in spec["waves"]:
-            items = config["indicators"][wave]
+            items = indicators_for(config, wave)
             factor = f"{construct}_{wave}"
             configural.append(f"{factor} =~ " + " + ".join(items))
             labelled = [f"l_{construct}_{index + 1}*{item}" for index, item in enumerate(items)]
@@ -75,11 +90,11 @@ def invariance_syntax(spec: dict) -> tuple[str, str, str]:
             scalar.append(f"{factor} =~ " + " + ".join(labelled))
             scalar.extend(f"{item} ~ i_{construct}_{index + 1}*1" for index, item in enumerate(items))
         waves = spec["waves"]
-        indicator_count = len(config["indicators"][waves[0]])
+        indicator_count = len(indicators_for(config, waves[0]))
         for item_index in range(indicator_count):
             for wave_index in range(1, len(waves)):
-                previous = config["indicators"][waves[wave_index - 1]][item_index]
-                current = config["indicators"][waves[wave_index]][item_index]
+                previous = indicators_for(config, waves[wave_index - 1])[item_index]
+                current = indicators_for(config, waves[wave_index])[item_index]
                 residual = f"{previous} ~~ {current}"
                 configural.append(residual)
                 metric.append(residual)
@@ -150,10 +165,11 @@ def generate(data: Path, spec_path: Path, output_dir: Path) -> dict:
     missing = spec.get("missing", "FIML").lower()
     cluster = spec.get("cluster_variable")
     group = spec.get("group_variable")
+    fixed_effects = spec.get("fixed_effect_variables", [])
     construct_vars = [variable for config in spec["constructs"].values() for variable in config["variables"].values()]
     indicator_vars = [
         item for config in spec["constructs"].values()
-        for items in config.get("indicators", {}).values() for item in items
+        for wave in spec["waves"] for item in indicators_for(config, wave)
     ]
 
     environment = f'''# Generated; do not edit results by hand.
@@ -161,12 +177,23 @@ required_packages <- c("readr", "dplyr", "psych", "lavaan", "semTools", "simsem"
 missing_packages <- required_packages[!vapply(required_packages, requireNamespace, logical(1), quietly = TRUE)]
 if (length(missing_packages)) stop("Install required R packages: ", paste(missing_packages, collapse = ", "))
 dat <- readr::read_csv("{data_ref}", show_col_types = FALSE)
-required_variables <- c({', '.join(json.dumps(name) for name in construct_vars + indicator_vars + [value for value in [group, cluster] if value])})
+required_variables <- c({', '.join(json.dumps(name) for name in construct_vars + indicator_vars + [value for value in [group, cluster, *fixed_effects] if value])})
 if (length(setdiff(required_variables, names(dat)))) stop("Missing variables: ", paste(setdiff(required_variables, names(dat)), collapse = ", "))
 set.seed({int(spec.get('random_seed', 20260718))})
 '''
     if spec.get("measurement_mode", "score-comparability") == "item-level":
         configural_model, metric_model, scalar_model = invariance_syntax(spec)
+        sex_measurement = f'''
+# Sex-group measurement comparability is a separate gate before structural path comparison.
+fit_sex_configural <- lavaan::cfa(configural_model, data = dat, group = "{group}", estimator = "{estimator}", missing = "{missing}", std.lv = TRUE)
+fit_sex_metric <- lavaan::cfa(metric_model, data = dat, group = "{group}", estimator = "{estimator}", missing = "{missing}", std.lv = TRUE)
+fit_sex_scalar <- lavaan::cfa(scalar_model, data = dat, group = "{group}", estimator = "{estimator}", missing = "{missing}", std.lv = TRUE)
+sex_fits <- list(configural = fit_sex_configural, metric = fit_sex_metric, scalar = fit_sex_scalar)
+sex_fit_table <- do.call(rbind, lapply(names(sex_fits), function(name) cbind(model = name, as.data.frame(t(fitMeasures(sex_fits[[name]], c("cfi", "rmsea", "srmr")))))))
+sex_fit_table$delta_cfi <- c(NA, diff(sex_fit_table$cfi))
+sex_fit_table$delta_rmsea <- c(NA, diff(sex_fit_table$rmsea))
+write.csv(sex_fit_table, "../sex_measurement_invariance_fit.csv", row.names = FALSE)
+''' if group else ""
         measurement = f'''source("00_environment.R")
 # Longitudinal measurement-invariance sequence; equality labels link item positions across waves.
 configural_model <- '
@@ -189,6 +216,7 @@ fit_table$delta_rmsea <- c(NA, diff(fit_table$rmsea))
 write.csv(fit_table, "../measurement_invariance_fit.csv", row.names = FALSE)
 capture.output(lavaan::lavTestLRT(fit_configural, fit_metric, fit_scalar), file = "../measurement_invariance_lrt.txt")
 # Decide configural/metric/scalar or partial invariance from preregistered criteria; do not rely on chi-square alone.
+{sex_measurement}
 '''
     else:
         measurement = f'''source("00_environment.R")
@@ -212,12 +240,15 @@ write.csv(as.data.frame(t(fitMeasures(fit_riclpm))), "../ri_clpm_fit.csv", row.n
 saveRDS(fit_riclpm, "../ri_clpm_fit.rds")
 '''
     if group:
-        group_code = f'''source("02_ri_clpm.R")
+        group_code = f'''source("01_measurement_gate.R")
+if (!file.exists("../sex_measurement_invariance_fit.csv")) stop("Sex-group measurement gate is missing")
+source("02_ri_clpm.R")
 fit_group_free <- lavaan::sem(riclpm_model, data = dat, group = "{group}", estimator = "{estimator}", missing = "{missing}"{cluster_arg})
 fit_group_equal <- lavaan::sem(riclpm_model, data = dat, group = "{group}", group.equal = c("regressions"), estimator = "{estimator}", missing = "{missing}"{cluster_arg})
 comparison <- lavaan::lavTestLRT(fit_group_equal, fit_group_free)
 capture.output(comparison, file = "../sex_group_constraint_test.txt")
 # Interpret the constrained-vs-free test; never compare separate group p-values.
+# Structural interpretation remains blocked until the preregistered sex-measurement criteria are met.
 '''
     else:
         group_code = '# No group variable configured. Record sex/gender comparison as not applicable.\n'
@@ -271,6 +302,22 @@ write.csv(descriptives, "../descriptives.csv")
 missingness <- data.frame(variable = names(dat), missing_n = colSums(is.na(dat)), missing_percent = colMeans(is.na(dat)) * 100)
 write.csv(missingness, "../missingness.csv", row.names = FALSE)
 '''
+    if fixed_effects:
+        fixed_variable = fixed_effects[0]
+        fixed_effect_code = f'''source("02_ri_clpm.R")
+school_matrix <- stats::model.matrix(~ factor(dat[["{fixed_variable}"]]))[, -1, drop = FALSE]
+if (!ncol(school_matrix)) stop("Fixed-effect variable has fewer than two observed levels")
+colnames(school_matrix) <- make.names(paste0("school_fe_", colnames(school_matrix)))
+dat_school <- cbind(dat, school_matrix)
+school_terms <- vapply(c({', '.join(json.dumps(name) for name in construct_vars)}), function(variable) paste(variable, "~", paste(colnames(school_matrix), collapse = " + ")), character(1))
+school_model <- paste(riclpm_model, paste(school_terms, collapse = "\\n"), sep = "\\n")
+fit_school <- lavaan::sem(school_model, data = dat_school, estimator = "{estimator}", missing = "{missing}")
+if (!lavInspect(fit_school, "converged")) stop("School fixed-effect sensitivity model did not converge")
+write.csv(parameterEstimates(fit_school, standardized = TRUE, ci = TRUE), "../school_fixed_effect_parameters.csv", row.names = FALSE)
+write.csv(as.data.frame(t(fitMeasures(fit_school))), "../school_fixed_effect_fit.csv", row.names = FALSE)
+'''
+    else:
+        fixed_effect_code = "# No fixed-effect sensitivity variable configured.\n"
     export_output = f'''source("00_environment.R")
 fit_riclpm <- readRDS("../ri_clpm_fit.rds")
 parameter_table <- lavaan::parameterEstimates(fit_riclpm, standardized = TRUE, ci = TRUE)
@@ -309,6 +356,7 @@ jsonlite::write_json(model_output, "../model_output.json", auto_unbox = TRUE, pr
         write(code_dir / "05_power_simulation.R", power),
         write(code_dir / "06_descriptives_missingness.R", descriptives),
         write(code_dir / "07_export_machine_output.R", export_output),
+        write(code_dir / "08_school_fixed_effect_sensitivity.R", fixed_effect_code),
     ]
     expected_outputs = [
         output_dir / ("measurement_invariance_fit.csv" if spec.get("measurement_mode") == "item-level" else "measurement_score_summary.csv"),
@@ -321,6 +369,10 @@ jsonlite::write_json(model_output, "../model_output.json", auto_unbox = TRUE, pr
         expected_outputs.append(output_dir / "measurement_invariance_lrt.txt")
     if group:
         expected_outputs.append(output_dir / "sex_group_constraint_test.txt")
+        if spec.get("measurement_mode") == "item-level":
+            expected_outputs.append(output_dir / "sex_measurement_invariance_fit.csv")
+    if fixed_effects:
+        expected_outputs.extend([output_dir / "school_fixed_effect_parameters.csv", output_dir / "school_fixed_effect_fit.csv"])
     manifest = {
         "schema_version": 1, "status": "ready", "profile": spec.get("profile"),
         "data": str(data.resolve()), "data_sha256": sha256(data),
@@ -328,6 +380,7 @@ jsonlite::write_json(model_output, "../model_output.json", auto_unbox = TRUE, pr
         "code_files": code_files, "code_hashes": {path: sha256(Path(path)) for path in code_files},
         "estimator": estimator, "missing": spec.get("missing", "FIML"),
         "group_variable": group, "cluster_variable": cluster,
+        "fixed_effect_variables": fixed_effects,
         "measurement_gate": spec.get("measurement_mode", "score-comparability"),
         "expected_outputs": [str(path.resolve()) for path in expected_outputs],
         "execution_status": "not-run", "blocked_reasons": [],

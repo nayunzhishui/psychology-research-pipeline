@@ -1,6 +1,6 @@
 # Current project profile
 
-Snapshot: 2026-07-18. Treat as intake evidence, not a frozen protocol.
+Snapshot: 2026-07-21. Treat as audited intake evidence, not a frozen protocol.
 
 ## Workspace
 
@@ -30,7 +30,7 @@ Observed derived variables include parent-conflict resolution, conflict degree/t
 
 - Confirm actual wave dates and intervals; the filename alone is insufficient.
 - Confirm stable participant identifiers, duplicates, attrition, and whether 882 is the merged or complete-case sample.
-- Recover exact scale provenance, scoring keys, reverse items, valid ranges, and derivation syntax for every T1-T3 score.
+- Preserve the verified item map and raw-item rescoring rules in `measurement-map.json`; obtain original SPSS syntax only as corroborating provenance.
 - Determine whether NSSI aggregates are continuous, ordinal, count-like, binary, or weighted composites and inspect zero inflation/skew.
 - Verify measurement invariance feasibility and item consistency across waves.
 - Decide whether the primary estimand is within-person dynamics, between-person differences, or both.
@@ -40,12 +40,12 @@ Observed derived variables include parent-conflict resolution, conflict degree/t
 
 These are audit triggers, not final error determinations:
 
-- T1–T2 participant IDs disagree on 29 rows; T2–T3 IDs disagree on 33 rows. T2 contains one duplicated ID.
-- T2 sex contains values `3`, `13`, and `22`; T3 contains `12` and `50`. Resolve against the questionnaire and source files before grouping.
-- Depression totals are T1 `20–73`, T2 `20–80`, and T3 `19–83`; confirm item count, scoring, missing-item rule, and out-of-range records.
-- NSSI measures are zero-heavy. T3 NSSI severity includes `-1`, and T3 NSSI level reaches `450`; inspect raw items and derivation syntax.
-- T2 interparental-conflict total is exactly `conflict degree + 24 - resolution`, while T3 total does not consistently follow that formula; no directly comparable T1 total is currently identified.
-- School prefixes and the questionnaire metadata indicate likely school clustering; determine school/class structure and privacy-safe reporting.
+- ID格式规范化后，871行三波一致、11行存在可由两波多数支持的单波差异、无三波全部不同；原始ID不进入分析数据，11行仍应由来源匹配表复核。
+- 性别按问卷记为sex（1男、2女）；T1有869个有效编码、13个缺失，跨波有效编码有41行不一致。主分析仅使用T1有效编码，其他波次不用于覆盖或强制纠正。
+- CES-D为20题、1–4分，反向题4/8/12/16；T1/T2旧总分完全复现，T3改由有效原始题项重算。
+- NSSI为18种方式，次数0–3、程度0–4、逐项乘积后求和；T3越界原始单元格仅在派生数据中置缺失，并预设两部分敏感性分析。
+- 父母冲突采用18题统一高冲突方向，反向题1/3/4/5/7/9/13/16。禁止跨波混用旧“解决情况/冲突程度”派生变量。
+- 学号首字母仅派生匿名学校代码a–i；九所学校不支持常规聚类稳健推断，使用学校固定效应或敏感性分析。
 
 ## Method candidates, not decisions
 

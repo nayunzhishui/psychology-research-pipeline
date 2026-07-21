@@ -5,6 +5,7 @@
   "title": "早期青少年父母冲突、抑郁与自伤三波纵向研究",
   "profile": "project-profile.md",
   "data_audit_spec": "data-audit-spec.json",
+  "measurement_map": "measurement-map.json",
   "analysis_spec": "analysis-spec.example.json",
   "search_plan": "search-plan.json",
   "evidence_coverage": "evidence-coverage.json"

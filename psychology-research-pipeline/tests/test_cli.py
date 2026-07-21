@@ -246,6 +246,167 @@ class PipelineCliTests(unittest.TestCase):
             self.assertEqual(3, blocked.returncode)
             self.assertIn("resolution is not allowed", blocked.stdout)
 
+    def test_audit_distinguishes_id_format_candidates_and_item_range_errors(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            run_dir = Path(json.loads(self.invoke(
+                "init", "--project", str(project), "--title", "item audit",
+                "--run-id", "item-audit-run",
+            ).stdout)["run_dir"])
+            data = project / "panel.csv"
+            data.write_text(
+                "id1,id2,sex1,sex2,d1,d2,total\n"
+                "a01,a1,1,1,1,4,5\n"
+                "b02,b9,2,22,5,2,7\n",
+                encoding="utf-8",
+            )
+            spec = project / "spec.json"
+            spec.write_text(json.dumps({
+                "profile": "item-audit-test",
+                "id_by_wave": {"T1": "id1", "T2": "id2"},
+                "id_normalization": {"mode": "alpha-prefix-integer-suffix"},
+                "sex_by_wave": {"T1": "sex1", "T2": "sex2"},
+                "allowed_sex_values": [1, 2],
+                "measures": [],
+                "item_sets": [{
+                    "construct": "depression", "wave": "T1",
+                    "variables": ["d1", "d2"], "expected_min": 1, "expected_max": 4,
+                }],
+                "score_relations": [{
+                    "name": "sum", "target": "total", "coefficients": {"d1": 1, "d2": 1},
+                }],
+            }), encoding="utf-8")
+            private_register = run_dir / "06_数据管理" / ".private" / "issues.jsonl"
+
+            audit = json.loads(self.invoke(
+                "audit-data", "--run-dir", str(run_dir), "--data", str(data),
+                "--spec", str(spec), "--private-register", str(private_register),
+            ).stdout)
+
+            linkage = audit["ids"]["rowwise_mismatch"]["T1-T2"]
+            self.assertEqual(2, linkage["raw_mismatch"])
+            self.assertEqual(1, linkage["format_only_candidates"])
+            self.assertEqual(1, linkage["normalized_mismatch"])
+            self.assertEqual(1, audit["item_sets"][0]["invalid_cell_count"])
+            categories = {item["category"] for item in audit["issues"]}
+            self.assertIn("linkage-format", categories)
+            self.assertIn("linkage", categories)
+            self.assertIn("item-range", categories)
+            self.assertIn("sex-code", categories)
+            self.assertNotIn('"a01"', private_register.read_text(encoding="utf-8"))
+
+    def test_project_pack_copies_measurement_map(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            pack = SKILL / "project-packs" / "interparental-conflict-depression-nssi"
+            result = json.loads(self.invoke(
+                "init", "--project", temp, "--title", "measurement map",
+                "--run-id", "measurement-map-run", "--project-pack", str(pack),
+            ).stdout)
+            copied = Path(result["run_dir"]) / "00_项目定标" / "课题包_project_pack"
+            self.assertTrue((copied / "measurement-map.json").is_file())
+
+    def test_prepare_analysis_data_rescores_items_without_exporting_identifiers(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            run_dir = Path(json.loads(self.invoke(
+                "init", "--project", str(project), "--title", "prepare data",
+                "--run-id", "prepare-run",
+            ).stdout)["run_dir"])
+            data = project / "raw.csv"
+            data.write_text(
+                "id1,sex1,d1,d2,f1,f2,s1,s2,c1,c2\n"
+                "a01,1,1,4,0,2,,3,1,5\n"
+                "b02,9,8,2,1,1,2,2,2,4\n",
+                encoding="utf-8",
+            )
+            measurement_map = project / "measurement-map.json"
+            measurement_map.write_text(json.dumps({
+                "schema_version": 1,
+                "constructs": {
+                    "depressive_symptoms": {
+                        "response_range": [1, 4], "reverse_items": [2],
+                        "raw_selectors": {"T1": {"template": "d{item}", "start": 1, "end": 2}},
+                        "analysis_scores": {"T1": "depression_score_t1"},
+                    },
+                    "nssi": {
+                        "frequency_range": [0, 3], "severity_range": [0, 4],
+                        "frequency_selectors": {"T1": {"template": "f{item}", "start": 1, "end": 2}},
+                        "severity_selectors": {"T1": {"template": "s{item}", "start": 1, "end": 2}},
+                        "analysis_scores": {"T1": "nssi_level_t1"},
+                    },
+                    "interparental_conflict": {
+                        "response_range": [1, 5], "high_conflict_reverse_items": [1],
+                        "raw_selectors": {"T1": {"template": "c{item}", "start": 1, "end": 2}},
+                        "analysis_scores": {"T1": "conflict_score_t1"},
+                    },
+                },
+                "identifiers_and_covariates": {
+                    "id_by_wave": {"T1": "id1"}, "sex_by_wave": {"T1": "sex1"},
+                },
+            }), encoding="utf-8")
+
+            result = json.loads(self.invoke(
+                "prepare-analysis-data", "--run-dir", str(run_dir),
+                "--data", str(data), "--measurement-map", str(measurement_map),
+            ).stdout)
+            self.assertEqual("prepared", result["status"])
+            output = Path(result["analysis_data"])
+            with output.open(encoding="utf-8-sig") as handle:
+                prepared = list(csv.DictReader(handle))
+            self.assertNotIn("id1", prepared[0])
+            self.assertEqual("a", prepared[0]["school_code"])
+            self.assertEqual("2.0", prepared[0]["depression_score_t1"])
+            self.assertEqual("6.0", prepared[0]["nssi_level_t1"])
+            self.assertEqual("10.0", prepared[0]["conflict_score_t1"])
+            self.assertEqual("", prepared[1]["sex_analysis"])
+            self.assertGreater(result["invalid_cells_set_missing"], 0)
+
+    def test_zotero_sync_exports_imports_and_audits_pdf_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            run_dir = Path(json.loads(self.invoke(
+                "init", "--project", str(project), "--title", "zotero sync",
+                "--run-id", "zotero-run",
+            ).stdout)["run_dir"])
+            helper = project / "fake_zotero.py"
+            helper.write_text(
+                "import json, pathlib, sys\n"
+                "if sys.argv[1] == 'status': print(json.dumps({'api_running': True, 'connector_running': True}))\n"
+                "elif sys.argv[1] == 'export-bibtex':\n"
+                " p=pathlib.Path(sys.argv[sys.argv.index('--out')+1]); p.write_text('@article{x, title={Test paper}, author={Li}, year={2024}, doi={10.1/test}}', encoding='utf-8'); print(p)\n",
+                encoding="utf-8",
+            )
+            pdf_dir = run_dir / "文献" / "02_全文PDF"
+            (pdf_dir / "paper.pdf").write_bytes(b"%PDF-1.4\n%%EOF")
+
+            result = json.loads(self.invoke(
+                "sync-zotero", "--run-dir", str(run_dir), "--helper", str(helper),
+            ).stdout)
+            self.assertEqual("complete", result["status"])
+            self.assertEqual(1, result["imported_records"])
+            self.assertEqual(1, result["pdf_count"])
+            self.assertTrue(Path(result["zotero_manifest"]).is_file())
+            self.assertTrue(Path(result["pdf_manifest"]).is_file())
+
+    def test_export_publication_files_builds_docx_pdf_and_submission_manifests(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            run_dir = Path(json.loads(self.invoke(
+                "init", "--project", str(project), "--title", "publication files",
+                "--run-id", "publication-run",
+            ).stdout)["run_dir"])
+            manuscript = project / "manuscript.md"
+            manuscript.write_text("# Test title\n\n## Abstract\n\nVerified text.\n", encoding="utf-8")
+            result = json.loads(self.invoke(
+                "export-publication-files", "--run-dir", str(run_dir),
+                "--manuscript", str(manuscript), "--title", "Test title",
+            ).stdout)
+            self.assertEqual("complete", result["status"])
+            self.assertTrue(Path(result["manuscript_docx"]).is_file())
+            self.assertTrue(Path(result["manuscript_pdf"]).read_bytes().startswith(b"%PDF-"))
+            self.assertTrue(Path(result["tables_figures_manifest"]).is_file())
+            self.assertTrue(Path(result["submission_manifest"]).is_file())
+
     def test_user_can_generate_auditable_longitudinal_analysis_code(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             project = Path(temp)

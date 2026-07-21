@@ -239,6 +239,30 @@ class LiteratureCliTests(unittest.TestCase):
             self.assertEqual(1, blocked.returncode)
             self.assertIn("candidate records hash differs", blocked.stdout)
 
+    def test_dual_reviewer_screening_produces_prisma_and_adjudication_audit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            run_dir = self.init_run(project, "screening-run")
+            decisions = project / "decisions.csv"
+            decisions.write_text(
+                "candidate_id,stage,reviewer,decision,reason,decided_at\n"
+                "c1,title-abstract,A,include,relevant,2026-07-21\n"
+                "c1,title-abstract,B,include,relevant,2026-07-21\n"
+                "c2,title-abstract,A,include,relevant,2026-07-21\n"
+                "c2,title-abstract,B,exclude,wrong population,2026-07-21\n"
+                "c2,title-abstract,ADJ,exclude,wrong population,2026-07-21\n",
+                encoding="utf-8",
+            )
+            result = json.loads(self.invoke(
+                "audit-screening", "--run-dir", str(run_dir), "--input", str(decisions),
+                "--reviewers", "A", "B", "--adjudicator", "ADJ",
+            ).stdout)
+            self.assertEqual("complete", result["status"])
+            self.assertEqual(1, result["conflicts"])
+            self.assertEqual(0, result["unresolved_conflicts"])
+            self.assertTrue(Path(result["prisma_counts"]).is_file())
+            self.assertTrue(Path(result["risk_of_bias_template"]).is_file())
+
 
 if __name__ == "__main__":
     unittest.main()

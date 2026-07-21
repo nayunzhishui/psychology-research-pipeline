@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import math
+import re
 import secrets
 from datetime import datetime
 from pathlib import Path
@@ -51,9 +52,11 @@ def finite_or_none(value):
 
 ISSUE_RULES = {
     "linkage": ("critical", ["source-verified", "rematched", "excluded"]),
+    "linkage-format": ("major", ["source-verified", "normalized", "rematched", "excluded"]),
     "duplicate-id": ("critical", ["source-verified", "deduplicated", "excluded"]),
     "sex-code": ("major", ["source-verified", "corrected", "excluded"]),
-    "score-range": ("major", ["source-verified", "corrected", "excluded"]),
+    "score-range": ("major", ["source-verified", "corrected", "rescored", "excluded"]),
+    "item-range": ("major", ["source-verified", "set-missing", "corrected", "excluded"]),
     "distribution": ("major", ["analysis-accommodation", "not-applicable"]),
     "extreme-value": ("major", ["source-verified", "corrected", "excluded"]),
     "scoring-formula": ("critical", ["corrected", "rescored", "excluded"]),
@@ -105,7 +108,21 @@ def measure_summary(series, spec: dict) -> dict:
     }
 
 
-def audit_ids(frame, id_by_wave: dict) -> dict:
+def normalize_id(value: object, config: dict) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text or text.lower() == "nan":
+        return None
+    if config.get("mode") == "alpha-prefix-integer-suffix":
+        match = re.fullmatch(r"([A-Za-z]+)0*(\d+)", text)
+        if match:
+            return f"{match.group(1).lower()}{int(match.group(2))}"
+    return text
+
+
+def audit_ids(frame, id_by_wave: dict, normalization: dict | None = None) -> dict:
+    normalization = normalization or {}
     result = {"by_wave": {}, "rowwise_mismatch": {}}
     waves = list(id_by_wave)
     for wave, variable in id_by_wave.items():
@@ -113,14 +130,22 @@ def audit_ids(frame, id_by_wave: dict) -> dict:
         result["by_wave"][wave] = {
             "variable": variable, "nonmissing": int(len(values)),
             "unique": int(values.nunique()), "duplicate_rows": int(values.duplicated().sum()),
+            "normalized_unique": int(values.map(lambda value: normalize_id(value, normalization)).nunique()),
         }
     for left, right in zip(waves, waves[1:]):
         left_values = frame[id_by_wave[left]]
         right_values = frame[id_by_wave[right]]
         comparable = left_values.notna() & right_values.notna()
         mismatch = comparable & left_values.astype(str).ne(right_values.astype(str))
+        normalized_left = left_values.map(lambda value: normalize_id(value, normalization))
+        normalized_right = right_values.map(lambda value: normalize_id(value, normalization))
+        normalized_mismatch = comparable & normalized_left.ne(normalized_right)
         result["rowwise_mismatch"][f"{left}-{right}"] = {
-            "comparable": int(comparable.sum()), "mismatch": int(mismatch.sum())
+            "comparable": int(comparable.sum()),
+            "mismatch": int(mismatch.sum()),
+            "raw_mismatch": int(mismatch.sum()),
+            "format_only_candidates": int((mismatch & ~normalized_mismatch).sum()),
+            "normalized_mismatch": int(normalized_mismatch.sum()),
         }
     return result
 
@@ -138,13 +163,47 @@ def audit_sex(frame, spec: dict) -> dict:
     return result
 
 
+def relation_terms(relation: dict) -> tuple[float, dict[str, float], list[tuple[str, str, float]]]:
+    if "sum" in relation:
+        config = relation["sum"]
+        variables = item_variables({"selector": config["selector"]})
+        reverse = {int(index) for index in config.get("reverse_items", [])}
+        reverse_constant = float(config.get("reverse_constant", 0))
+        coefficients = {
+            variable: (-1.0 if index in reverse else 1.0)
+            for index, variable in enumerate(variables, start=1)
+        }
+        intercept = float(relation.get("intercept", 0)) + reverse_constant * len(reverse)
+        return intercept, coefficients, []
+    if "product_sum" in relation:
+        config = relation["product_sum"]
+        left = item_variables({"selector": config["left_selector"]})
+        right = item_variables({"selector": config["right_selector"]})
+        if len(left) != len(right):
+            raise ValueError(f"product relation has unequal item counts: {relation['name']}")
+        return float(relation.get("intercept", 0)), {}, [
+            (left_item, right_item, 1.0) for left_item, right_item in zip(left, right)
+        ]
+    return (
+        float(relation.get("intercept", 0)),
+        {key: float(value) for key, value in relation.get("coefficients", {}).items()},
+        [(item["left"], item["right"], float(item.get("coefficient", 1))) for item in relation.get("products", [])],
+    )
+
+
 def audit_relation(frame, relation: dict) -> dict:
     import pandas as pd
-    columns = [relation["target"], *relation["coefficients"]]
+    intercept, coefficients, products = relation_terms(relation)
+    columns = list(dict.fromkeys([
+        relation["target"], *coefficients,
+        *(variable for left, right, _ in products for variable in (left, right)),
+    ]))
     data = frame[columns].apply(pd.to_numeric, errors="coerce").dropna()
-    predicted = relation.get("intercept", 0)
-    for variable, coefficient in relation["coefficients"].items():
+    predicted = intercept
+    for variable, coefficient in coefficients.items():
         predicted = predicted + coefficient * data[variable]
+    for left, right, coefficient in products:
+        predicted = predicted + coefficient * data[left] * data[right]
     error = (data[relation["target"]] - predicted).abs()
     tolerance = relation.get("tolerance", 1e-6)
     return {
@@ -153,6 +212,46 @@ def audit_relation(frame, relation: dict) -> dict:
         "mismatch_count": int((error > tolerance).sum()),
         "max_abs_error": finite_or_none(error.max()) if len(error) else None,
         "flag": bool(len(error) and (error > tolerance).any()),
+    }
+
+
+def item_variables(spec: dict) -> list[str]:
+    if "variables" in spec:
+        return spec["variables"]
+    selector = spec["selector"]
+    width = int(selector.get("width", 0))
+    prefix = selector.get("prefix", "")
+    return [
+        selector["template"].format(item=f"{prefix}{str(index).zfill(width) if width else index}")
+        for index in range(int(selector["start"]), int(selector["end"]) + 1)
+    ]
+
+
+def audit_item_set(frame, spec: dict) -> dict:
+    import pandas as pd
+    variables = item_variables(spec)
+    data = frame[variables].apply(pd.to_numeric, errors="coerce")
+    invalid = data.notna() & (
+        data.lt(spec.get("expected_min", -math.inf)) |
+        data.gt(spec.get("expected_max", math.inf))
+    )
+    by_variable = {
+        variable: {
+            "nonmissing": int(data[variable].notna().sum()),
+            "invalid_count": int(invalid[variable].sum()),
+            "min": finite_or_none(data[variable].min()) if data[variable].notna().any() else None,
+            "max": finite_or_none(data[variable].max()) if data[variable].notna().any() else None,
+        }
+        for variable in variables
+    }
+    return {
+        "construct": spec["construct"], "wave": spec["wave"],
+        "item_count": len(variables),
+        "expected_min": spec.get("expected_min"), "expected_max": spec.get("expected_max"),
+        "invalid_cell_count": int(invalid.sum().sum()),
+        "affected_row_count": int(invalid.any(axis=1).sum()),
+        "by_variable": by_variable,
+        "flag": bool(invalid.any().any()),
     }
 
 
@@ -167,7 +266,10 @@ def render_markdown(report: dict) -> str:
     for wave, item in report["ids"]["by_wave"].items():
         lines.append(f"- {wave} `{item['variable']}`：非缺失 {item['nonmissing']}，唯一 {item['unique']}，重复行 {item['duplicate_rows']}。")
     for pair, item in report["ids"]["rowwise_mismatch"].items():
-        lines.append(f"- {pair}：可比较 {item['comparable']}，行内不一致 {item['mismatch']}。")
+        lines.append(
+            f"- {pair}：可比较 {item['comparable']}，原始不一致 {item['raw_mismatch']}，"
+            f"仅格式候选 {item['format_only_candidates']}，规范化后仍不一致 {item['normalized_mismatch']}。"
+        )
     lines.extend(["", "## 性别编码", ""])
     for wave, item in report["sex"].items():
         lines.append(f"- {wave} `{item['variable']}`：缺失 {item['missing']}，异常 {item['invalid_count']}，异常值 {item['invalid_values']}。")
@@ -177,6 +279,12 @@ def render_markdown(report: dict) -> str:
             f"- {item['wave']} {item['construct']} `{item['variable']}`：n={item['n']}，缺失={item['missing']}，"
             f"范围={item['min']}–{item['max']}，零值={item['zero_percent']:.1f}%，"
             f"低于预期={item['below_expected']}，高于预期={item['above_expected']}，极端高值={item['extreme_high_count']}。"
+        )
+    lines.extend(["", "## 原始题项范围", ""])
+    for item in report["item_sets"]:
+        lines.append(
+            f"- {item['wave']} {item['construct']}：题项 {item['item_count']}，"
+            f"异常单元格 {item['invalid_cell_count']}，受影响行 {item['affected_row_count']}。"
         )
     lines.extend(["", "## 总分公式核验", ""])
     for item in report["score_relations"]:
@@ -206,29 +314,47 @@ def main() -> int:
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
     variables = set(spec.get("id_by_wave", {}).values()) | set(spec.get("sex_by_wave", {}).values())
     variables |= {item["variable"] for item in spec.get("measures", [])}
+    for item_set in spec.get("item_sets", []):
+        variables.update(item_variables(item_set))
     for relation in spec.get("score_relations", []):
         variables.add(relation["target"])
-        variables.update(relation["coefficients"])
+        _, coefficients, products = relation_terms(relation)
+        variables.update(coefficients)
+        variables.update(variable for left, right, _ in products for variable in (left, right))
 
     frame, shape = load_frame(data_path, sorted(variables))
-    ids = audit_ids(frame, spec.get("id_by_wave", {}))
+    ids = audit_ids(frame, spec.get("id_by_wave", {}), spec.get("id_normalization"))
     sex = audit_sex(frame, spec)
     measures = [measure_summary(frame[item["variable"]], item) for item in spec.get("measures", [])]
+    item_sets = [audit_item_set(frame, item) for item in spec.get("item_sets", [])]
     relations = [audit_relation(frame, item) for item in spec.get("score_relations", [])]
     issues = []
     private_records = []
     salt = secrets.token_hex(32)
     id_variables = list(spec.get("id_by_wave", {}).values())
     for pair, item in ids["rowwise_mismatch"].items():
-        if item["mismatch"]:
-            message = f"{pair} 存在 {item['mismatch']} 行 ID 不一致，需核验合并。"
+        left_wave, right_wave = pair.split("-")
+        left_var, right_var = spec["id_by_wave"][left_wave], spec["id_by_wave"][right_wave]
+        comparable = frame[left_var].notna() & frame[right_var].notna()
+        raw_mismatch = comparable & frame[left_var].astype(str).ne(frame[right_var].astype(str))
+        normalized_left = frame[left_var].map(lambda value: normalize_id(value, spec.get("id_normalization", {})))
+        normalized_right = frame[right_var].map(lambda value: normalize_id(value, spec.get("id_normalization", {})))
+        normalized_mismatch = comparable & normalized_left.ne(normalized_right)
+        format_only = raw_mismatch & ~normalized_mismatch
+        if item["format_only_candidates"]:
+            message = f"{pair} 有 {item['format_only_candidates']} 行仅在预设 ID 格式规范化后相符，需保留源值并核验映射。"
+            issue = make_issue("linkage-format", message)
+            issues.append(issue)
+            for row_index in frame.index[format_only]:
+                private_records.append(private_record(
+                    issue, row_index, [frame.at[row_index, variable] for variable in id_variables],
+                    salt, f"{left_var}|{right_var}",
+                ))
+        if item["normalized_mismatch"]:
+            message = f"{pair} 规范化后仍有 {item['normalized_mismatch']} 行 ID 不一致，需核验合并。"
             issue = make_issue("linkage", message)
             issues.append(issue)
-            left_wave, right_wave = pair.split("-")
-            left_var, right_var = spec["id_by_wave"][left_wave], spec["id_by_wave"][right_wave]
-            comparable = frame[left_var].notna() & frame[right_var].notna()
-            mismatch = comparable & frame[left_var].astype(str).ne(frame[right_var].astype(str))
-            for row_index in frame.index[mismatch]:
+            for row_index in frame.index[normalized_mismatch]:
                 private_records.append(private_record(
                     issue, row_index, [frame.at[row_index, variable] for variable in id_variables],
                     salt, f"{left_var}|{right_var}",
@@ -270,7 +396,8 @@ def main() -> int:
                 ))
         if item["construct"].startswith("self_harm") and item["zero_heavy"]:
             issues.append(make_issue("distribution", f"{item['wave']} `{item['variable']}` 零值比例为 {item['zero_percent']:.1f}%，需预设非正态/两部分等分布方案。"))
-        if item["extreme_high_count"]:
+        measure_spec = next(value for value in spec["measures"] if value["variable"] == item["variable"])
+        if item["extreme_high_count"] and measure_spec.get("flag_extremes", False):
             issue = make_issue("extreme-value", f"{item['wave']} `{item['variable']}` 有 {item['extreme_high_count']} 个基于宽松 IQR 规则的极端高值，需回查原始题项。")
             issues.append(issue)
             numeric = __import__("pandas").to_numeric(frame[item["variable"]], errors="coerce")
@@ -280,17 +407,44 @@ def main() -> int:
                 private_records.append(private_record(
                     issue, row_index, [frame.at[row_index, value] for value in id_variables], salt, item["variable"],
                 ))
+    for item, item_spec in zip(item_sets, spec.get("item_sets", [])):
+        if not item["flag"]:
+            continue
+        issue = make_issue(
+            "item-range",
+            f"{item['wave']} {item['construct']} 原始题项有 {item['invalid_cell_count']} 个单元格超出预设范围。",
+        )
+        issues.append(issue)
+        pd = __import__("pandas")
+        variables_for_set = item_variables(item_spec)
+        data = frame[variables_for_set].apply(pd.to_numeric, errors="coerce")
+        invalid = data.notna() & (
+            data.lt(item_spec.get("expected_min", -math.inf)) |
+            data.gt(item_spec.get("expected_max", math.inf))
+        )
+        for row_index in frame.index[invalid.any(axis=1)]:
+            affected = [variable for variable in variables_for_set if bool(invalid.at[row_index, variable])]
+            private_records.append(private_record(
+                issue, row_index, [frame.at[row_index, value] for value in id_variables],
+                salt, "|".join(affected),
+            ))
     for item in relations:
         if item["flag"]:
             issue = make_issue("scoring-formula", f"{item['name']} 有 {item['mismatch_count']} 行不符合预设公式。")
             issues.append(issue)
             relation = next(value for value in spec.get("score_relations", []) if value["name"] == item["name"])
             pd = __import__("pandas")
-            columns = [relation["target"], *relation["coefficients"]]
+            intercept, coefficients, products = relation_terms(relation)
+            columns = list(dict.fromkeys([
+                relation["target"], *coefficients,
+                *(variable for left, right, _ in products for variable in (left, right)),
+            ]))
             comparable = frame[columns].apply(pd.to_numeric, errors="coerce").dropna()
-            predicted = relation.get("intercept", 0)
-            for variable, coefficient in relation["coefficients"].items():
+            predicted = intercept
+            for variable, coefficient in coefficients.items():
                 predicted = predicted + coefficient * comparable[variable]
+            for left, right, coefficient in products:
+                predicted = predicted + coefficient * comparable[left] * comparable[right]
             mismatch = (comparable[relation["target"]] - predicted).abs().gt(relation.get("tolerance", 1e-6))
             for row_index in comparable.index[mismatch]:
                 private_records.append(private_record(
@@ -315,7 +469,8 @@ def main() -> int:
         "schema_version": 1, "profile": spec.get("profile"), "generated_at": now(),
         "data_file": str(data_path), "sha256": sha256(data_path),
         "spec_file": str(spec_path), "spec_sha256": sha256(spec_path), "shape": shape,
-        "ids": ids, "sex": sex, "measures": measures, "score_relations": relations,
+        "ids": ids, "sex": sex, "measures": measures, "item_sets": item_sets,
+        "score_relations": relations,
         "issues": issues, "private_register": str(private_path) if private_path else None,
         "flags": flags, "privacy": "aggregate-only; no participant IDs or row-level self-harm records",
     }

@@ -9,13 +9,15 @@ import hashlib
 import json
 import re
 import unicodedata
+from difflib import SequenceMatcher
 from pathlib import Path
 
 
 def normalize_doi(value: str) -> str:
     value = (value or "").strip().lower()
     value = re.sub(r"^(https?://(dx\.)?doi\.org/|doi:\s*)", "", value)
-    return value.rstrip(". ")
+    match = re.search(r"10\.\d{4,9}/\S+", value)
+    return (match.group(0) if match else value).rstrip(".,;:)]} ")
 
 
 def normalize_text(value: str) -> str:
@@ -95,12 +97,35 @@ def dedupe(source: Path, output_dir: Path) -> dict:
             writer = csv.DictWriter(handle, fieldnames=output_fields)
             writer.writeheader()
             writer.writerows(records)
+    review_pairs = []
+    for left_index, left in enumerate(unique_rows):
+        for right in unique_rows[left_index + 1:]:
+            left_title, right_title = normalize_text(left.get("title", "")), normalize_text(right.get("title", ""))
+            if not left_title or not right_title:
+                continue
+            similarity = SequenceMatcher(None, left_title, right_title).ratio()
+            left_author = normalize_text(re.split(r"[,;]", left.get("authors", ""), maxsplit=1)[0])
+            right_author = normalize_text(re.split(r"[,;]", right.get("authors", ""), maxsplit=1)[0])
+            years = {left.get("year", "").strip(), right.get("year", "").strip()} - {""}
+            if similarity >= 0.92 and (left_author == right_author or len(years) == 1):
+                review_pairs.append({
+                    "left_candidate_id": left["candidate_id"], "right_candidate_id": right["candidate_id"],
+                    "title_similarity": f"{similarity:.4f}", "same_first_author": str(left_author == right_author).lower(),
+                    "review_status": "pending", "review_decision": "", "reviewer": "", "reviewed_at": "",
+                })
+    review_path = output_dir / "疑似重复人工复核_fuzzy_duplicate_candidates.csv"
+    review_fields = ["left_candidate_id", "right_candidate_id", "title_similarity", "same_first_author", "review_status", "review_decision", "reviewer", "reviewed_at"]
+    with review_path.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=review_fields)
+        writer.writeheader(); writer.writerows(review_pairs)
     manifest = {
         "schema_version": 1, "status": "complete", "source": str(source.resolve()),
         "source_sha256": file_hash(source), "input_records": len(rows),
         "unique_records": len(unique_rows), "duplicate_records": len(duplicate_rows),
+        "fuzzy_review_candidates": len(review_pairs),
         "deduplicated_file": str(deduplicated_path.resolve()),
         "duplicate_file": str(duplicate_path.resolve()),
+        "fuzzy_review_file": str(review_path.resolve()),
     }
     manifest_path = output_dir / "文献去重清单_evidence_dedupe_manifest.json"
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

@@ -84,11 +84,14 @@ python scripts/pipeline.py inventory --run-dir <运行目录> --source <资料�
 
 ```powershell
 python scripts/pipeline.py audit-data --run-dir <运行目录> --data <sav或csv> --spec <审计规格json> [--private-register <本地私密jsonl>]
+python scripts/pipeline.py prepare-analysis-data --run-dir <运行目录> --data <sav或csv> --measurement-map <测量映射json>
 python scripts/pipeline.py freeze-data --run-dir <运行目录> --data <数据> --spec <规格> [--decisions <逐项决策json>]
 python scripts/pipeline.py plan-search --run-dir <运行目录> --spec <search-plan.json>
 python scripts/pipeline.py import-evidence --run-dir <运行目录> --search-id <search-id> --input <导出文件> [--input <导出文件> ...]
+python scripts/pipeline.py sync-zotero --run-dir <运行目录> --helper <Zotero助手脚本>
 python scripts/pipeline.py dedupe-evidence --run-dir <运行目录> --input <候选文献csv>
 python scripts/pipeline.py cluster-studies --run-dir <运行目录> --input <去重后csv>
+python scripts/pipeline.py audit-screening --run-dir <运行目录> --input <独立筛选csv> --reviewers <A> <B> --adjudicator <C>
 python scripts/pipeline.py audit-evidence-coverage --run-dir <运行目录> --input <已标注证据csv> --requirements <coverage.json>
 python scripts/pipeline.py build-retrieval-queue --run-dir <运行目录> --input <已标注证据csv>
 python scripts/pipeline.py refresh-search --run-dir <运行目录> --baseline <旧候选csv> --current <新候选csv>
@@ -96,6 +99,7 @@ python scripts/pipeline.py generate-analysis --run-dir <运行目录> --data <�
 python scripts/pipeline.py run-analysis --run-dir <运行目录> --manifest <代码清单json> [--rscript <Rscript路径>]
 python scripts/pipeline.py validate-results --run-dir <运行目录> --input <模型输出json>
 python scripts/pipeline.py render-manuscript --run-dir <运行目录> --template <正文模板> --results <已验证结果json> --claims <主张表csv> --references <bib>
+python scripts/pipeline.py export-publication-files --run-dir <运行目录> --manuscript <正文md> --title <题目>
 python scripts/pipeline.py build-submission --run-dir <运行目录> --journal-policy <实时核查json> --manuscript <正文> --numeric-audit <数字审计json> --claim-audit <主张审计md>
 ```
 

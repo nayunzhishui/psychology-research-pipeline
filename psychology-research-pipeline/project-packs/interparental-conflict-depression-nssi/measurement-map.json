@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "profile": "three-wave-interparental-conflict-depression-self-harm",
+  "status": "verified-against-questionnaire-and-sav-structure-with-listed-blockers",
+  "source_files": {
+    "questionnaire": "施测问卷 （测量工具名）.doc",
+    "data": "2018、2019和2020怀化和韶山数据全.sav",
+    "privacy": "Source files remain outside the versioned skill and must never be committed."
+  },
+  "wave_selector_convention": {
+    "T1": {"prefix": "", "width": 0},
+    "T2": {"prefix": "0", "width": 0},
+    "T3": {"prefix": "1", "width": 2},
+    "note": "For example, item 10 is 问卷三10, 问卷三010, and 问卷三110."
+  },
+  "constructs": {
+    "depressive_symptoms": {
+      "instrument": "CES-D 20-item questionnaire as administered",
+      "response_range": [1, 4],
+      "reverse_items": [4, 8, 12, 16],
+      "reverse_rule": "5 - item",
+      "score_rule": "sum 20 valid items after reversal; retain missingness unless a preregistered prorating rule is adopted",
+      "theoretical_range": [20, 80],
+      "raw_selectors": {
+        "T1": {"template": "问卷三{item}", "start": 1, "end": 20, "prefix": "", "width": 0},
+        "T2": {"template": "问卷三{item}", "start": 1, "end": 20, "prefix": "0", "width": 0},
+        "T3": {"template": "问卷三{item}", "start": 1, "end": 20, "prefix": "1", "width": 2}
+      },
+      "legacy_scores": {"T1": "抑郁T1", "T2": "抑郁T2", "T3": "T3抑郁"},
+      "analysis_scores": {"T1": "depression_score_t1", "T2": "depression_score_t2", "T3": "depression_score_t3"},
+      "decision": "Recompute from valid raw items. T1/T2 legacy totals reproduce exactly; T3 contains raw-range and legacy-total discrepancies."
+    },
+    "nssi": {
+      "instrument": "18-method adolescent non-suicidal self-injury checklist as administered",
+      "frequency_range": [0, 3],
+      "severity_range": [0, 4],
+      "score_rule": "For each method multiply frequency by severity, then sum the 18 products; also retain occurrence and positive-part outcomes for sensitivity analysis.",
+      "theoretical_range": [0, 216],
+      "frequency_selectors": {
+        "T1": {"template": "问卷五{item}次数", "start": 1, "end": 18, "prefix": "", "width": 0},
+        "T2": {"template": "问卷五{item}次数", "start": 1, "end": 18, "prefix": "0", "width": 0},
+        "T3": {"template": "问卷五{item}次数", "start": 1, "end": 18, "prefix": "1", "width": 2}
+      },
+      "severity_selectors": {
+        "T1": {"template": "问卷五{item}程度", "start": 1, "end": 18, "prefix": "", "width": 0},
+        "T2": {"template": "问卷五{item}程度", "start": 1, "end": 18, "prefix": "0", "width": 0},
+        "T3": {"template": "问卷五{item}程度", "start": 1, "end": 18, "prefix": "1", "width": 2}
+      },
+      "legacy_scores": {
+        "T1": {"frequency": "自伤次数T1", "severity": "自伤严重程度T1", "level": "自伤伤害水平T1"},
+        "T2": {"frequency": "自伤次数T2", "severity": "自伤严重T2", "level": "自伤伤害水平T2"},
+        "T3": {"frequency": "T3自伤次数", "severity": "T3自伤程度", "level": "T3自伤水平"}
+      },
+      "analysis_scores": {"T1": "nssi_level_t1", "T2": "nssi_level_t2", "T3": "nssi_level_t3"},
+      "decision": "Recompute from valid raw pairs. Values outside the administered ranges become missing only in a derived analysis dataset and remain listed in the private issue register."
+    },
+    "interparental_conflict": {
+      "instrument": "18-item, five-point interparental-conflict questionnaire as administered",
+      "response_range": [1, 5],
+      "high_conflict_reverse_items": [1, 3, 4, 5, 7, 9, 13, 16],
+      "reverse_rule": "6 - item",
+      "score_rule": "Consistent high-conflict sum across all 18 items",
+      "theoretical_range": [18, 90],
+      "raw_selectors": {
+        "T1": {"template": "问卷六{item}", "start": 1, "end": 18, "prefix": "", "width": 0},
+        "T2": {"template": "问卷六{item}", "start": 1, "end": 18, "prefix": "0", "width": 0},
+        "T3": {"template": "问卷六{item}", "start": 1, "end": 18, "prefix": "1", "width": 2}
+      },
+      "legacy_scores": {
+        "T1": {"resolution": "问题解决T1", "degree": "冲突程度T1"},
+        "T2": {"resolution": "解决情况T2", "degree": "冲突程度T2", "total": "父母冲突总分T2"},
+        "T3": {"resolution": "T3父母冲突解决情况", "degree": "T3父母冲突程度", "total": "T3父母冲突总分"}
+      },
+      "analysis_scores": {"T1": "conflict_score_t1", "T2": "conflict_score_t2", "T3": "conflict_score_t3"},
+      "decision": "Do not analyze legacy conflict composites. The T3 resolution variable mixes waves; recompute the same 18-item high-conflict score at every wave and test longitudinal measurement invariance."
+    }
+  },
+  "identifiers_and_covariates": {
+    "id_by_wave": {"T1": "学号", "T2": "学号0", "T3": "学号1"},
+    "id_normalization_candidate": "lowercase alphabetic prefix plus integer numeric suffix; never overwrite raw IDs",
+    "sex_by_wave": {"T1": "性别", "T2": "性别0", "T3": "性别1"},
+    "sex_codes": {"1": "male", "2": "female"},
+    "analysis_group_candidate": "sex_analysis",
+    "sex_policy": "Treat as measured sex, not gender. Derive only after source verification or an explicit cross-wave consensus rule; do not coerce anomalous codes.",
+    "school_code_candidate": "first alphabetic ID prefix a-i",
+    "school_policy": "Use anonymized school code only. Nine schools are insufficient for routine cluster-robust inference; prefer school fixed effects or a sensitivity analysis."
+  },
+  "unresolved_blockers": [
+    "Verify the four T1-T3 ID disagreements against the source linkage record.",
+    "Approve a documented rule for invalid or missing sex values before multi-group analysis.",
+    "Recover exact wave dates or intervals from administration records.",
+    "Locate original SPSS scoring syntax if available; it is corroborating evidence, not a substitute for raw-item reconstruction."
+  ]
+}

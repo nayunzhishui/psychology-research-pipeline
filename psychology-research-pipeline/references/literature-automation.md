@@ -6,6 +6,10 @@
 
 自动化只处理检索计划、已有合法导出、元数据和审计文件；不代替数据库登录、权限判断、人工纳排、全文判断或方法质量评价。
 
+Chrome用于依赖现有登录态或Connector的可见页面操作；CLI负责队列、哈希和产物合同。`sync-zotero` 先核验本地API，再导出BibTeX、规范化题录并核验本地PDF头与哈希；Zotero未运行时必须返回明确阻断，不得伪造同步成功。
+
+正式纳排使用两个独立reviewer；分歧必须由第三位裁决者处理。`audit-screening` 输出双人一致/分歧/裁决依据、PRISMA计数和按研究设计选择工具的偏倚风险待评表，缺任一独立判断或裁决时返回`blocked`。
+
 ## 题录导入
 
 支持 CSV、RIS、BibTeX、PubMed XML、Crossref JSON 和 OpenAlex JSON。每次导入写入原始文件绝对路径、格式、记录数和 SHA-256；规范化 DOI 并生成稳定 `candidate_id`。原始导出不可改写，人工标注应在筛选表或其派生副本完成。

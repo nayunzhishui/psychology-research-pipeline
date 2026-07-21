@@ -1,50 +1,46 @@
 {
+  "schema_version": 1,
   "profile": "three-wave-interparental-conflict-depression-self-harm",
-  "id_by_wave": {
-    "T1": "学号",
-    "T2": "学号0",
-    "T3": "学号1"
-  },
-  "sex_by_wave": {
-    "T1": "性别",
-    "T2": "性别0",
-    "T3": "性别1"
-  },
+  "id_by_wave": {"T1": "学号", "T2": "学号0", "T3": "学号1"},
+  "id_normalization": {"mode": "alpha-prefix-integer-suffix", "candidate_only": true},
+  "sex_by_wave": {"T1": "性别", "T2": "性别0", "T3": "性别1"},
   "allowed_sex_values": [1, 2],
   "measures": [
-    {"construct": "depression", "wave": "T1", "variable": "抑郁T1", "expected_min": 20, "expected_max": 80},
-    {"construct": "depression", "wave": "T2", "variable": "抑郁T2", "expected_min": 20, "expected_max": 80},
-    {"construct": "depression", "wave": "T3", "variable": "T3抑郁", "expected_min": 20, "expected_max": 80},
-    {"construct": "self_harm_count", "wave": "T1", "variable": "自伤次数T1", "expected_min": 0},
-    {"construct": "self_harm_count", "wave": "T2", "variable": "自伤次数T2", "expected_min": 0},
-    {"construct": "self_harm_count", "wave": "T3", "variable": "T3自伤次数", "expected_min": 0},
-    {"construct": "self_harm_severity", "wave": "T1", "variable": "自伤严重程度T1", "expected_min": 0},
-    {"construct": "self_harm_severity", "wave": "T2", "variable": "自伤严重T2", "expected_min": 0},
-    {"construct": "self_harm_severity", "wave": "T3", "variable": "T3自伤程度", "expected_min": 0},
-    {"construct": "self_harm_level", "wave": "T1", "variable": "自伤伤害水平T1", "expected_min": 0},
-    {"construct": "self_harm_level", "wave": "T2", "variable": "自伤伤害水平T2", "expected_min": 0},
-    {"construct": "self_harm_level", "wave": "T3", "variable": "T3自伤水平", "expected_min": 0},
-    {"construct": "conflict_resolution", "wave": "T1", "variable": "问题解决T1", "expected_min": 6, "expected_max": 30},
-    {"construct": "conflict_resolution", "wave": "T2", "variable": "解决情况T2", "expected_min": 6, "expected_max": 30},
-    {"construct": "conflict_resolution", "wave": "T3", "variable": "T3父母冲突解决情况", "expected_min": 6, "expected_max": 30},
-    {"construct": "conflict_degree", "wave": "T1", "variable": "冲突程度T1", "expected_min": 12, "expected_max": 60},
-    {"construct": "conflict_degree", "wave": "T2", "variable": "冲突程度T2", "expected_min": 12, "expected_max": 60},
-    {"construct": "conflict_degree", "wave": "T3", "variable": "T3父母冲突程度", "expected_min": 12, "expected_max": 60}
+    {"construct": "depression_legacy", "wave": "T1", "variable": "抑郁T1", "expected_min": 20, "expected_max": 80},
+    {"construct": "depression_legacy", "wave": "T2", "variable": "抑郁T2", "expected_min": 20, "expected_max": 80},
+    {"construct": "depression_legacy", "wave": "T3", "variable": "T3抑郁", "expected_min": 20, "expected_max": 80},
+    {"construct": "self_harm_level_legacy", "wave": "T1", "variable": "自伤伤害水平T1", "expected_min": 0, "expected_max": 216},
+    {"construct": "self_harm_level_legacy", "wave": "T2", "variable": "自伤伤害水平T2", "expected_min": 0, "expected_max": 216},
+    {"construct": "self_harm_level_legacy", "wave": "T3", "variable": "T3自伤水平", "expected_min": 0, "expected_max": 216}
+  ],
+  "item_sets": [
+    {"construct": "depression", "wave": "T1", "selector": {"template": "问卷三{item}", "start": 1, "end": 20, "prefix": "", "width": 0}, "expected_min": 1, "expected_max": 4},
+    {"construct": "depression", "wave": "T2", "selector": {"template": "问卷三{item}", "start": 1, "end": 20, "prefix": "0", "width": 0}, "expected_min": 1, "expected_max": 4},
+    {"construct": "depression", "wave": "T3", "selector": {"template": "问卷三{item}", "start": 1, "end": 20, "prefix": "1", "width": 2}, "expected_min": 1, "expected_max": 4},
+    {"construct": "nssi_frequency", "wave": "T1", "selector": {"template": "问卷五{item}次数", "start": 1, "end": 18, "prefix": "", "width": 0}, "expected_min": 0, "expected_max": 3},
+    {"construct": "nssi_frequency", "wave": "T2", "selector": {"template": "问卷五{item}次数", "start": 1, "end": 18, "prefix": "0", "width": 0}, "expected_min": 0, "expected_max": 3},
+    {"construct": "nssi_frequency", "wave": "T3", "selector": {"template": "问卷五{item}次数", "start": 1, "end": 18, "prefix": "1", "width": 2}, "expected_min": 0, "expected_max": 3},
+    {"construct": "nssi_severity", "wave": "T1", "selector": {"template": "问卷五{item}程度", "start": 1, "end": 18, "prefix": "", "width": 0}, "expected_min": 0, "expected_max": 4},
+    {"construct": "nssi_severity", "wave": "T2", "selector": {"template": "问卷五{item}程度", "start": 1, "end": 18, "prefix": "0", "width": 0}, "expected_min": 0, "expected_max": 4},
+    {"construct": "nssi_severity", "wave": "T3", "selector": {"template": "问卷五{item}程度", "start": 1, "end": 18, "prefix": "1", "width": 2}, "expected_min": 0, "expected_max": 4},
+    {"construct": "interparental_conflict", "wave": "T1", "selector": {"template": "问卷六{item}", "start": 1, "end": 18, "prefix": "", "width": 0}, "expected_min": 1, "expected_max": 5},
+    {"construct": "interparental_conflict", "wave": "T2", "selector": {"template": "问卷六{item}", "start": 1, "end": 18, "prefix": "0", "width": 0}, "expected_min": 1, "expected_max": 5},
+    {"construct": "interparental_conflict", "wave": "T3", "selector": {"template": "问卷六{item}", "start": 1, "end": 18, "prefix": "1", "width": 2}, "expected_min": 1, "expected_max": 5}
   ],
   "score_relations": [
-    {
-      "name": "T2 conflict total formula",
-      "target": "父母冲突总分T2",
-      "intercept": 24,
-      "coefficients": {"冲突程度T2": 1, "解决情况T2": -1},
-      "tolerance": 0.000001
-    },
-    {
-      "name": "T3 conflict total formula using T2 rule",
-      "target": "T3父母冲突总分",
-      "intercept": 24,
-      "coefficients": {"T3父母冲突程度": 1, "T3父母冲突解决情况": -1},
-      "tolerance": 0.000001
-    }
+    {"name": "T1 CES-D raw-item reconstruction", "target": "抑郁T1", "sum": {"selector": {"template": "问卷三{item}", "start": 1, "end": 20, "prefix": "", "width": 0}, "reverse_items": [4, 8, 12, 16], "reverse_constant": 5}},
+    {"name": "T2 CES-D raw-item reconstruction", "target": "抑郁T2", "sum": {"selector": {"template": "问卷三{item}", "start": 1, "end": 20, "prefix": "0", "width": 0}, "reverse_items": [4, 8, 12, 16], "reverse_constant": 5}},
+    {"name": "T3 CES-D raw-item reconstruction", "target": "T3抑郁", "sum": {"selector": {"template": "问卷三{item}", "start": 1, "end": 20, "prefix": "1", "width": 2}, "reverse_items": [4, 8, 12, 16], "reverse_constant": 5}},
+    {"name": "T1 NSSI frequency sum", "target": "自伤次数T1", "sum": {"selector": {"template": "问卷五{item}次数", "start": 1, "end": 18, "prefix": "", "width": 0}}},
+    {"name": "T2 NSSI frequency sum", "target": "自伤次数T2", "sum": {"selector": {"template": "问卷五{item}次数", "start": 1, "end": 18, "prefix": "0", "width": 0}}},
+    {"name": "T3 NSSI frequency sum", "target": "T3自伤次数", "sum": {"selector": {"template": "问卷五{item}次数", "start": 1, "end": 18, "prefix": "1", "width": 2}}},
+    {"name": "T1 NSSI severity sum", "target": "自伤严重程度T1", "sum": {"selector": {"template": "问卷五{item}程度", "start": 1, "end": 18, "prefix": "", "width": 0}}},
+    {"name": "T2 NSSI severity sum", "target": "自伤严重T2", "sum": {"selector": {"template": "问卷五{item}程度", "start": 1, "end": 18, "prefix": "0", "width": 0}}},
+    {"name": "T3 NSSI severity sum", "target": "T3自伤程度", "sum": {"selector": {"template": "问卷五{item}程度", "start": 1, "end": 18, "prefix": "1", "width": 2}}},
+    {"name": "T1 NSSI frequency-severity product", "target": "自伤伤害水平T1", "product_sum": {"left_selector": {"template": "问卷五{item}次数", "start": 1, "end": 18, "prefix": "", "width": 0}, "right_selector": {"template": "问卷五{item}程度", "start": 1, "end": 18, "prefix": "", "width": 0}}},
+    {"name": "T2 NSSI frequency-severity product", "target": "自伤伤害水平T2", "product_sum": {"left_selector": {"template": "问卷五{item}次数", "start": 1, "end": 18, "prefix": "0", "width": 0}, "right_selector": {"template": "问卷五{item}程度", "start": 1, "end": 18, "prefix": "0", "width": 0}}},
+    {"name": "T3 NSSI frequency-severity product", "target": "T3自伤水平", "product_sum": {"left_selector": {"template": "问卷五{item}次数", "start": 1, "end": 18, "prefix": "1", "width": 2}, "right_selector": {"template": "问卷五{item}程度", "start": 1, "end": 18, "prefix": "1", "width": 2}}},
+    {"name": "T2 legacy conflict total", "target": "父母冲突总分T2", "intercept": 24, "coefficients": {"冲突程度T2": 1, "解决情况T2": -1}},
+    {"name": "T3 consistent 18-item high-conflict total", "target": "T3父母冲突总分", "sum": {"selector": {"template": "问卷六{item}", "start": 1, "end": 18, "prefix": "1", "width": 2}, "reverse_items": [1, 3, 4, 5, 7, 9, 13, 16], "reverse_constant": 6}}
   ]
 }

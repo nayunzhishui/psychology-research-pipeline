@@ -1,12 +1,57 @@
 {
+  "$schema": "../../schemas/analysis-spec.schema.json",
   "schema_version": 1,
   "profile": "three-wave-interparental-conflict-depression-self-harm",
+  "analysis_id": "primary-three-construct-ri-clpm",
   "waves": ["T1", "T2", "T3"],
-  "constructs": {},
-  "group_variable": null,
+  "constructs": {
+    "conflict": {
+      "variables": {"T1": "conflict_score_t1", "T2": "conflict_score_t2", "T3": "conflict_score_t3"},
+      "indicator_selectors": {
+        "T1": {"template": "conflict_item{item}_t1", "start": 1, "end": 18, "width": 2},
+        "T2": {"template": "conflict_item{item}_t2", "start": 1, "end": 18, "width": 2},
+        "T3": {"template": "conflict_item{item}_t3", "start": 1, "end": 18, "width": 2}
+      },
+      "distribution": "continuous",
+      "orientation": "higher means more interparental conflict"
+    },
+    "depression": {
+      "variables": {"T1": "depression_score_t1", "T2": "depression_score_t2", "T3": "depression_score_t3"},
+      "indicator_selectors": {
+        "T1": {"template": "depression_item{item}_t1", "start": 1, "end": 20, "width": 2},
+        "T2": {"template": "depression_item{item}_t2", "start": 1, "end": 20, "width": 2},
+        "T3": {"template": "depression_item{item}_t3", "start": 1, "end": 20, "width": 2}
+      },
+      "distribution": "continuous",
+      "orientation": "higher means more depressive symptoms"
+    },
+    "nssi": {
+      "variables": {"T1": "nssi_level_t1", "T2": "nssi_level_t2", "T3": "nssi_level_t3"},
+      "indicator_selectors": {
+        "T1": {"template": "nssi_item{item}_t1", "start": 1, "end": 18, "width": 2},
+        "T2": {"template": "nssi_item{item}_t2", "start": 1, "end": 18, "width": 2},
+        "T3": {"template": "nssi_item{item}_t3", "start": 1, "end": 18, "width": 2}
+      },
+      "distribution": "zero-heavy",
+      "orientation": "higher means greater frequency-by-severity NSSI level"
+    }
+  },
+  "group_variable": "sex_analysis",
+  "group_labels": {"1": "male", "2": "female"},
   "cluster_variable": null,
+  "fixed_effect_variables": ["school_code"],
+  "school_strategy": "anonymized school fixed effects or sensitivity analysis; do not claim cluster-robust correction with nine schools",
   "estimator": "MLR",
   "missing": "FIML",
   "measurement_mode": "item-level",
-  "status": "blocked-until-item-mapping-and-scoring-are-verified"
+  "random_seed": 20260718,
+  "sample_size": 882,
+  "power_replications": 1000,
+  "status": "blocked-until-private-id-sex-and-invalid-cell-decisions-are-approved",
+  "blocking_items": [
+    "four T1-T3 ID disagreements",
+    "invalid and missing cross-wave sex codes",
+    "invalid T1/T3 raw item cells",
+    "exact wave dates or intervals"
+  ]
 }

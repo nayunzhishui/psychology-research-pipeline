@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 from pipeline_schema import STAGE_IDS
-from audit_panel_data import load_frame
+from audit_panel_data import item_variables, load_frame, relation_terms
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -185,6 +185,20 @@ def command_audit_data(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_prepare_analysis_data(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("prepare_analysis_data.py", [
+        "--data", args.data, "--measurement-map", args.measurement_map,
+        "--output-dir", str(run_dir / "06_数据管理"),
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
 def command_freeze_data(args: argparse.Namespace) -> int:
     run_dir = Path(args.run_dir).expanduser().resolve()
     load_state(run_dir)
@@ -261,9 +275,13 @@ def command_freeze_data(args: argparse.Namespace) -> int:
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
     variables = set(spec.get("id_by_wave", {}).values()) | set(spec.get("sex_by_wave", {}).values())
     variables |= {item["variable"] for item in spec.get("measures", [])}
+    for item_set in spec.get("item_sets", []):
+        variables.update(item_variables(item_set))
     for relation in spec.get("score_relations", []):
         variables.add(relation["target"])
-        variables.update(relation["coefficients"])
+        _, coefficients, products = relation_terms(relation)
+        variables.update(coefficients)
+        variables.update(variable for left, right, _ in products for variable in (left, right))
     frame, _ = load_frame(data_path, sorted(variables))
     frozen_path = output_dir / "冻结分析数据_frozen.csv"
     temp_path = frozen_path.with_suffix(".csv.tmp")
@@ -366,11 +384,36 @@ def command_import_evidence(args: argparse.Namespace) -> int:
     return result.returncode
 
 
+def command_sync_zotero(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("zotero_bridge.py", ["--run-dir", str(run_dir), "--helper", args.helper])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
 def command_cluster_studies(args: argparse.Namespace) -> int:
     run_dir = Path(args.run_dir).expanduser().resolve()
     load_state(run_dir)
     result = run_child("literature_pipeline.py", [
         "cluster-studies", "--run-dir", str(run_dir), "--input", args.input,
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_audit_screening(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("screening_audit.py", [
+        "--input", args.input, "--output-dir", str(run_dir / "04_文献筛选与小综述"),
+        "--reviewers", *args.reviewers, "--adjudicator", args.adjudicator,
     ])
     if result.stdout:
         sys.stdout.write(result.stdout)
@@ -401,6 +444,20 @@ def command_render_manuscript(args: argparse.Namespace) -> int:
     result = run_child("render_manuscript.py", [
         "--template", args.template, "--results", args.results, "--claims", args.claims,
         "--references", args.references, "--output-dir", str(run_dir / "09_论文正文"),
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_export_publication_files(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("export_publication_files.py", [
+        "--run-dir", str(run_dir), "--manuscript", args.manuscript, "--title", args.title,
+        *(["--soffice", args.soffice] if args.soffice else []),
     ])
     if result.stdout:
         sys.stdout.write(result.stdout)
@@ -475,6 +532,12 @@ def build_parser() -> argparse.ArgumentParser:
     audit.add_argument("--private-register", help="local ignored JSONL row-issue register")
     audit.set_defaults(handler=command_audit_data)
 
+    prepare_data = subparsers.add_parser("prepare-analysis-data", help="derive privacy-safe rescored analysis data")
+    prepare_data.add_argument("--run-dir", required=True)
+    prepare_data.add_argument("--data", required=True)
+    prepare_data.add_argument("--measurement-map", required=True)
+    prepare_data.set_defaults(handler=command_prepare_analysis_data)
+
     freeze = subparsers.add_parser("freeze-data", help="freeze analysis data only after a clean audit")
     freeze.add_argument("--run-dir", required=True)
     freeze.add_argument("--data", required=True)
@@ -515,10 +578,22 @@ def build_parser() -> argparse.ArgumentParser:
     evidence_import.add_argument("--search-id", required=True)
     evidence_import.set_defaults(handler=command_import_evidence)
 
+    zotero_sync = subparsers.add_parser("sync-zotero", help="export Zotero, import records, and audit local PDFs")
+    zotero_sync.add_argument("--run-dir", required=True)
+    zotero_sync.add_argument("--helper", required=True, help="path to the installed Zotero helper")
+    zotero_sync.set_defaults(handler=command_sync_zotero)
+
     study_clusters = subparsers.add_parser("cluster-studies", help="flag possible multi-report study families for review")
     study_clusters.add_argument("--run-dir", required=True)
     study_clusters.add_argument("--input", required=True)
     study_clusters.set_defaults(handler=command_cluster_studies)
+
+    screening = subparsers.add_parser("audit-screening", help="audit dual-reviewer screening, adjudication, PRISMA, and risk-of-bias setup")
+    screening.add_argument("--run-dir", required=True)
+    screening.add_argument("--input", required=True)
+    screening.add_argument("--reviewers", nargs=2, required=True)
+    screening.add_argument("--adjudicator", required=True)
+    screening.set_defaults(handler=command_audit_screening)
 
     coverage = subparsers.add_parser("audit-evidence-coverage", help="gate synthesis on explicit evidence slots")
     coverage.add_argument("--run-dir", required=True)
@@ -544,6 +619,13 @@ def build_parser() -> argparse.ArgumentParser:
     manuscript.add_argument("--claims", required=True)
     manuscript.add_argument("--references", required=True)
     manuscript.set_defaults(handler=command_render_manuscript)
+
+    publication = subparsers.add_parser("export-publication-files", help="build DOCX, PDF, supplement, and publication manifests")
+    publication.add_argument("--run-dir", required=True)
+    publication.add_argument("--manuscript", required=True)
+    publication.add_argument("--title", required=True)
+    publication.add_argument("--soffice")
+    publication.set_defaults(handler=command_export_publication_files)
 
     submission = subparsers.add_parser("build-submission", help="build a privacy-safe simulated submission package")
     submission.add_argument("--run-dir", required=True)
