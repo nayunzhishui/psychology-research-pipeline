@@ -1,0 +1,139 @@
+{
+  "title": "TaskEnvelope",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "default": 1,
+      "enum": [
+        1
+      ],
+      "type": "integer"
+    },
+    "task_id": {
+      "title": "Task Id",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,79}$",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "minLength": 1,
+      "type": "string"
+    },
+    "stage": {
+      "title": "Stage",
+      "enum": [
+        "00_scope",
+        "01_protocol",
+        "02_search",
+        "03_library",
+        "04_synthesis",
+        "05_methods",
+        "06_data",
+        "07_analysis",
+        "08_results",
+        "09_manuscript",
+        "10_alignment",
+        "11_review"
+      ],
+      "type": "string"
+    },
+    "role": {
+      "title": "Role",
+      "enum": [
+        "evidence",
+        "research-design",
+        "data-measurement",
+        "statistics",
+        "result-verification",
+        "manuscript-submission"
+      ],
+      "type": "string"
+    },
+    "action": {
+      "title": "Action",
+      "minLength": 3,
+      "type": "string"
+    },
+    "inputs": {
+      "title": "Inputs",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ArtifactRef"
+      }
+    },
+    "allowed_tools": {
+      "title": "Allowed Tools",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "human_approval_required": {
+      "title": "Human Approval Required",
+      "default": false,
+      "type": "boolean"
+    },
+    "max_retries": {
+      "title": "Max Retries",
+      "default": 2,
+      "minimum": 0,
+      "maximum": 5,
+      "type": "integer"
+    },
+    "reads_primary_results": {
+      "title": "Reads Primary Results",
+      "default": false,
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "task_id",
+    "run_id",
+    "stage",
+    "role",
+    "action"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "ArtifactRef": {
+      "title": "ArtifactRef",
+      "type": "object",
+      "properties": {
+        "path": {
+          "title": "Path",
+          "minLength": 1,
+          "type": "string"
+        },
+        "sha256": {
+          "title": "Sha256",
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "enum": [
+            "input",
+            "output",
+            "evidence",
+            "code",
+            "log"
+          ],
+          "type": "string"
+        },
+        "sensitive": {
+          "title": "Sensitive",
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "role"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
