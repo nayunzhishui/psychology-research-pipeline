@@ -16,6 +16,8 @@ description: End-to-end, Chinese-first workflow for auditable empirical psycholo
 - 不从观察性关联推出因果；不以“一组显著、另一组不显著”证明组间差异。
 - 不覆盖旧运行；修订使用新版本并记录原因。
 - 涉及青少年自伤时，限制行级数据、学校标识和小单元组合的暴露。
+- 所有 Agent 工作必须通过受控任务契约；不得跨越人工门禁、扩大工具权限或无限重试。
+- 先建不可变原始来源与证据账本，再建可重建 RAG 索引；检索命中不等于可靠证据。
 - 遇到关键阻断条件，生成 `停止原因与补救清单_stop_reason_and_fix.md`，不得生成“可投稿”结论。
 
 ## 启动
@@ -36,6 +38,9 @@ python scripts/pipeline.py preflight-environment --run-dir <运行目录> --help
 python scripts/pipeline.py prepare-presearch --run-dir <运行目录> --spec <presearch-protocol.json>
 python scripts/pipeline.py plan-search --run-dir <运行目录> --spec <search-plan.json>
 python scripts/pipeline.py sync-zotero --run-dir <运行目录> --helper <Zotero助手> --collection-name <精确名称> --collection-key <精确key> --allow-empty
+python scripts/pipeline.py dispatch-task --run-dir <运行目录> --spec <task-envelope.json>
+python scripts/pipeline.py resume-task --run-dir <运行目录> --task-id <任务ID> --result <role-result.json>
+python scripts/pipeline.py verify-task --run-dir <运行目录> --task-id <任务ID>
 ```
 
 `preflight-environment` 自动定位 Rscript、核验核心 R 包及 Zotero API/Connector/精确集合，并把结果写入 00 阶段。`prepare-presearch` 生成项目定标、研究问题/假设、构念映射、协议、报告规范、伦理开放科学和检索前准备度审计。`plan-search` 只冻结检索方案，不代表执行过检索。`sync-zotero --allow-empty` 只核验空的精确项目集合；禁止回退到 Zotero 全库导出。
@@ -102,17 +107,23 @@ python scripts/pipeline.py plan-search --run-dir <运行目录> --spec <search-p
 python scripts/pipeline.py import-evidence --run-dir <运行目录> --search-id <search-id> --input <导出文件> [--input <导出文件> ...]
 python scripts/pipeline.py sync-zotero --run-dir <运行目录> --helper <Zotero助手脚本> --collection-name <精确名称> --collection-key <精确key>
 python scripts/pipeline.py dedupe-evidence --run-dir <运行目录> --input <候选文献csv>
+python scripts/pipeline.py build-evidence-index --run-dir <运行目录> --ledger <已核验证据账本jsonl>
+python scripts/pipeline.py verify-metadata --run-dir <运行目录> --candidate <候选json> --crossref <Crossref规范化json> --openalex <OpenAlex规范化json>
+python scripts/pipeline.py audit-pdf --run-dir <运行目录> --pdf <PDF> [--grobid-url <本地GROBID>]
+python scripts/pipeline.py rank-screening --run-dir <运行目录> --input <主动学习分数jsonl>
 python scripts/pipeline.py cluster-studies --run-dir <运行目录> --input <去重后csv>
 python scripts/pipeline.py audit-screening --run-dir <运行目录> --input <独立筛选csv> --reviewers <A> <B> --adjudicator <C>
 python scripts/pipeline.py audit-evidence-coverage --run-dir <运行目录> --input <已标注证据csv> --requirements <coverage.json>
 python scripts/pipeline.py build-retrieval-queue --run-dir <运行目录> --input <已标注证据csv>
 python scripts/pipeline.py refresh-search --run-dir <运行目录> --baseline <旧候选csv> --current <新候选csv>
 python scripts/pipeline.py generate-analysis --run-dir <运行目录> --data <冻结数据> --spec <分析规格json>
+python scripts/pipeline.py plan-longitudinal-sem --run-dir <运行目录> --spec <冻结纵向SEM规格json>
 python scripts/pipeline.py run-analysis --run-dir <运行目录> --manifest <代码清单json> [--rscript <Rscript路径>]
 python scripts/pipeline.py validate-results --run-dir <运行目录> --input <模型输出json>
 python scripts/pipeline.py render-manuscript --run-dir <运行目录> --template <正文模板> --results <已验证结果json> --claims <主张表csv> --references <bib>
 python scripts/pipeline.py export-publication-files --run-dir <运行目录> --manuscript <正文md> --title <题目>
 python scripts/pipeline.py build-submission --run-dir <运行目录> --journal-policy <实时核查json> --manuscript <正文> --numeric-audit <数字审计json> --claim-audit <主张审计md>
+python scripts/pipeline.py export-ro-crate --run-dir <运行目录> --artifact <产物> [--artifact <产物> ...]
 ```
 
 `generate-analysis` 生成测量不变性、RI-CLPM、直接组间约束检验、零值密集两部分敏感性和模拟检验力 R 代码，但不把“已生成”写成“已执行”。`run-analysis` 核验代码哈希、真实调用 R、保存逐脚本日志并检查预期输出；仍须经 `validate-results` 才能进入正文。`freeze-data` 对每个结构化 issue 要求与当前审计哈希绑定的允许处置；ID 错配和计分错误不得用“分析适配”绕过。
@@ -135,7 +146,13 @@ python scripts/pipeline.py autopilot --run-dir <运行目录>
 ## 按需读取
 
 - 阶段输入、输出、字段与 gate：读取 `references/stage-contracts.md`。
+- 五层架构与人工门禁：读取 `references/research-system-architecture.md`。
+- 六个研究角色与有界 Loop：读取 `references/controlled-research-roles.md`。
+- 证据账本、RAG 边界和 ASReview 限制：读取 `references/evidence-ledger-and-retrieval.md`。
+- 工具能力与权限：读取 `references/tool-capabilities.json`。
+- `renv`、`targets`、双源题录、PDF、Quarto 与 RO-Crate：读取 `references/reproducibility-and-publishing.md`。
 - 纵向面板、RI-CLPM、自伤和性别差异：读取 `references/longitudinal-panel-nssi.md`。
+- 纵向 SEM 模型阶梯、功效恢复、缺失与聚类敏感性：调用 `subskills/empirical-longitudinal-sem/`。
 - 报告规范选择：读取 `references/psychology-standards.md`。
 - 文献与 Zotero 工具路线：读取 `references/tool-routing.md`。
 - 文献自动化命令、题录字段、去重和覆盖 gate：读取 `references/literature-automation.md`。

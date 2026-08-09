@@ -16,6 +16,7 @@ from audit_panel_data import item_variables, load_frame, relation_terms
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+LONGITUDINAL_SEM_SCRIPTS = SCRIPT_DIR.parent / "subskills" / "empirical-longitudinal-sem" / "scripts"
 
 
 def state_path(run_dir: Path) -> Path:
@@ -44,6 +45,15 @@ def run_child(script: str, arguments: list[str]) -> subprocess.CompletedProcess[
     environment["PYTHONIOENCODING"] = "utf-8"
     return subprocess.run(
         [sys.executable, str(SCRIPT_DIR / script), *arguments],
+        text=True, encoding="utf-8", capture_output=True, env=environment,
+    )
+
+
+def run_longitudinal_sem_child(script: str, arguments: list[str]) -> subprocess.CompletedProcess[str]:
+    environment = os.environ.copy()
+    environment["PYTHONIOENCODING"] = "utf-8"
+    return subprocess.run(
+        [sys.executable, str(LONGITUDINAL_SEM_SCRIPTS / script), *arguments],
         text=True, encoding="utf-8", capture_output=True, env=environment,
     )
 
@@ -153,6 +163,45 @@ def command_preflight_environment(args: argparse.Namespace) -> int:
     if args.collection_key:
         child_args.extend(["--collection-key", args.collection_key])
     result = run_child("environment_preflight.py", child_args)
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_dispatch_task(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("research_orchestrator.py", [
+        "dispatch", "--run-dir", str(run_dir), "--spec", args.spec,
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_resume_task(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("research_orchestrator.py", [
+        "resume", "--run-dir", str(run_dir), "--task-id", args.task_id, "--result", args.result,
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_verify_task(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("research_orchestrator.py", [
+        "verify", "--run-dir", str(run_dir), "--task-id", args.task_id,
+    ])
     if result.stdout:
         sys.stdout.write(result.stdout)
     if result.stderr:
@@ -348,6 +397,20 @@ def command_generate_analysis(args: argparse.Namespace) -> int:
     return result.returncode
 
 
+def command_plan_longitudinal_sem(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    output = run_dir / "05_方法设计" / "纵向SEM模型阶梯_longitudinal_sem_plan.json"
+    result = run_longitudinal_sem_child("generate_analysis_plan.py", [
+        "--spec", args.spec, "--output", str(output),
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
 def command_validate_results(args: argparse.Namespace) -> int:
     run_dir = Path(args.run_dir).expanduser().resolve()
     load_state(run_dir)
@@ -381,6 +444,75 @@ def command_dedupe_evidence(args: argparse.Namespace) -> int:
     result = run_child("evidence_dedupe.py", [
         "--input", args.input, "--output-dir", str(run_dir / "04_文献筛选与小综述"),
     ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_build_evidence_index(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    result = run_child("evidence_ledger.py", [
+        "--run-dir", str(run_dir), "--ledger", args.ledger,
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_verify_metadata(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    output = run_dir / "03_Zotero与全文获取" / args.output_name
+    result = run_child("metadata_verify.py", [
+        "--candidate", args.candidate, "--crossref", args.crossref,
+        "--openalex", args.openalex, "--output", str(output),
+    ])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_audit_pdf(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    output = run_dir / "03_Zotero与全文获取" / args.output_name
+    child_args = ["--pdf", args.pdf, "--output", str(output)]
+    if args.grobid_url:
+        child_args.extend(["--grobid-url", args.grobid_url])
+    result = run_child("pdf_ingest.py", child_args)
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_rank_screening(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    output = run_dir / "04_文献筛选与小综述" / "主动学习排序_queue.json"
+    result = run_child("screening_rank_bridge.py", ["--input", args.input, "--output", str(output)])
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.stderr:
+        sys.stderr.write(result.stderr)
+    return result.returncode
+
+
+def command_export_ro_crate(args: argparse.Namespace) -> int:
+    run_dir = Path(args.run_dir).expanduser().resolve()
+    load_state(run_dir)
+    child_args = ["--run-dir", str(run_dir)]
+    for artifact in args.artifact:
+        child_args.extend(["--artifact", artifact])
+    result = run_child("export_ro_crate.py", child_args)
     if result.stdout:
         sys.stdout.write(result.stdout)
     if result.stderr:
@@ -562,6 +694,22 @@ def build_parser() -> argparse.ArgumentParser:
     environment.add_argument("--collection-key", help="exact collection key; may come from the attached project pack")
     environment.set_defaults(handler=command_preflight_environment)
 
+    dispatch_task = subparsers.add_parser("dispatch-task", help="register a hash-bound controlled research-role task")
+    dispatch_task.add_argument("--run-dir", required=True)
+    dispatch_task.add_argument("--spec", required=True)
+    dispatch_task.set_defaults(handler=command_dispatch_task)
+
+    resume_task = subparsers.add_parser("resume-task", help="record one controlled task attempt and enforce bounded retries")
+    resume_task.add_argument("--run-dir", required=True)
+    resume_task.add_argument("--task-id", required=True)
+    resume_task.add_argument("--result", required=True)
+    resume_task.set_defaults(handler=command_resume_task)
+
+    verify_task = subparsers.add_parser("verify-task", help="verify controlled task inputs and outputs against recorded hashes")
+    verify_task.add_argument("--run-dir", required=True)
+    verify_task.add_argument("--task-id", required=True)
+    verify_task.set_defaults(handler=command_verify_task)
+
     gate = subparsers.add_parser("gate", help="check or advance one canonical stage")
     gate.add_argument("--run-dir", required=True)
     gate.add_argument("--stage", choices=STAGE_IDS, required=True)
@@ -602,6 +750,11 @@ def build_parser() -> argparse.ArgumentParser:
     analysis.add_argument("--spec", required=True)
     analysis.set_defaults(handler=command_generate_analysis)
 
+    sem_plan = subparsers.add_parser("plan-longitudinal-sem", help="generate the fail-closed 14-step longitudinal SEM ladder")
+    sem_plan.add_argument("--run-dir", required=True)
+    sem_plan.add_argument("--spec", required=True)
+    sem_plan.set_defaults(handler=command_plan_longitudinal_sem)
+
     run_analysis = subparsers.add_parser("run-analysis", help="execute generated R code with hash and output verification")
     run_analysis.add_argument("--run-dir", required=True)
     run_analysis.add_argument("--manifest", required=True)
@@ -617,6 +770,31 @@ def build_parser() -> argparse.ArgumentParser:
     evidence.add_argument("--run-dir", required=True)
     evidence.add_argument("--input", required=True)
     evidence.set_defaults(handler=command_dedupe_evidence)
+
+    evidence_index = subparsers.add_parser("build-evidence-index", help="build a disposable index from full-text-verified ledger records")
+    evidence_index.add_argument("--run-dir", required=True)
+    evidence_index.add_argument("--ledger", required=True)
+    evidence_index.set_defaults(handler=command_build_evidence_index)
+
+    metadata = subparsers.add_parser("verify-metadata", help="compare candidate metadata against normalized Crossref and OpenAlex records")
+    metadata.add_argument("--run-dir", required=True)
+    metadata.add_argument("--candidate", required=True)
+    metadata.add_argument("--crossref", required=True)
+    metadata.add_argument("--openalex", required=True)
+    metadata.add_argument("--output-name", default="题录双源核验_metadata_verification.json")
+    metadata.set_defaults(handler=command_verify_metadata)
+
+    pdf_audit = subparsers.add_parser("audit-pdf", help="audit PDF integrity and optional GROBID availability")
+    pdf_audit.add_argument("--run-dir", required=True)
+    pdf_audit.add_argument("--pdf", required=True)
+    pdf_audit.add_argument("--grobid-url")
+    pdf_audit.add_argument("--output-name", default="全文解析审计_pdf_audit.json")
+    pdf_audit.set_defaults(handler=command_audit_pdf)
+
+    rank = subparsers.add_parser("rank-screening", help="import active-learning scores as a ranking-only human queue")
+    rank.add_argument("--run-dir", required=True)
+    rank.add_argument("--input", required=True)
+    rank.set_defaults(handler=command_rank_screening)
 
     search_plan = subparsers.add_parser("plan-search", help="freeze modular database-specific query families")
     search_plan.add_argument("--run-dir", required=True)
@@ -688,6 +866,11 @@ def build_parser() -> argparse.ArgumentParser:
     submission.add_argument("--numeric-audit", required=True)
     submission.add_argument("--claim-audit", required=True)
     submission.set_defaults(handler=command_build_submission)
+
+    crate = subparsers.add_parser("export-ro-crate", help="export a hash-linked RO-Crate-style research manifest")
+    crate.add_argument("--run-dir", required=True)
+    crate.add_argument("--artifact", action="append", required=True)
+    crate.set_defaults(handler=command_export_ro_crate)
     return parser
 
 

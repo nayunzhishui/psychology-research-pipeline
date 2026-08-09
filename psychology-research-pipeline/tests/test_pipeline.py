@@ -42,6 +42,8 @@ class PipelineTests(unittest.TestCase):
             "analysis-output.schema.json", "journal-policy.schema.json", "search-plan.schema.json",
             "evidence-record.schema.json", "evidence-coverage.schema.json",
             "presearch-protocol.schema.json", "zotero-target.schema.json",
+            "task-envelope.schema.json", "role-result.schema.json", "tool-capability.schema.json",
+            "loop-policy.schema.json", "evidence-ledger.schema.json",
         }
         schema_dir = SKILL / "schemas"
         self.assertEqual(expected, {path.name for path in schema_dir.glob("*.json")})
