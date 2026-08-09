@@ -1,0 +1,4 @@
+interface:
+  display_name: "纵向 SEM 实证分析"
+  short_description: "受控设计、生成与核验 RI-CLPM 及纵向 SEM 分析"
+  default_prompt: "使用 $empirical-longitudinal-sem 为冻结后的纵向心理学数据设计并核验模型阶梯。"
