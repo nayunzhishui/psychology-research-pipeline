@@ -1,0 +1,36 @@
+---
+title: "{{TITLE}}"
+format:
+  docx: default
+  pdf: default
+bibliography: references.bib
+csl: apa.csl
+execute:
+  freeze: true
+---
+
+> 构建门禁：仅允许读取 `08_结果与图表` 中独立核验的结果，以及证据账本中 `claim-verified` 的主张。
+
+# 摘要
+
+{{VERIFIED_ABSTRACT}}
+
+# 引言
+
+{{CLAIM_VERIFIED_INTRODUCTION}}
+
+# 方法
+
+{{FROZEN_METHODS}}
+
+# 结果
+
+{{VERIFIED_RESULTS}}
+
+# 讨论
+
+{{CLAIM_VERIFIED_DISCUSSION}}
+
+# 声明
+
+{{APPROVED_DECLARATIONS}}

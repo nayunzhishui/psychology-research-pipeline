@@ -15,6 +15,10 @@ from analysis_runner import resolve_rscript
 
 
 R_PACKAGES = ["readr", "dplyr", "psych", "lavaan", "semTools", "simsem", "jsonlite"]
+REPRODUCIBILITY_PACKAGES = ["renv", "targets"]
+ANALYSIS_EXTENSION_PACKAGES = [
+    "mice", "powRICLPM", "effectsize", "performance", "parameters", "clubSandwich",
+]
 
 
 def sha256(path: Path) -> str:
@@ -39,7 +43,8 @@ def r_audit(rscript_value: str) -> dict:
     executable = resolve_rscript(rscript_value)
     result = {
         "ready": False, "executable": str(executable), "version": None,
-        "executable_sha256": None, "packages": [], "errors": [],
+        "executable_sha256": None, "packages": [], "reproducibility_packages": [],
+        "analysis_extension_packages": [], "full_analysis_ready": False, "errors": [],
     }
     if not executable.is_file():
         result["errors"].append(f"Rscript executable missing: {executable}")
@@ -53,7 +58,7 @@ def r_audit(rscript_value: str) -> dict:
         result["errors"].append(f"Rscript version check failed: {version_text}")
         return result
     expression = (
-        "pkgs <- c(" + ",".join(json.dumps(name) for name in R_PACKAGES) + "); "
+        "pkgs <- c(" + ",".join(json.dumps(name) for name in [*R_PACKAGES, *REPRODUCIBILITY_PACKAGES, *ANALYSIS_EXTENSION_PACKAGES]) + "); "
         "v <- vapply(pkgs, function(x) if (requireNamespace(x, quietly=TRUE)) "
         "as.character(utils::packageVersion(x)) else NA_character_, character(1)); "
         "cat(paste(names(v), v, sep='\\t', collapse='\\n'))"
@@ -74,6 +79,14 @@ def r_audit(rscript_value: str) -> dict:
             {"name": name, "version": versions.get(name), "installed": versions.get(name) not in {None, "NA", "<NA>"}}
             for name in R_PACKAGES
         ],
+        "reproducibility_packages": [
+            {"name": name, "version": versions.get(name), "installed": versions.get(name) not in {None, "NA", "<NA>"}}
+            for name in REPRODUCIBILITY_PACKAGES
+        ],
+        "analysis_extension_packages": [
+            {"name": name, "version": versions.get(name), "installed": versions.get(name) not in {None, "NA", "<NA>"}}
+            for name in ANALYSIS_EXTENSION_PACKAGES
+        ],
     })
     if packages.returncode:
         result["errors"].append((packages.stderr or packages.stdout).strip() or "R package check failed")
@@ -81,6 +94,9 @@ def r_audit(rscript_value: str) -> dict:
     if missing:
         result["errors"].append(f"R packages missing: {missing}")
     result["ready"] = not result["errors"]
+    result["full_analysis_ready"] = result["ready"] and all(
+        item["installed"] for item in [*result["reproducibility_packages"], *result["analysis_extension_packages"]]
+    )
     return result
 
 
@@ -135,6 +151,10 @@ def write_report(run_dir: Path, payload: dict) -> tuple[Path, Path]:
         f"- {item['name']}: {item['version'] or 'missing'} ({'通过' if item['installed'] else '缺失'})"
         for item in payload["r"]["packages"]
     ) or "- 尚未取得包信息。"
+    extension_lines = "\n".join(
+        f"- {item['name']}: {item['version'] or 'missing'} ({'通过' if item['installed'] else '待安装'})"
+        for item in [*payload["r"].get("reproducibility_packages", []), *payload["r"].get("analysis_extension_packages", [])]
+    ) or "- 尚未取得扩展包信息。"
     errors = payload["errors"]
     md_path.write_text(
         "# 环境预检\n\n"
@@ -144,7 +164,9 @@ def write_report(run_dir: Path, payload: dict) -> tuple[Path, Path]:
         f"- Zotero API：{payload['zotero']['api_running']}\n"
         f"- Zotero Connector：{payload['zotero']['connector_running']}\n"
         f"- 精确集合：{payload['zotero']['target']['collection_name']} (`{payload['zotero']['target']['collection_key']}`)\n\n"
-        f"## R 包\n\n{package_lines}\n\n"
+        f"## 检索前核心 R 包\n\n{package_lines}\n\n"
+        f"## 正式分析扩展包\n\n{extension_lines}\n\n"
+        f"- 完整分析环境：{payload['r'].get('full_analysis_ready', False)}\n\n"
         "## 阻断项\n\n" + ("\n".join(f"- {item}" for item in errors) if errors else "- 无。") +
         "\n\n> 此检查只确认技术环境，不代表研究问题、伦理、检索协议或分析计划已获批准。\n",
         encoding="utf-8", newline="\n",
