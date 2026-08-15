@@ -16,15 +16,16 @@ description: Local subskill under psych-cog-neuro-review for screening cognitive
 
 ## 输入
 
-候选文献表、检索记录、纳排标准、PDF 全文清单、机制边界说明。
+候选文献表、检索记录、纳排标准、PDF 全文清单、机制边界说明。开始前完整读取 `../../references/literature-operations-contract.md`。
 
 ## 执行步骤
 
-1. 去重并核验题录。
+1. 对历轮已见主表去重并核验题录；同一研究的不同报告、任务或模态结果保留并建立研究家族。
 2. 按理论/综述/元分析/方法学/范式/EEG/ERP/fMRI/PSG/眼动/NIRS/心理生理/行为研究分类。
 3. 按 1–4 级评估主题相关性。
-4. 初评方法质量、指标适配度和机制证据强度。
-5. 登记排除理由和需复核文献。
+4. 分开初评方法质量、指标适配度和机制证据强度；显著激活、期刊声望或引用数不能替代质量判断。
+5. 在证据计数前预识别研究家族，未知使用 `family-uncertain-<candidate_id>`。
+6. 登记排除理由和需复核文献；Reviewer B 在看不到 A 结论时独立复核，冲突保留待裁决。
 
 ## 输出文件
 
@@ -44,6 +45,7 @@ description: Local subskill under psych-cog-neuro-review for screening cognitive
 - 是否标记神经/生理指标类型？
 - 是否登记排除理由？
 - 是否识别需全文复核文献？
+- 是否完成研究家族预识别与真正独立 Reviewer B？
 
 ## 失败与停止条件
 

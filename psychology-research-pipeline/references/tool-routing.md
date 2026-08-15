@@ -11,7 +11,7 @@
 
 ## Route order
 
-Prefer structured scholarly APIs, publisher metadata, and purpose-built connectors for discovery and metadata. Use Chrome only when the user's existing session, institutional access, or Zotero Connector is needed. Use Computer Use only for a desktop action the Zotero helper/connector cannot perform.
+Prefer structured scholarly APIs, publisher metadata, and purpose-built connectors for discovery and metadata. PubMed/PsycINFO/Web of Science/CNKI exports are core-search evidence when used; Crossref resolves DOI metadata, and OpenAlex expands citation discovery but is not a substitute for a database search. Use Chrome only when the user's existing session, institutional access, or Zotero Connector is needed. Use Computer Use only for a desktop action the Zotero helper/connector cannot perform.
 
 Before controlling a tool, load and follow its installed skill: `control-chrome`, `Zotero`, `computer-use`, and `literature-to-zotero`. Their current instructions override duplicated operational detail here.
 
@@ -27,13 +27,15 @@ Before controlling a tool, load and follow its installed skill: `control-chrome`
 ## Zotero
 
 1. Run the bundled helper `status --json`.
-2. Resolve the exact named collection; never substitute the currently selected collection silently.
+2. Resolve and record both the exact collection name and collection key; never substitute the currently selected collection or the whole library silently.
 3. Search for duplicates before download using DOI, PMID, then normalized title + first author + year.
 4. Preferred save path: Zotero Connector on the verified article page into the exact collection.
 5. Fallback: export RIS/BibTeX, import with the Zotero helper, then use Computer Use to attach the verified PDF to the parent item.
 6. Verify title, creators, year, DOI, collection, parent item key, attachment child key, and readable full text.
 
 Never create attachment-only items when metadata is available. Additive authorization never permits delete, merge, rename, move, or overwrite of existing records.
+
+`sync-zotero` must receive `--collection-name`/`--collection-key` or read the same pair from a versioned project pack. Before formal collection, `--allow-empty` may verify that the target exists and is empty without creating candidate evidence. A whole-library integration export is never admissible as project evidence.
 
 ## Computer Use
 

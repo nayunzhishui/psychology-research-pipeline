@@ -1,0 +1,10 @@
+{
+  "$schema": "../../schemas/zotero-target.schema.json",
+  "schema_version": 1,
+  "library": "users/0",
+  "collection_name": "早期",
+  "collection_key": "S2I8LT6I",
+  "verified_at": "2026-07-22T00:00:00+08:00",
+  "initial_item_count": 0,
+  "notes": "本课题专属集合；正式同步不得回退到全库导出。"
+}

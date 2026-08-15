@@ -11,20 +11,22 @@ description: Local subskill under psych-literature-review-workflow for safe Zote
 
 ## 适用场景
 
-- 需要使用 Chrome + Zotero Connector 保存题录和 PDF。
+- 需要批量导入筛选保留的父条目、核验附件、交付缺 PDF 队列或完成下载后挂载。
 - 需要建立 Zotero 入库清单、PDF 全文清单、重复文献检查和失败队列。
 
 ## 输入
 
-候选文献表、DOI/PMID、数据库页面、期刊官网页面、Zotero collection 名称、用户已合法访问的 PDF。
+候选文献表、父条目清单、DOI/PMID、数据库原始导出、Zotero collection 名称、附件状态、本批队列和用户已合法访问的 PDF。开始前完整读取 `../../references/literature-operations-contract.md`。
 
 ## 执行步骤
 
-1. 确认 Zotero collection 和本地文献目录。
-2. 使用 Zotero Connector 保存题录和 PDF。
-3. 核验题名、作者、年份、DOI/PMID 和 PDF 是否匹配。
-4. 记录重复、缺失 PDF、无法访问、题录不完整和需用户手动处理项。
-5. 导出 BibTeX/RIS/CSV，并写入清单。
+1. 精确确认目标 collection 名称/key，并对候选主表、父条目清单、Zotero 目标集合三方查重。
+2. 对筛选保留的新增记录，优先从数据库 RIS/BibTeX/CSV 批量导入父条目且不带附件；Connector 只补单篇。
+3. 核验 `candidate_id`、父条目 key、题名、作者、年份、DOI/PMID 和集合；超时后先实时查询，不能盲目重试。
+4. 按实际附件状态原位重建当前缺 PDF 队列。尚未尝试下载的记录不进入失败清单。
+5. 用户下载后按 DOI，或规范题名+首位作者+年份唯一映射；验证 `%PDF-`、页数、首页题名/作者/DOI。
+6. 通过异步 Zotero JavaScript 将有效正文 PDF 挂到既有父条目，逐条返回 imported/skipped/failed；不新建父条目、不猜测多义匹配。
+7. 只读核验附件可打开后更新现有 Zotero/PDF 清单、队列和唯一实际下载失败清单。
 
 ## 输出文件
 
@@ -32,7 +34,8 @@ description: Local subskill under psych-literature-review-workflow for safe Zote
 - `PDF全文清单_pdf_manifest.csv`
 - `重复文献检查_duplicate_check.csv`
 - `全文获取报告_acquisition_report.md`
-- `全文获取失败清单_failed_ingest_queue.csv`
+- `缺PDF下载队列_freepaper.csv`
+- `未能正常下载PDF清单.csv`
 
 ## 中文文件命名
 
@@ -49,7 +52,7 @@ description: Local subskill under psych-literature-review-workflow for safe Zote
 
 - 无合法访问权限时停止获取全文。
 - PDF 与题录不匹配时不得进入矩阵。
-- 大量题录缺失 DOI/PMID 时需先清洗题录。
+- 父条目或 PDF 映射不唯一、文件损坏/错文、状态未知时停止该条并保留失败原因。
 
 ## 安全边界
 

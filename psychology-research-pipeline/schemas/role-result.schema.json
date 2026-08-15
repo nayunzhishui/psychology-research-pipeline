@@ -1,0 +1,185 @@
+{
+  "title": "RoleResult",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "default": 1,
+      "enum": [
+        1
+      ],
+      "type": "integer"
+    },
+    "task_id": {
+      "title": "Task Id",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,79}$",
+      "type": "string"
+    },
+    "status": {
+      "title": "Status",
+      "enum": [
+        "complete",
+        "blocked",
+        "failed"
+      ],
+      "type": "string"
+    },
+    "inputs": {
+      "title": "Inputs",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ArtifactRef"
+      }
+    },
+    "outputs": {
+      "title": "Outputs",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ArtifactRef"
+      }
+    },
+    "decisions": {
+      "title": "Decisions",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/DecisionRecord"
+      }
+    },
+    "unresolved_items": {
+      "title": "Unresolved Items",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "human_approval_required": {
+      "title": "Human Approval Required",
+      "default": false,
+      "type": "boolean"
+    },
+    "stop_reason": {
+      "title": "Stop Reason",
+      "default": "",
+      "type": "string"
+    },
+    "error_class": {
+      "title": "Error Class",
+      "default": "not-applicable",
+      "enum": [
+        "not-applicable",
+        "tool-transient",
+        "network-transient",
+        "format-repair",
+        "missing-source",
+        "human-decision",
+        "ethics-unverified",
+        "method-invalid",
+        "sensitive-data-risk",
+        "stage-gate-failed",
+        "significance-driven"
+      ],
+      "type": "string"
+    },
+    "attempt": {
+      "title": "Attempt",
+      "default": 1,
+      "minimum": 1,
+      "maximum": 6,
+      "type": "integer"
+    },
+    "read_primary_results": {
+      "title": "Read Primary Results",
+      "default": false,
+      "type": "boolean"
+    },
+    "analysis_classification": {
+      "title": "Analysis Classification",
+      "default": "not-applicable",
+      "enum": [
+        "not-applicable",
+        "confirmatory",
+        "secondary",
+        "exploratory"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "task_id",
+    "status"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "ArtifactRef": {
+      "title": "ArtifactRef",
+      "type": "object",
+      "properties": {
+        "path": {
+          "title": "Path",
+          "minLength": 1,
+          "type": "string"
+        },
+        "sha256": {
+          "title": "Sha256",
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "enum": [
+            "input",
+            "output",
+            "evidence",
+            "code",
+            "log"
+          ],
+          "type": "string"
+        },
+        "sensitive": {
+          "title": "Sensitive",
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "role"
+      ],
+      "additionalProperties": false
+    },
+    "DecisionRecord": {
+      "title": "DecisionRecord",
+      "type": "object",
+      "properties": {
+        "decision_id": {
+          "title": "Decision Id",
+          "minLength": 1,
+          "type": "string"
+        },
+        "statement": {
+          "title": "Statement",
+          "minLength": 1,
+          "type": "string"
+        },
+        "basis": {
+          "title": "Basis",
+          "minLength": 1,
+          "type": "string"
+        },
+        "human_approved": {
+          "title": "Human Approved",
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "decision_id",
+        "statement",
+        "basis"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

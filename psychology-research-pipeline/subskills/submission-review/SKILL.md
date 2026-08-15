@@ -20,32 +20,23 @@ description: Local subskill under psychology-research-pipeline for top-journal-p
 - 论文正文、参考文献、方法设计方案、统计分析报告、来源对齐表。
 - 目标期刊或候选期刊列表。
 - 报告规范检查表、开放科学材料、数据/代码/材料可用性说明。
+- 开始前完整读取 `../../references/literature-operations-contract.md`，复用现有模拟审稿意见和唯一修改矩阵。
 
 ## 执行步骤
 
-1. 进行主编初筛：scope、创新性、伦理、格式、数据透明性和明显拒稿风险。
-2. 模拟理论贡献审稿：理论新意、文献空白、假设合理性。
-3. 模拟方法学审稿：设计、样本、测量、程序和推论边界。
-4. 模拟统计审稿：分析计划、模型、效应量、置信区间、稳健性和探索性分析标注。
-5. 模拟测量工具审稿：量表来源、信效度、计分、反向题、跨群体适用性。
-6. 模拟开放科学审稿：数据、代码、材料、预注册、伦理和限制说明。
-7. 模拟 APA/格式审稿：标题层级、图表、引用、参考文献和补充材料。
-8. 模拟反对性审稿：主动寻找最可能导致拒稿的问题。
-9. 生成修改矩阵和作者回复草稿。
+1. 冻结审稿输入和目标期刊官网核验快照；标明这是模拟审稿。
+2. Reviewer 1 审查理论贡献、研究问题、可证伪性、构念边界和替代解释。
+3. Reviewer 2 审查检索透明性、研究家族、证据位置、数字、设计/测量/统计、估计对象和来源对齐。
+4. Reviewer 3 以主编/拒稿风险视角审查跨摘要—方法—结果—讨论一致性、报告规范、伦理、开放科学、格式和期刊适配。
+5. 每个问题分配稳定 `issue_id`，写入同一修改矩阵的严重度、证据位置、动作、状态和验证；不为每个角色机械创建平行报告。
+6. 修改后复跑来源、数字和跨章节最终审计；未解决项保持 blocker，再生成作者回复草稿。
 
 ## 输出文件
 
-- `模拟主编初筛_editor_screening.md`
-- `模拟理论贡献审稿_theory_review.md`
-- `模拟方法学审稿_methods_review.md`
-- `模拟统计审稿_statistical_review.md`
-- `模拟测量审稿_measurement_review.md`
-- `模拟开放科学审稿_open_science_review.md`
-- `模拟格式审稿_format_review.md`
-- `模拟反对性审稿_adversarial_review.md`
+- `模拟审稿意见_simulated_reviews.md`（三轮累积，不拆平行角色报告）
 - `修改矩阵_revision_matrix.csv`
 - `作者回复草稿_response_to_reviewers.md`
-- `顶刊预备度报告_top_journal_readiness.md`
+- `最终审计_final_audit.md`
 
 ## 中文文件命名
 

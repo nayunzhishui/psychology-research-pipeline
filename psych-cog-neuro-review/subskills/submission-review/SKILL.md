@@ -16,37 +16,22 @@ description: Local subskill under psych-cog-neuro-review for top-journal-prep si
 
 ## 输入
 
-综述正文、参考文献、综述协议、检索记录、筛选记录、机制矩阵、方法评价、预处理透明性评价、来源对齐表、目标期刊或候选期刊列表。
+综述正文、参考文献、综述协议、检索记录、筛选记录、机制矩阵、方法评价、预处理透明性评价、来源对齐表、目标期刊或候选期刊列表。开始前完整读取 `../../references/literature-operations-contract.md`，复用现有审稿意见和唯一修改矩阵。
 
 ## 执行步骤
 
-1. 主编初筛：scope、机制贡献、方法透明性、格式和明显拒稿风险。
-2. 理论机制审稿：机制模型、理论贡献、边界条件。
-3. 实验范式审稿：任务、刺激、流程、行为指标和范式适配度。
-4. 神经/生理方法审稿：EEG/ERP、fMRI、PSG、眼动、NIRS、心理生理方法质量。
-5. 预处理与分析审稿：预处理透明性、统计模型、校正、效应量和探索性分析标注。
-6. 统计审稿：证据强度、稳健性、样本量和结果解释边界。
-7. 开放科学审稿：数据、代码、材料、协议、预注册和限制说明。
-8. 引用与机制对齐审稿：机制主张、原文位置、引用风险和过度推断。
-9. APA/格式审稿：标题层级、图表、摘要、参考文献和补充材料。
-10. 反对性审稿：主动寻找最可能导致拒稿的问题。
-11. 输出修改矩阵和作者回复草稿。
+1. 冻结输入和目标期刊官网快照；醒目标注模拟性质。
+2. Reviewer 1：机制模型、理论贡献、可证伪性、构念边界和替代解释。
+3. Reviewer 2：检索/家族/证据位置，以及范式、模态、预处理、ROI/全脑、多重比较、分析灵活性、数字和来源对齐。
+4. Reviewer 3：主编拒稿风险、跨摘要—方法—机制—讨论一致性、开放科学、格式和期刊适配。
+5. 每个问题给稳定 `issue_id` 并写入同一修改矩阵；修改后复跑机制来源、方法和跨章节最终审计，未解决项保持 blocker。
 
 ## 输出文件
 
-- `模拟主编初筛_editor_screening.md`
-- `模拟理论机制审稿_mechanism_review.md`
-- `模拟实验范式审稿_paradigm_review.md`
-- `模拟神经生理方法审稿_neuro_methods_review.md`
-- `模拟预处理分析审稿_preprocessing_analysis_review.md`
-- `模拟统计审稿_statistical_review.md`
-- `模拟开放科学审稿_open_science_review.md`
-- `模拟机制对齐审稿_mechanism_alignment_review.md`
-- `模拟格式审稿_format_review.md`
-- `模拟反对性审稿_adversarial_review.md`
+- `模拟审稿意见_simulated_reviews.md`（三轮累积）
 - `修改矩阵_revision_matrix.csv`
 - `作者回复草稿_response_to_reviewers.md`
-- `顶刊预备度报告_top_journal_readiness.md`
+- `最终审计_final_audit.md`
 
 ## 中文文件命名
 

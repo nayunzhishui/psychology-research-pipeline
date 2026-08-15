@@ -1,0 +1,66 @@
+{
+  "title": "LoopPolicy",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "default": 1,
+      "enum": [
+        1
+      ],
+      "type": "integer"
+    },
+    "max_retries": {
+      "title": "Max Retries",
+      "default": 2,
+      "minimum": 0,
+      "maximum": 5,
+      "type": "integer"
+    },
+    "retryable_errors": {
+      "title": "Retryable Errors",
+      "type": "array",
+      "items": {
+        "enum": [
+          "tool-transient",
+          "network-transient",
+          "format-repair"
+        ],
+        "type": "string"
+      }
+    },
+    "non_retryable_errors": {
+      "title": "Non Retryable Errors",
+      "type": "array",
+      "items": {
+        "enum": [
+          "missing-source",
+          "human-decision",
+          "ethics-unverified",
+          "method-invalid",
+          "sensitive-data-risk",
+          "stage-gate-failed"
+        ],
+        "type": "string"
+      }
+    },
+    "forbid_significance_driven_retry": {
+      "title": "Forbid Significance Driven Retry",
+      "default": true,
+      "enum": [
+        true
+      ],
+      "type": "boolean"
+    },
+    "require_stop_reason": {
+      "title": "Require Stop Reason",
+      "default": true,
+      "enum": [
+        true
+      ],
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

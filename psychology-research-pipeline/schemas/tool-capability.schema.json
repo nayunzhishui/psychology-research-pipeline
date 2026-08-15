@@ -1,0 +1,82 @@
+{
+  "title": "ToolCapability",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "default": 1,
+      "enum": [
+        1
+      ],
+      "type": "integer"
+    },
+    "tool_id": {
+      "title": "Tool Id",
+      "pattern": "^[a-z0-9][a-z0-9._-]{1,79}$",
+      "type": "string"
+    },
+    "kind": {
+      "title": "Kind",
+      "enum": [
+        "browser",
+        "reference-manager",
+        "statistics",
+        "publishing",
+        "metadata",
+        "filesystem",
+        "other"
+      ],
+      "type": "string"
+    },
+    "interface": {
+      "title": "Interface",
+      "enum": [
+        "cli",
+        "mcp",
+        "local-api",
+        "http-api",
+        "desktop-ui"
+      ],
+      "type": "string"
+    },
+    "operations": {
+      "title": "Operations",
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "write_operations": {
+      "title": "Write Operations",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "readiness": {
+      "title": "Readiness",
+      "default": "unknown",
+      "enum": [
+        "ready",
+        "optional",
+        "blocked",
+        "unknown"
+      ],
+      "type": "string"
+    },
+    "sensitive_data_allowed": {
+      "title": "Sensitive Data Allowed",
+      "default": false,
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "tool_id",
+    "kind",
+    "interface",
+    "operations"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

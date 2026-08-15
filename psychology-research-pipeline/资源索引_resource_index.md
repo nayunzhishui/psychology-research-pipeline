@@ -1,30 +1,40 @@
 # 资源索引
 
-本索引用于 `psychology-research-pipeline` 运行时选择内部资源。仅在本主 skill 文件夹内使用，不调用其他主 skill。
+按需读取，避免一次加载全部资源：
 
-## 读取顺序
+| 任务 | 必读资源 |
+|---|---|
+| 初始化、推进和 gate | `references/stage-contracts.md`、`scripts/pipeline_schema.py` |
+| 五层科研架构、角色契约与有界 Loop | `references/research-system-architecture.md`、`references/controlled-research-roles.md`、`scripts/research_orchestrator.py` |
+| 证据账本与可重建 RAG 索引 | `references/evidence-ledger-and-retrieval.md`、`scripts/evidence_ledger.py`、`schemas/evidence-ledger.schema.json` |
+| 工具权限与能力清单 | `references/tool-capabilities.json`、`scripts/tool_registry.py`、`schemas/tool-capability.schema.json` |
+| R 可复现环境、双源题录、PDF 与投稿构建 | `references/reproducibility-and-publishing.md`、`scripts/bootstrap_r_environment.R`、`templates/_targets.R`、`templates/manuscript.qmd` |
+| Crossref/OpenAlex 双源核验 | `scripts/metadata_verify.py` |
+| PyMuPDF/GROBID 两级 PDF 审计 | `scripts/pdf_ingest.py` |
+| ASReview 排序边界 | `scripts/screening_rank_bridge.py` |
+| RO-Crate 式哈希关系导出 | `scripts/export_ro_crate.py` |
+| 检索前定标、协议草案和准备度审计 | `scripts/prepare_presearch.py`、`schemas/presearch-protocol.schema.json` |
+| 本课题定标与数据审计 | `project-packs/interparental-conflict-depression-nssi/` |
+| 三波 RI-CLPM、自伤、性别差异 | `references/longitudinal-panel-nssi.md` |
+| 完整纵向 SEM 模型阶梯与恢复模拟 | `subskills/empirical-longitudinal-sem/` |
+| APA JARS、STROBE、SAGER | `references/psychology-standards.md` |
+| 检索前环境与 Chrome/Zotero | `scripts/environment_preflight.py`、`references/tool-routing.md`、`scripts/zotero_bridge.py`、`schemas/zotero-target.schema.json` |
+| 自动生成运行目录 | `scripts/init_research_run.py` |
+| 阶段验收 | `scripts/pipeline_gate.py` |
+| SPSS/CSV 面板结构审计 | `scripts/audit_panel_data.py` |
+| 原始题项重算与隐私安全分析数据 | `scripts/prepare_analysis_data.py` |
+| 统一命令入口与全阶段推进 | `scripts/pipeline.py` |
+| 旧十阶段运行安全迁移 | `scripts/migrate_legacy_run.py` |
+| 资料元数据盘点 | `scripts/inventory_sources.py` |
+| 文献规范化去重 | `scripts/evidence_dedupe.py` |
+| 双人筛选、裁决、PRISMA与偏倚风险 | `scripts/screening_audit.py` |
+| RI-CLPM、测量不变性与敏感性代码 | `scripts/generate_longitudinal_analysis.py` |
+| 哈希校验与真实 R 执行 | `scripts/analysis_runner.py` |
+| 模型输出一致性与结果产物 | `scripts/validate_analysis_results.py` |
+| 已验证数字/主张渲染正文 | `scripts/render_manuscript.py` |
+| DOCX/PDF、补充材料与表图投稿清单 | `scripts/export_publication_files.py` |
+| 期刊政策核查与隐私安全预投稿包 | `scripts/build_submission_package.py` |
+| JSON 机器契约 | `schemas/` |
+| 冻结策略案例与回归评测 | `tests/frozen_cases/`、`scripts/run_frozen_evals.py`、`rubrics/promptfoo-research-policy.yaml`、`rubrics/inspect_research_policy_eval.py` |
 
-1. 先读主 `SKILL.md`，确认任务边界、运行模式和停止条件。
-2. 再读 `subskills/README.md`，确认分 skill 顺序。
-3. 按当前阶段读取对应 `subskills/<name>/SKILL.md`。
-4. 需要生成文件时读取 `中文文件命名规范.md`。
-5. 需要标准化输出时读取 `templates/`。
-6. 需要质量控制时读取 `checklists/`。
-7. 需要评分判断时读取 `rubrics/`。
-8. 用户需要启动提示或示例时读取 `examples/`。
-
-## 阶段资源对应
-
-| 阶段 | 分 skill | 模板 | 检查表 | 评分表 |
-|---|---|---|---|---|
-| 项目定标 | `project-scope` | `项目定标模板_project_brief.md`、`研究问题与假设模板_research_questions_hypotheses.md` | `启动需求检查表_startup_questions.md` | `研究问题质量评分表_research_question_quality.md`、`理论贡献评分表_theoretical_contribution.md` |
-| 证据检索 | `evidence-search` | `检索记录模板_search_log.csv` | `顶刊级总检查表_top_journal_gate.md` | `引用风险评分表_citation_risk.md` |
-| 文献筛选 | `literature-screen` | `文献筛选表模板_literature_screening.csv`、`文献阅读矩阵模板_literature_matrix.csv` | `来源对齐检查表_source_alignment.md` | `引用风险评分表_citation_risk.md` |
-| 方法设计 | `methods-design` | `方法设计方案模板_methods_plan.md`、`测量工具表模板_measurement_table.csv`、`统计分析计划模板_statistical_analysis_plan.md` | `APA_JARS报告检查表_apa_jars.md`、`STROBE观察性研究检查表_strobe.md`、`CONSORT_SPIRIT干预试验检查表_consort_spirit.md`、`量表与测量质量检查表_measurement_quality.md` | `方法质量评分表_method_quality.md`、`测量质量评分表_measurement_quality.md` |
-| 数据分析 | `data-analysis` | `数据字典模板_data_dictionary.csv`、`分析偏离记录模板_analysis_deviation_log.csv` | `数据质量检查表_data_quality.md`、`统计分析检查表_statistical_analysis.md` | `统计证据强度评分表_statistical_evidence.md` |
-| 来源对齐 | `source-alignment` | `来源对齐表模板_source_alignment_table.csv` | `来源对齐检查表_source_alignment.md` | `引用风险评分表_citation_risk.md` |
-| 模拟审稿 | `submission-review` | `模拟审稿意见模板_simulated_reviews.md`、`修改矩阵模板_revision_matrix.csv` | `投稿前检查表_submission_readiness.md`、`严格停止条件清单_stop_conditions.md` | `写作质量评分表_manuscript_quality.md`、`顶刊预备度评分表_top_journal_readiness.md` |
-
-## 文件命名
-
-所有本地运行产物默认使用“中文主名_英文兼容名.扩展名”。若必须使用纯英文文件名，必须在 `日志/决策记录_decisions.md` 记录原因。
+运行时唯一产物契约由 `scripts/pipeline_schema.py` 生成。顶层 `templates/` 不得作为另一套运行目录来源。

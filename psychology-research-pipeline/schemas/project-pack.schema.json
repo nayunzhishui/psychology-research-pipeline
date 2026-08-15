@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "project-pack.schema.json",
+  "title": "Psychology research project pack",
+  "type": "object",
+  "required": ["schema_version", "id", "title", "profile", "data_audit_spec", "analysis_spec"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+    "title": {"type": "string", "minLength": 1},
+    "profile": {"type": "string"},
+    "presearch_protocol": {"type": "string"},
+    "zotero_target": {"type": "string"},
+    "data_audit_spec": {"type": "string"},
+    "measurement_map": {"type": "string"},
+    "analysis_spec": {"type": "string"},
+    "search_plan": {"type": "string"},
+    "evidence_coverage": {"type": "string"}
+  },
+  "additionalProperties": false
+}

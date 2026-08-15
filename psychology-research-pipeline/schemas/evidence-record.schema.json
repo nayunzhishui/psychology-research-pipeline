@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evidence-record.schema.json",
+  "title": "Canonical empirical evidence record",
+  "type": "object",
+  "required": ["candidate_id", "title", "authors", "year", "doi", "pmid", "openalex_id", "source", "database", "search_id", "raw_export_file", "raw_export_sha256", "dedup_status"],
+  "properties": {
+    "candidate_id": {"type": "string", "pattern": "^cand-[a-f0-9]{16}$"},
+    "title": {"type": "string", "minLength": 1},
+    "authors": {"type": "string"},
+    "year": {"type": "string", "pattern": "^$|^(19|20)\\d{2}$"},
+    "doi": {"type": "string"},
+    "pmid": {"type": "string"},
+    "openalex_id": {"type": "string"},
+    "source": {"type": "string", "minLength": 1},
+    "database": {"type": "string", "minLength": 1},
+    "search_id": {"type": "string", "minLength": 1},
+    "evidence_role": {"type": "string"},
+    "fulltext_status": {"enum": ["metadata-only", "queued", "available", "verified", "failed", ""]},
+    "retraction_status": {"enum": ["unknown", "clear", "retracted", "withdrawn", ""]},
+    "raw_export_file": {"type": "string", "minLength": 1},
+    "raw_export_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "dedup_status": {"type": "string"}
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "tools": [
+    {
+      "schema_version": 1,
+      "tool_id": "chrome",
+      "kind": "browser",
+      "interface": "mcp",
+      "operations": ["search", "open", "inspect", "download-authorized"],
+      "write_operations": ["download-authorized"],
+      "readiness": "unknown",
+      "sensitive_data_allowed": false
+    },
+    {
+      "schema_version": 1,
+      "tool_id": "zotero",
+      "kind": "reference-manager",
+      "interface": "local-api",
+      "operations": ["status", "collections", "export-exact-collection", "save-item"],
+      "write_operations": ["save-item"],
+      "readiness": "unknown",
+      "sensitive_data_allowed": false
+    },
+    {
+      "schema_version": 1,
+      "tool_id": "rscript",
+      "kind": "statistics",
+      "interface": "cli",
+      "operations": ["version", "package-audit", "execute-frozen-analysis"],
+      "write_operations": ["execute-frozen-analysis"],
+      "readiness": "unknown",
+      "sensitive_data_allowed": true
+    },
+    {
+      "schema_version": 1,
+      "tool_id": "quarto",
+      "kind": "publishing",
+      "interface": "cli",
+      "operations": ["version", "render-docx", "render-pdf"],
+      "write_operations": ["render-docx", "render-pdf"],
+      "readiness": "unknown",
+      "sensitive_data_allowed": false
+    },
+    {
+      "schema_version": 1,
+      "tool_id": "crossref",
+      "kind": "metadata",
+      "interface": "http-api",
+      "operations": ["lookup-doi", "verify-title-author-year"],
+      "write_operations": [],
+      "readiness": "unknown",
+      "sensitive_data_allowed": false
+    },
+    {
+      "schema_version": 1,
+      "tool_id": "openalex",
+      "kind": "metadata",
+      "interface": "http-api",
+      "operations": ["lookup-doi", "verify-title-author-year", "citation-neighborhood"],
+      "write_operations": [],
+      "readiness": "unknown",
+      "sensitive_data_allowed": false
+    },
+    {
+      "schema_version": 1,
+      "tool_id": "obsidian",
+      "kind": "other",
+      "interface": "desktop-ui",
+      "operations": ["open-vault", "read-note", "write-derived-note"],
+      "write_operations": ["write-derived-note"],
+      "readiness": "unknown",
+      "sensitive_data_allowed": false
+    }
+  ]
+}

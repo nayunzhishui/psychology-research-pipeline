@@ -1,0 +1,118 @@
+{
+  "title": "EvidenceLedgerRecord",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "default": 1,
+      "enum": [
+        1
+      ],
+      "type": "integer"
+    },
+    "evidence_id": {
+      "title": "Evidence Id",
+      "pattern": "^EV-[A-Za-z0-9._-]+$",
+      "type": "string"
+    },
+    "candidate_id": {
+      "title": "Candidate Id",
+      "minLength": 1,
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "minLength": 1,
+      "type": "string"
+    },
+    "doi": {
+      "title": "Doi",
+      "default": "",
+      "type": "string"
+    },
+    "zotero_item_key": {
+      "title": "Zotero Item Key",
+      "default": "",
+      "type": "string"
+    },
+    "study_design": {
+      "title": "Study Design",
+      "minLength": 1,
+      "type": "string"
+    },
+    "sample": {
+      "title": "Sample",
+      "minLength": 1,
+      "type": "string"
+    },
+    "measures": {
+      "title": "Measures",
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "waves": {
+      "title": "Waves",
+      "minLength": 1,
+      "type": "string"
+    },
+    "effect_estimate": {
+      "title": "Effect Estimate",
+      "default": "",
+      "type": "string"
+    },
+    "uncertainty": {
+      "title": "Uncertainty",
+      "default": "",
+      "type": "string"
+    },
+    "claim_ids": {
+      "title": "Claim Ids",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_location": {
+      "title": "Evidence Location",
+      "minLength": 1,
+      "type": "string"
+    },
+    "correction_status": {
+      "title": "Correction Status",
+      "default": "unverified",
+      "enum": [
+        "none-found",
+        "corrected",
+        "retracted",
+        "unverified"
+      ],
+      "type": "string"
+    },
+    "verification_status": {
+      "title": "Verification Status",
+      "default": "pending",
+      "enum": [
+        "pending",
+        "metadata-verified",
+        "fulltext-verified",
+        "claim-verified"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "evidence_id",
+    "candidate_id",
+    "title",
+    "study_design",
+    "sample",
+    "measures",
+    "waves",
+    "evidence_location"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
