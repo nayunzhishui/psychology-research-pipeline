@@ -1,1 +1,1 @@
-candidate_id,title,authors,year,doi,pmid,cnki_id,wanfang_id,vip_id,source,abstract,landing_url,database,search_id,dedup_status,record_status,notes
+candidate_id,title,authors,first_author,year,doi,pmid,database_ids,source_databases,search_ids,raw_export_files,first_seen_round,last_seen_round,appearance_count,screening_status,zotero_item_key,zotero_attachment_status,normalized_title,identity_key,record_status,notes,cnki_id,wanfang_id,vip_id,source,abstract,landing_url,database,search_id,dedup_status,modality,paradigm

@@ -19,14 +19,15 @@ description: Local subskill under psychology-research-pipeline for claim-source-
 
 - 论文正文、参考文献、文献阅读矩阵、主张证据对应表。
 - 统计分析报告、原始输出、结果表格、图表和方法设计方案。
+- 开始前完整读取 `../../references/literature-operations-contract.md`，以唯一主张证据对应表为事实源。
 
 ## 执行步骤
 
 1. 拆分正文中的事实性、理论性、方法性、结果性和解释性主张。
-2. 为每条主张绑定文献来源、页码/章节/表图，或绑定数据输出位置。
-3. 判断支持程度：direct、partial、unsupported、overextended。
+2. 每条文献主张按一个 `claim_id × candidate_id/report_id` 配对绑定研究家族、页码/章节/表图、证据载体和 Reviewer 状态；数据主张绑定正式输出位置。
+3. 使用公共合同的 `confirmed/partial/rejected/blocked`、`claim_ceiling`、`construct_match`、`estimand_level` 和 `result_direction`，不再维护另一套 direct/unsupported 状态体系。
 4. 核查 p 值、效应量、置信区间、样本量、模型拟合、表图数字。
-5. 对 unsupported 和 overextended 主张给出删除、降级、补证据或重写建议。
+5. 对 rejected、blocked、单独 partial、措辞超过 ceiling 或 Reviewer B 未通过的主张给出删除、降级、补证据、复核或重写建议。
 6. 输出投稿前对齐审计结论。
 
 ## 输出文件
@@ -55,7 +56,7 @@ description: Local subskill under psychology-research-pipeline for claim-source-
 - 没有全文，不得做页码级强引用。
 - 没有统计输出，不得确认统计数字。
 - 来源对齐未完成，不得声称“可投稿”。
-- unsupported 主张未处理前不得生成终稿。
+- rejected、blocked、超上限或 Reviewer B 未通过的关键主张未处理前不得生成终稿。
 
 ## 安全边界
 

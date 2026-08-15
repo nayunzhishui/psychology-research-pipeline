@@ -33,7 +33,7 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 
 1. `cog-neuro-scope`：方向与任务定标，明确综述问题和机制边界。
 2. `evidence-search`：认知神经科学理论、范式、指标和实证证据检索。
-3. `zotero-ingest`：Zotero 入库和 PDF/题录核验。
+3. `zotero-ingest`：结构化题录批量导入父条目、Zotero/PDF 状态核验和下载后挂载；Connector 仅作单篇补充。
 4. `literature-screen`：认知神经科学文献分类和评级。
 5. `paradigm-design`：实验范式提取、比较和质量评价。
 6. `neuro-methods-design`：EEG/ERP、fMRI、PSG、眼动、NIRS、心理生理等方法评价。
@@ -49,6 +49,10 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 - `checklists/`：EEG/ERP、fMRI、PSG、眼动、NIRS、心理生理、实验范式、预处理与分析、机制对齐和停止条件检查表。
 - `rubrics/`：机制理论贡献、范式质量、神经/生理方法质量、预处理透明性、行为—神经整合、机制引用风险和顶刊预备度评分表。
 - `examples/`：认知神经综述、范式综述、EEG/ERP、fMRI、睡眠与情绪记忆、顶刊级模拟审稿示例。
+
+## 文献操作核心合同
+
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。合同规定默认采用内置浏览器检索、外置浏览器兼容回退、历轮全部已见题录差集、父条目与附件分离、PDF 队列与挂载、研究家族、Reviewer B 和主张级证据。认知神经覆盖层继续负责模态、范式、预处理、分析灵活性、反向推断和机制上限，不得降低公共合同。
 
 ## 4. 本地文件命名
 
@@ -88,7 +92,7 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 3. 核心边界：构念、人群、年龄段、临床/非临床、human/animal/computational、实验范式、神经/生理指标。
 4. 目标用途：课程作业、开题、学位论文、中文期刊、英文期刊、投稿预备。
 5. 运行模式：`lite`、`standard`、`strict`、`top-journal-prep`。
-6. 文献获取方式：是否允许 Chrome + Zotero Connector；Zotero 目标 collection；失败时是否下载到文件夹由用户手动导入。
+6. 文献获取方式：默认内置浏览器还是外置浏览器回退；可用数据库导出格式；Zotero 目标 collection；PDF 是否由用户下载后批量挂载。
 7. 输出格式：Markdown、DOCX、CSV、Excel、HTML、BibTeX/RIS、APA 参考文献、模拟审稿报告。
 
 用户已明确回答时，不要重复询问；用户未回答时，可以使用默认值继续，但必须记录为 assumption。
@@ -130,6 +134,8 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 └── 11_模拟投稿审稿/
 ```
 
+唯一活动运行内优先原位更新同一职责文件并保留轮次、来源和变更记录；不得用 `_v2`、日期副本、分批平行清单或“最新版”代替版本治理。原始导出、历史运行和正式归档不可覆盖。
+
 ## 9. 阶段总览
 
 | 阶段 | 名称 | 主要产物 |
@@ -137,7 +143,7 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 | 00 | 方向与任务定标 | `方向定标简报_cog_neuro_scope.md`, `机制范围说明_mechanism_scope.md` |
 | 01 | 协议冻结 | `综述协议_review_protocol.md`, `概念关系图_concept_map.md`, `纳入排除标准_inclusion_exclusion.md` |
 | 02 | 证据检索 | `检索式记录_queries.md`, `数据库检索记录_database_search_log.csv`, `候选文献表_candidate_records.csv` |
-| 03 | Zotero/全文获取 | `Zotero入库清单_zotero_manifest.csv`, `PDF全文清单_pdf_manifest.csv`, `全文获取报告_acquisition_report.md` |
+| 03 | Zotero/全文获取 | `Zotero入库清单_zotero_manifest.csv`, `PDF全文清单_pdf_manifest.csv`, `缺PDF下载队列_freepaper.csv`, `未能正常下载PDF清单.csv`, `全文获取报告_acquisition_report.md` |
 | 04 | 分类与筛查 | `文献筛选表_literature_screening.csv`, `相关性评级表_relevance_ratings.csv` |
 | 05 | 证据矩阵 | `文献阅读矩阵_literature_matrix.csv/xlsx/md`, `机制矩阵_neural_mechanism_matrix.csv`, `质量评价表_quality_appraisal.csv` |
 | 06 | 机制模型 | `机制模型说明_mechanism_model.md`, `主张证据对应表_claim_evidence_map.csv` |

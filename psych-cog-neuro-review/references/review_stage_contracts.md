@@ -58,13 +58,13 @@ Required: `search_strategy.md`, `database_search_log.csv`, `candidate_records.cs
 
 `database_search_log.csv` minimum columns: `search_id,database,platform,query,filters,run_at,result_count,export_file,notes`.
 
-`candidate_records.csv` minimum columns: `candidate_id,title,authors,year,doi,pmid,cnki_id,wanfang_id,vip_id,source,abstract,landing_url,database,search_id,dedup_status,record_status`.
+`candidate_records.csv` is the canonical all-seen register across every search round. Minimum columns: `candidate_id,title,authors,first_author,year,doi,pmid,database_ids,source_databases,search_ids,raw_export_files,first_seen_round,last_seen_round,appearance_count,screening_status,zotero_item_key,zotero_attachment_status,normalized_title,identity_key,record_status,notes`. Domain fields such as modality, paradigm, population, abstract and landing URL may be appended.
 
-Pass when bilingual concept blocks exist; database-specific queries are reproducible; exact counts, dates, and filters are logged; citation chasing and Zotero/library searches are separately logged; no convenience source is described as exhaustive. For `standard` and `strict`, English sources normally include PubMed, Web of Science, PsycINFO, Scopus, Google Scholar, Semantic Scholar, Crossref, Zotero; Chinese sources normally include CNKI, 万方, 维普. Unsearched sources require a reason.
+Pass when bilingual concept blocks exist; database-specific queries are reproducible; exact counts, dates, filters and immutable raw exports are logged; citation chasing and Zotero/library searches are separately logged; this round is differenced against all prior seen records, including records never imported into Zotero. No convenience source is described as exhaustive. For `standard` and `strict`, database choice follows the frozen protocol and actual access; unsearched core sources require a reason rather than a fabricated result.
 
 ### 03 Acquire
 
-Required: `library_acquisition_manifest.csv`, `zotero_manifest.csv`, `zotero_collection_plan.md`, `acquisition_report.md`.
+Required: `library_acquisition_manifest.csv`, `zotero_manifest.csv`, `zotero_collection_plan.md`, `acquisition_report.md`, current missing-PDF queue, and one actual-download failure register.
 
 `zotero_manifest.csv` minimum columns: `candidate_id,zotero_item_key,title,year,doi,collection,attachment_key,attachment_status,validation_status,source_url,notes`.
 
@@ -74,7 +74,7 @@ Allowed Zotero acquisition statuses: `complete`, `metadata-only`, `duplicate-ski
 
 Allowed normalized attachment/full-text statuses: `readable_pdf`, `metadata_only`, `abstract_only`, `access_blocked`, `duplicate_skipped`, `failed_validation`, `manual_needed`, `user_provided`.
 
-Pass when every retained candidate has metadata and access status; the exact Zotero collection key/name is verified when Zotero is used; duplicates are grouped rather than deleted; matching is attempted by DOI, PMID, then normalized title + first author + year; readable PDF claims are validated; full-text availability is not confused with scientific eligibility; temporary or failed records remain traceable. Fail the gate if any import relies on paywall bypass, CAPTCHA bypass, credential/cookie extraction, shadow-library access, or unattended high-frequency downloading.
+Pass when every retained candidate has metadata and access status; the exact Zotero collection key/name is verified; candidate register, parent manifest and target collection are checked before import; only new retained parent items are imported; matching uses DOI, PMID, then normalized title + first author + year; readable正文 PDF claims are validated and uniquely attached to an existing parent. The queue contains only current missing PDFs, while the failure register contains only actually attempted downloads. Fail the gate on ambiguous mapping, unknown post-timeout state, access-control bypass, credential/cookie extraction, shadow-library access, or unattended high-frequency downloading.
 
 ### 04 Screen
 
@@ -82,21 +82,21 @@ Required: `screening_table.csv`, `prisma_flow_counts.csv`, `exclusion_reason_dic
 
 Screening minimum columns: `candidate_id,stage,decision,primary_reason,secondary_reason,reviewer_basis,full_text_available,decided_at,notes`.
 
-Pass when title/abstract and full-text screening decisions have explicit reasons; unavailable full text is an access state; study type is labeled; duplicate reports from one study are linked; no inclusion/exclusion decision is based on desired findings, citation count, or journal prestige alone.
+Pass when title/abstract and full-text decisions have explicit reasons; unavailable full text is an access state; study type is labeled; study families are identified before counting; uncertain families use report-bound IDs; Reviewer B is independent and conflicts are adjudicated; no decision is based on desired findings, citation count, journal prestige or PDF availability alone.
 
 ### 05 Extract
 
 Required: `literature_matrix.csv`, `neural_mechanism_matrix.csv`, `quality_appraisal.csv`, and reading cards for central studies.
 
-Pass when extracted claims contain source locations; sample, design, measures, task, analysis, main findings, limitations, quality judgments, and neuroscience indicators are recorded where available; primary studies and review/theory papers are separated; null and contradictory findings are retained. Quality appraisal must record both custom judgment and whether formal tools were used or intentionally not used.
+Pass when core direct evidence completes six-pass reading; extracted claims contain PDF page/table/figure locations; sample, design, measures, task, modality, preprocessing, ROI/full-brain status, correction, analysis, estimand, main/null/opposite/mixed findings, limitations and domain-specific bias judgments are recorded. Primary studies and review/theory papers are separated. Quality appraisal records formal tools where applicable but never replaces domain judgment with journal rank, citation count or a single score.
 
 ### 06 Synthesize
 
 Required: `prewriting_synthesis_plan.md`, `concept_theory_framework.md`, `claim_evidence_map.csv`, `evidence_gap_register.csv`.
 
-Claim map minimum columns: `claim_id,claim_text,claim_type,source_role,study_ids,candidate_ids,evidence_locations,support_level,contradictions,verification_status,manuscript_destination,allowed_wording`.
+Claim map uses one row per `claim_id × candidate_id/report_id`. Minimum columns: `claim_id,claim_text,claim_type,candidate_id,study_id,report_id,study_family_id,support_status,claim_ceiling,support_carrier_type,support_carrier_value,fulltext_location,construct_match,estimand_level,result_direction,reviewer_status,reviewer_reason,verified_at,effect_estimate,standard_error,ci_95,p_value`.
 
-Pass when synthesis is thematic/mechanistic rather than one-paper-per-paragraph; direct evidence is separated from interpretation; contradictions and limitations are explicit; every planned claim is supported or marked tentative/unsupported; gaps are methodological or theoretical rather than simply “few studies.”
+Pass when synthesis is thematic/mechanistic and counts studies rather than reports; direct evidence is separated from interpretation; contradictions, nulls and limitations are explicit; mechanism claims respect design/modality ceilings and reverse-inference limits; every planned claim is confirmed or visibly blocked; Reviewer status is `agreed/adjudicated` for final claims.
 
 ### 07 Prewrite
 

@@ -28,23 +28,23 @@
 
 必需：`检索式记录_queries.md`、`检索记录_search_log.csv`、`候选文献表_candidate_records.csv`。
 
-检索表至少包含 `search_id,database,platform,query,filters,run_at,result_count,export_file,notes`；候选表使用 `schemas/evidence-record.schema.json` 的规范字段，并增加用于筛选的 `constructs,design,cohort_name,sample_country,sample_size,recruitment_years`。
+检索表至少包含 `search_id,database,platform,query,filters,run_at,result_count,export_file,notes`。候选表是历轮全部已见题录的唯一主表，至少包含 `candidate_id,title,authors,first_author,year,doi,pmid,database_ids,source_databases,search_ids,raw_export_files,first_seen_round,last_seen_round,appearance_count,screening_status,zotero_item_key,zotero_attachment_status,normalized_title,identity_key,record_status,notes`，并可增加 `constructs,design,cohort_name,sample_country,sample_size,recruitment_years`。
 
 `strict` 与 `top-journal-prep` 还必须有 `检索计划_search_plan.json` 和 `题录导入清单_evidence_import_manifest.json`；候选表哈希须与导入清单一致，原始导出文件只读且逐文件记录 SHA-256。
 
-全 Zotero 库导出的 `zotero-library.bib` 只可作为连接测试，不能作为课题证据源；发现后 gate 失败。Zotero 来源必须记录精确集合名称与 key。
+全 Zotero 库导出的 `zotero-library.bib` 只可作为连接测试，不能作为课题证据源；发现后 gate 失败。Zotero 来源必须记录精确集合名称与 key。只有与历轮全部已见主表完成差集的新题录才能进入筛选；只对 Zotero 父条目或 PDF 查重时 gate 失败。
 
 ### 03_library — `03_Zotero与全文获取`
 
-必需：`Zotero入库清单_zotero_manifest.csv`、`PDF全文清单_pdf_manifest.csv`、`全文获取报告_acquisition_report.md`。
+必需：`Zotero入库清单_zotero_manifest.csv`、`PDF全文清单_pdf_manifest.csv`、`缺PDF下载队列_freepaper.csv`、`未能正常下载PDF清单.csv`、`全文获取报告_acquisition_report.md`。
 
-通过条件：每个候选有 `complete`、`metadata-only`、`duplicate-skipped`、`access-blocked` 或 `failed-validation` 状态；complete 项具有可读 PDF 子附件且题录一致。
+通过条件：导入前完成候选主表、父条目清单和 Zotero 目标集合三方查重；每个保留候选有 `complete`、`metadata-only`、`duplicate-skipped`、`access-blocked`、`failed-validation` 或 `unknown` 状态；complete 项具有题录一致且可打开的正文 PDF 子附件。缺 PDF 队列只列未有可读正文 PDF 的父条目；失败清单只统计实际尝试过下载的批次。超时或结果不明时先实时核验，不得盲目重试生成副本。
 
 ### 04_synthesis — `04_文献筛选与小综述`
 
 必需：`文献筛选表_literature_screening.csv`、`文献阅读矩阵_literature_matrix.csv`、`小综述_mini_review.md`、`主张证据对应表_claim_evidence_map.csv`。
 
-通过条件：纳排理由、同一研究多报告关联、证据位置、相关性与方法质量分开记录；矛盾和零结果未被删除；关键主张可追溯。`strict` 与 `top-journal-prep` 必须存在去重清单、研究家族识别清单和状态为 `ready` 的证据覆盖审计；任一核心 slot 缺口均阻断。
+通过条件：纳排理由、同一研究多报告关联、证据位置、相关性与方法质量分开记录；矛盾和零结果未被删除；核心直接证据完成六遍精读；Reviewer B 真正独立。主张表每行仅一个 `claim_id × candidate_id/report_id` 配对，并包含公共合同要求的 `support_status,claim_ceiling,support_carrier_type,support_carrier_value,fulltext_location,construct_match,estimand_level,result_direction,reviewer_status`。`strict` 与 `top-journal-prep` 必须存在去重清单、研究家族识别清单和状态为 `ready` 的证据覆盖审计；任一核心 slot 缺口或 Reviewer B 未完成均阻断。
 
 ### 05_methods — `05_方法设计`
 
@@ -80,13 +80,13 @@ manifest 必须记录源文件及哈希、软件与包版本、代码文件、�
 
 必需：`来源对齐表_source_alignment_table.csv`、`数字核查报告_numeric_audit.md`、`主张核查报告_claim_audit.md`。
 
-通过条件：所有关键主张为 direct/qualified；unsupported/overextended 均已删除、降级或补证；样本量、系数、区间、p 值、拟合和表图逐项核对。
+通过条件：所有关键主张达到 `confirmed`，或有不降低原意的多来源组合且 Reviewer 状态为 `agreed/adjudicated`；`rejected/blocked`、单独 `partial`、超过 `claim_ceiling` 的措辞均已删除、降级或补证；样本量、系数、区间、p 值、拟合和表图逐项核对。
 
 ### 11_review — `11_模拟投稿审稿`
 
 必需：`模拟审稿意见_simulated_reviews.md`、`修改矩阵_revision_matrix.csv`、`作者回复草稿_response_to_reviewers.md`、`最终审计_final_audit.md`。
 
-通过条件：目标期刊官网与文章类型已实时核查；URL 属于声明的期刊或出版商官方域名；政策页面快照、核查日期与 SHA-256 完整；理论、方法、统计、测量、开放科学和完整性审查均有结论；重大问题已解决或明确拒绝并说明理由；模拟性质醒目标注。
+通过条件：目标期刊官网与文章类型已实时核查；URL 属于声明的期刊或出版商官方域名；政策页面快照、核查日期与 SHA-256 完整；Reviewer 1 理论/可证伪性、Reviewer 2 证据/数字/方法、Reviewer 3 主编拒稿风险/跨章节一致性均有冻结结论；每个问题有稳定 `issue_id` 并进入唯一修改矩阵；重大问题已解决或明确拒绝并说明理由；模拟性质醒目标注。
 
 ## 交接与失效
 

@@ -16,35 +16,22 @@ description: Local subskill under psych-literature-review-workflow for top-journ
 
 ## 输入
 
-综述正文、参考文献、综述协议、检索记录、筛选记录、阅读矩阵、来源对齐表、目标期刊或候选期刊列表。
+综述正文、参考文献、综述协议、检索记录、筛选记录、阅读矩阵、来源对齐表、目标期刊或候选期刊列表。开始前完整读取 `../../references/literature-operations-contract.md`，复用现有审稿意见和唯一修改矩阵。
 
 ## 执行步骤
 
-1. 主编初筛：scope、创新性、透明性、格式和明显拒稿风险。
-2. 理论贡献审稿：理论推进、整合深度和边界条件。
-3. 检索透明性审稿：数据库、检索式、纳排、筛选和饱和停止。
-4. 方法学审稿：综述类型、协议、质量评价和证据综合。
-5. 文献完整性审稿：核心文献是否遗漏，证据覆盖是否充分。
-6. 证据综合审稿：矛盾、空白、过度概括和未来方向。
-7. 引用准确性审稿：来源对齐、页码、APA 引用和参考文献。
-8. APA/格式审稿：标题层级、图表、摘要、参考文献和补充材料。
-9. 反对性审稿：主动寻找最可能导致拒稿的问题。
-10. 输出修改矩阵和作者回复草稿。
+1. 冻结输入和目标期刊官网快照；醒目标注模拟性质。
+2. Reviewer 1：理论贡献、综述问题、可证伪性、构念边界、整合深度和替代解释。
+3. Reviewer 2：数据库与检索式、历轮查重、研究家族、纳排、质量评价、证据位置、数字和来源对齐。
+4. Reviewer 3：主编拒稿风险、跨摘要—方法—综合—讨论一致性、PRISMA/综述规范、开放科学、格式和期刊适配。
+5. 每个问题给稳定 `issue_id`，写入同一修改矩阵；修改后复跑来源和跨章节最终审计，未解决项保持 blocker。
 
 ## 输出文件
 
-- `模拟主编初筛_editor_screening.md`
-- `模拟理论贡献审稿_theory_review.md`
-- `模拟检索透明性审稿_search_transparency_review.md`
-- `模拟方法学审稿_methods_review.md`
-- `模拟文献完整性审稿_literature_completeness_review.md`
-- `模拟证据综合审稿_synthesis_review.md`
-- `模拟引用准确性审稿_citation_accuracy_review.md`
-- `模拟格式审稿_format_review.md`
-- `模拟反对性审稿_adversarial_review.md`
+- `模拟审稿意见_simulated_reviews.md`（三轮累积）
 - `修改矩阵_revision_matrix.csv`
 - `作者回复草稿_response_to_reviewers.md`
-- `顶刊预备度报告_top_journal_readiness.md`
+- `最终审计_final_audit.md`
 
 ## 中文文件命名
 

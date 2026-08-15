@@ -16,15 +16,17 @@ description: Local subskill under psych-literature-review-workflow for classific
 
 ## 输入
 
-候选文献表、检索记录、纳排标准、Zotero 题录、PDF 全文清单。
+候选文献表、检索记录、纳排标准、Zotero 题录、PDF 全文清单。开始前完整读取 `../../references/literature-operations-contract.md`。
 
 ## 执行步骤
 
-1. 去重并核验题录。
+1. 对历轮已见主表去重并核验题录；同一研究的不同报告保留并关联，不能当重复删除。
 2. 按文献类型分类：综述/元分析、理论、方法学、测量、横断、纵向、实验、干预、质性/混合方法、指南/共识。
 3. 按纳排标准记录纳入、排除或待定。
 4. 按 1–4 级评估主题相关性，相关性不等于方法质量。
-5. 登记排除理由和需复核文献。
+5. 在证据计数前预识别研究家族；未知使用 `family-uncertain-<candidate_id>`。
+6. 登记排除理由和需复核文献；不得按结果方向、引用数、期刊声望或全文可得性偷换科学纳排判断。
+7. Reviewer B 在看不到 A 结论时按冻结规则独立复核；冲突保留待裁决。
 
 ## 输出文件
 
@@ -44,6 +46,7 @@ description: Local subskill under psych-literature-review-workflow for classific
 - 排除理由是否可追溯？
 - 相关性评级是否独立于方法质量？
 - 是否标记需要全文复核的文献？
+- 是否完成研究家族预识别与真正独立 Reviewer B？
 
 ## 失败与停止条件
 

@@ -31,7 +31,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 
 1. `review-scope`：宽方向探索和综述聚焦。
 2. `evidence-search`：正式综述检索和检索饱和记录。
-3. `zotero-ingest`：Chrome + Zotero Connector 入库。
+3. `zotero-ingest`：结构化题录批量导入父条目、Zotero/PDF 状态核验和下载后挂载；Connector 仅作单篇补充。
 4. `literature-screen`：分类、纳排和 1–4 级相关性评级。
 5. `literature-matrix`：全文阅读矩阵和证据提取。
 6. `star-map`：基于阅读矩阵和激活扩散权重制作 HTML 文献星图。
@@ -47,6 +47,10 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 - `checklists/`：PRISMA 2020、PRISMA-ScR、检索透明性、检索饱和、筛选、矩阵、来源对齐、投稿前和停止条件检查表。
 - `rubrics/`：综述选题、检索透明性、文献完整性、证据综合、理论贡献、引用风险、写作质量和顶刊预备度评分表。
 - `examples/`：不同模式、不同综述类型和顶刊级模拟审稿启动示例。
+
+## 文献操作核心合同
+
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。合同规定默认采用内置浏览器检索、外置浏览器兼容回退、历轮全部已见题录差集、父条目与附件分离、PDF 队列与挂载、研究家族、Reviewer B 和主张级证据。通用综述覆盖层继续负责综述类型、PRISMA/范围综述透明性、质量工具、饱和度和理论综合，不得降低公共合同。
 
 ## 4. 本地文件命名
 
@@ -86,7 +90,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 3. 运行模式：`lite`、`standard`、`strict`、`top-journal-prep`。
 4. 目标用途：课程作业、开题、学位论文综述、中文期刊、英文期刊、投稿预备稿。
 5. 核心边界：核心构念、目标人群、年龄段、临床/非临床、研究设计、是否纳入干预、是否纳入神经机制。
-6. 文献获取方式：是否允许 Chrome + Zotero Connector；Zotero 目标 collection；失败时是否下载到文件夹由用户手动导入。
+6. 文献获取方式：默认内置浏览器还是外置浏览器回退；可用数据库导出格式；Zotero 目标 collection；PDF 是否由用户下载后批量挂载。
 7. 输出格式：Markdown、DOCX、CSV、Excel、HTML、BibTeX/RIS、APA 参考文献、模拟审稿报告。
 
 用户已明确回答时，不要重复询问；用户未回答时，可以使用默认值继续，但必须在 `日志/决策记录_decisions.md` 中记录为 assumption。
@@ -128,7 +132,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 └── 11_模拟投稿审稿/
 ```
 
-不要覆盖旧文件。修订版使用 `_v2`、`_v3`，并在日志中说明修订原因。
+唯一活动运行内优先原位更新同一职责文件并保留轮次、来源和变更记录；不得用 `_v2`、日期副本、分批平行清单或“最新版”代替版本治理。原始导出、历史运行和正式归档不可覆盖。
 
 ## 9. 阶段总览
 
@@ -137,7 +141,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 | 00 | 宽方向探索 | `综述方向聚焦_review_scope.md`, `种子综述文献表_seed_reviews.csv`, `综述方向候选方案_focus_options.md` |
 | 01 | 聚焦与协议 | `综述协议_review_protocol.md`, `概念关系图_concept_map.md`, `纳入排除标准_inclusion_exclusion.md` |
 | 02 | 正式检索 | `检索式记录_queries.md`, `检索记录_search_log.csv`, `候选文献表_candidate_records.csv`, `检索饱和记录_search_saturation_log.csv` |
-| 03 | Zotero/全文获取 | `Zotero入库清单_zotero_manifest.csv`, `PDF全文清单_pdf_manifest.csv`, `全文获取报告_acquisition_report.md` |
+| 03 | Zotero/全文获取 | `Zotero入库清单_zotero_manifest.csv`, `PDF全文清单_pdf_manifest.csv`, `缺PDF下载队列_freepaper.csv`, `未能正常下载PDF清单.csv`, `全文获取报告_acquisition_report.md` |
 | 04 | 文献筛选 | `文献筛选表_literature_screening.csv`, `相关性评级表_relevance_ratings.csv`, `排除理由登记表_exclusion_reason_register.csv` |
 | 05 | 阅读矩阵 | `文献阅读矩阵_literature_matrix.csv/xlsx/md`, `质量评价表_quality_appraisal.csv`, `主张证据对应表_claim_evidence_map.csv` |
 | 06 | 证据综合 | `证据综合备忘录_synthesis_memo.md`, `矛盾与空白登记表_contradiction_gap_register.csv` |

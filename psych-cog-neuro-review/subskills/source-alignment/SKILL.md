@@ -16,15 +16,15 @@ description: Local subskill under psych-cog-neuro-review for aligning cognitive 
 
 ## 输入
 
-综述正文、参考文献、文献阅读矩阵、机制矩阵、方法评价、PDF 全文或网页原文。
+综述正文、参考文献、文献阅读矩阵、机制矩阵、方法评价、唯一主张证据对应表、PDF 全文或网页原文。开始前完整读取 `../../references/literature-operations-contract.md`。
 
 ## 执行步骤
 
 1. 拆分正文中的机制主张、方法主张、结果主张和理论解释。
-2. 为每条主张绑定文献来源和原文位置。
-3. 判断支持程度：direct、partial、unsupported、overextended。
+2. 每条主张按一个 `claim_id × candidate_id/report_id` 配对绑定研究家族、原文页码/表图和证据载体。
+3. 使用公共合同的 `confirmed/partial/rejected/blocked`、`claim_ceiling`、`construct_match`、`estimand_level`、`result_direction` 和 Reviewer 状态。
 4. 核查脑区、网络、ERP 成分、睡眠阶段、眼动指标、NIRS 指标和心理生理指标是否准确。
-5. 输出未支持主张、过度推断和修改建议。
+5. 检查机制措辞是否超过设计、模态和分析允许的 ceiling；对反向推断、跨模态错配、rejected/blocked、单独 partial 或 Reviewer B 未通过项给出降级、删除、补证据或复核动作。
 
 ## 输出文件
 
@@ -49,7 +49,7 @@ description: Local subskill under psych-cog-neuro-review for aligning cognitive 
 
 - 没有全文，不得做页码级强引用。
 - 没有来源对齐，不得声称“可投稿”。
-- unsupported 机制主张未处理前不得生成终稿。
+- rejected、blocked、超上限或 Reviewer B 未通过的关键机制主张未处理前不得生成终稿。
 
 ## 安全边界
 

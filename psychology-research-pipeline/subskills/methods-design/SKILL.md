@@ -28,6 +28,8 @@ description: Local subskill under psychology-research-pipeline for empirical psy
 4. 制定程序：知情同意、伦理风险、测量顺序、实验任务、数据保存。
 5. 冻结主分析、次分析、探索性分析、协变量、缺失值和异常值处理。
 6. 选择报告规范：APA JARS、STROBE、CONSORT/SPIRIT、开放科学检查表。
+7. 对每个新增方法先记录“具体失败—失败后不同动作—最终裁决”。无法改变研究问题、估计对象或结论边界的方法不新增；不能修复构念、时间窗、识别或数据结构的问题不得用复杂模型包装。
+8. 结果可见后的敏感性、模拟或探索性方法明确标记，不能回写为盲态确认性计划；不得为追求显著性更换主模型。
 
 ## 输出文件
 
@@ -49,6 +51,7 @@ description: Local subskill under psychology-research-pipeline for empirical psy
 - 量表来源、计分和信效度是否可追溯？
 - 分析计划是否在看结果前冻结？
 - 报告规范与方法质量评价是否分开？
+- 新增方法是否对应真实失败和不同动作，并有采用/不采用的关闭理由？
 
 ## 失败与停止条件
 

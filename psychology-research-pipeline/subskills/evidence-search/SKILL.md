@@ -19,17 +19,18 @@ description: Local subskill under psychology-research-pipeline for empirical psy
 
 - 项目定标结果、变量模型、关键词、中英文术语。
 - 用户可访问的数据库、Zotero collection、已有文献或 DOI/PMID。
+- 开始前完整读取 `../../references/literature-operations-contract.md`，并盘点现有候选主表、检索计划、检索日志、证据缺口和历轮原始导出。
 
 ## 执行步骤
 
 1. 将人群、构念、结局、设计、测量、方法和调节变量拆为概念块；禁止把全部概念压成一个“大而全”检索式。
 2. 按证据任务建立多个 query family：直接变量关系、联合模型、综述/元分析、测量、方法和引文追踪。每个数据库保存其精确语法，不用跨库复制后冒充已验证。
-3. 冻结 `search-plan.json` 并运行 `plan-search`；保存检索式和 SHA-256。实际检索后记录平台、日期、过滤器、结果数和原始导出文件。
-4. 原始 CSV、RIS、BibTeX、PubMed XML、Crossref JSON 或 OpenAlex JSON 保持只读；运行 `import-evidence` 统一题录并记录每个导出文件哈希。
-5. 先做 DOI、PMID、OpenAlex ID、题名+首作者+年份的记录去重，再单独运行同研究多报告识别；后者只生成待人工复核候选，不自动合并。
-6. 标注证据用途、构念、设计、撤稿/更正、全文状态和证据位置。直接实证、测量、方法、综述和背景证据不得混为同一层级。
-7. 运行证据覆盖审计；任何核心 slot 未满足时阻断小综述和正式写作，输出精准补检索问题。
-8. 用全文获取队列排序合法获取任务；检索更新只追加新记录并标记变化，不删除旧证据。
+3. 结合阅读矩阵、证据账本、缺口和上轮日志原位更新 `search-plan.json`；每个主题写触发证据、精准问题、数据库专用语法、预期槽和停止条件。运行 `plan-search` 只表示冻结计划。
+4. 默认用已合法登录的内置浏览器检索并导出；页面不兼容时回退到用户授权的外置浏览器。Connector 只补单篇，不能替代批量原始导出。
+5. 原始 CSV、RIS、BibTeX、PubMed XML、Crossref JSON 或 OpenAlex JSON 保持只读；登记平台、日期、过滤器、结果数、导出路径和必要哈希。
+6. 将本轮全部结果追加到唯一候选主表；先按 DOI、PMID/稳定 ID、规范题名+首作者+年份与历轮全部已见题录求差集，再让真正新增题录进入筛选。不能只对 Zotero 或 PDF 查重。
+7. 记录级去重后单独识别同研究多报告；保留报告，只建立 `study_id/study_family_id` 候选关系，不自动合并。
+8. 标注证据用途、构念、设计、撤稿/更正和全文状态；运行覆盖审计。核心 slot 缺口转为下一轮精准问题，而非机械重跑旧检索式。
 
 ## 默认数据库
 
@@ -48,6 +49,7 @@ description: Local subskill under psychology-research-pipeline for empirical psy
 - `证据覆盖矩阵_evidence_coverage.csv`
 - `证据缺口_gap_memo.md`
 - `全文获取队列_retrieval_queue.csv`
+- `缺PDF下载队列_freepaper.csv`（仅在父条目与附件状态核验后原位重建）
 
 ## 中文文件命名
 
@@ -69,7 +71,7 @@ description: Local subskill under psychology-research-pipeline for empirical psy
 - 核心证据覆盖审计为 `blocked` 时不得进入小综述或正式写作。
 - 没有量表来源文献时不得声称“采用某量表”。
 - 没有全文时不得做页码级强引用。
-- 数据库权限或 Zotero 导入失败时，生成 `全文获取失败清单_failed_ingest_queue.csv`。
+- 原始导出缺失而无法建立历轮已见基线时，披露重复风险并阻断“已完成历轮排除”的声明。
 
 ## 安全边界
 

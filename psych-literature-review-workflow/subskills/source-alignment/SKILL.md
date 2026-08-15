@@ -17,14 +17,14 @@ description: Local subskill under psych-literature-review-workflow for sentence/
 
 ## 输入
 
-综述正文、参考文献、文献阅读矩阵、主张证据对应表、PDF 全文或网页原文。
+综述正文、参考文献、文献阅读矩阵、唯一主张证据对应表、PDF 全文或网页原文。开始前完整读取 `../../references/literature-operations-contract.md`。
 
 ## 执行步骤
 
 1. 拆分正文中的定义性、理论性、事实性、方法性、结论性主张。
-2. 为每条主张绑定支撑文献、页码/章节/段落/表图。
-3. 判断支持程度：direct、partial、unsupported、overextended。
-4. 对 unsupported 和 overextended 主张提出删除、降级、补证据或重写建议。
+2. 每条主张按一个 `claim_id × candidate_id/report_id` 配对绑定研究家族、页码/章节/段落/表图和证据载体。
+3. 使用公共合同的 `confirmed/partial/rejected/blocked`、`claim_ceiling`、`construct_match`、`estimand_level`、`result_direction` 和 Reviewer 状态。
+4. 对 rejected、blocked、单独 partial、超表述上限或 Reviewer B 未通过的主张提出删除、降级、补证据、复核或重写建议。
 5. 核查正文引用与参考文献一致性。
 
 ## 输出文件
@@ -50,7 +50,7 @@ description: Local subskill under psych-literature-review-workflow for sentence/
 
 - 没有全文，不得做页码级强引用。
 - 没有来源对齐，不得声称“可投稿”。
-- unsupported 主张未处理前不得生成终稿。
+- rejected、blocked、超上限或 Reviewer B 未通过的关键主张未处理前不得生成终稿。
 
 ## 安全边界
 
