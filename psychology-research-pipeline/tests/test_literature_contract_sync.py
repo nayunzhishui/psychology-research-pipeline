@@ -92,3 +92,9 @@ def test_zotero_subskills_do_not_prefer_connector_for_batch_ingest() -> None:
         assert "三方查重" in text
         assert "缺 PDF" in text
         assert "新建父条目" in text
+
+
+def test_repository_has_no_retired_fourth_workflow() -> None:
+    if (REPO_ROOT / ".git").exists():
+        retired = REPO_ROOT / "psych-review-workflow"
+        assert not retired.exists() or not any(path.is_file() for path in retired.rglob("*"))

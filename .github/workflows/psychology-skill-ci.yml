@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install pandas pyreadstat pyyaml jsonschema
+      - run: python -m pip install pandas pyreadstat pyyaml jsonschema "pydantic<2" python-docx
       - run: python -m unittest discover -s tests -v
 
   generated-r-syntax:
