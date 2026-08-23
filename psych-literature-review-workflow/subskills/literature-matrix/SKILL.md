@@ -7,7 +7,7 @@ description: Local subskill under psych-literature-review-workflow for full-text
 
 ## 目标
 
-把阅读全文后的信息结构化为证据矩阵、质量评价表和主张证据对应表。
+作为本工作流唯一逐篇深读入口，把3–4级全文按三轮七章节合同写入三表，并生成必要的教授汇报级阅读总结。
 
 ## 适用场景
 
@@ -16,16 +16,16 @@ description: Local subskill under psych-literature-review-workflow for full-text
 
 ## 输入
 
-文献筛选表、PDF 全文、纳入文献清单、综述协议和章节框架草案。开始前完整读取 `../../references/literature-operations-contract.md` 并对齐矩阵、账本和主张表字段。
+文献筛选表、PDF 全文、纳入文献清单、综述协议和章节框架草案。开始前完整读取 `../../references/literature-operations-contract.md` 与 `../../references/deep-reading-contract.md`，并对齐矩阵、账本和主张表字段。
 
 ## 执行步骤
 
-1. 按公共合同分为1级排除/弱相关、2级背景/相邻、3级理论/测量/方法、4级核心直接证据；对全文纳入项执行用途匹配的三轮六模块，摘要只允许 blocked/待核验。
-2. 第一轮读摘要、引言、讨论/结论和参考文献网络；第二轮读方法、样本/数据、测量、分析、结果、表图和补充材料；第三轮做摘要—结果—结论反核、偏倚/边界、家族、主张和写作转化。
-3. 提取稳定报告/研究/家族 ID、理论动机/假设、作者声称的创新、样本、数据清理/排除、测量信效度/计分、设计、缺失/协变量、分析模型、估计对象、诊断/稳健性、效应/零/相反/混合结果、关键参考文献、与项目结果关系、段落用途和 PDF 页码/表图。
-4. 分领域评价选择、测量、时间顺序、混杂、缺失、分析、选择性报告和适用性；相关性、权威性、新近性与方法质量分开。
-5. 每个 `claim_id × candidate_id/report_id` 单独写入唯一主张表，记录证据载体、位置、构念匹配、估计层级、方向、表述上限、Reviewer状态，以及论文一句话结论、段落功能、谨慎转述、并列/对照来源、与项目结果关系和禁止措辞。
-6. Reviewer B 真正独立复核；冲突裁决后按研究而非报告综合矛盾、空白和补检索问题。
+1. 只处理4级全文和实际承担理论、测量、方法、关键反例或正文主张的3级全文；摘要只允许 blocked/待核验。
+2. 按公共合同完成三轮阅读及摘要、引言、方法、数据、结果、讨论、结论七章节审计。
+3. 综述覆盖层增加理论谱系、原始/二手来源、研究间异质性、共识/争议/空白、证据槽、边界条件和补检索触发。
+4. 论文级事实写入矩阵，身份/全文/家族写入账本，单一主张、位置、上限和写作卡写入主张表；逐篇MD不得产生三表之外的新事实。
+5. 4级全文及被正式论证使用的3级全文，按 `../../templates/深度阅读报告模板_deep_reading_report.md` 生成派生阅读总结。
+6. Reviewer B 真正独立复核；本 skill 完成单篇判断后，跨研究比较交由综合阶段。
 
 ## 输出文件
 
@@ -36,6 +36,7 @@ description: Local subskill under psych-literature-review-workflow for full-text
 - `质量评价表_quality_appraisal.csv`
 - `主张证据对应表_claim_evidence_map.csv`
 - `矛盾与空白登记表_contradiction_gap_register.csv`
+- 必要的 `candidate_id_首位作者年份_中文短题名_阅读总结.md`
 
 ## 中文文件命名
 
@@ -44,7 +45,7 @@ description: Local subskill under psych-literature-review-workflow for full-text
 ## 质量检查
 
 - 核心文献是否阅读全文？
-- 三轮适用状态是否均为 complete，并覆盖摘要、引言、方法/数据、结果、讨论/结论、参考文献、表图和补充材料？
+- 三轮与七章节状态是否满足 `deep-reading-contract.md` 的教授汇报gate？
 - 可引用位置是否可追溯？
 - 质量评价是否与相关性评级分开？
 - 主张证据对应表是否能支撑正文写作？
@@ -63,4 +64,4 @@ description: Local subskill under psych-literature-review-workflow for full-text
 
 ## 完成条件
 
-完成阅读矩阵、证据覆盖台账、质量评价表、主张证据对应表和矛盾与空白登记表。
+完成三表和质量评价原位更新，并仅为符合生成条件的文献形成派生阅读总结；跨研究综合仍由后续阶段完成。

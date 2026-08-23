@@ -69,6 +69,20 @@ CORE_MATRIX_FIELDS = {
     "key_references_to_trace",
     "relation_to_project_results",
     "paragraph_level_use",
+    "legacy_reading_status",
+    "abstract_status",
+    "introduction_status",
+    "methods_status",
+    "data_status",
+    "results_status",
+    "discussion_status",
+    "conclusion_status",
+    "references_trace_status",
+    "professor_briefing_status",
+    "abstract_audit",
+    "introduction_gap",
+    "procedure_ethics",
+    "discussion_interpretation",
 }
 
 CORE_LEDGER_FIELDS = {
@@ -106,13 +120,50 @@ def test_literature_contract_is_identical_and_routed_by_all_main_skills() -> Non
     assert "历轮全部已见题录" in texts[0]
     assert "Reviewer B" in texts[0]
     assert "Zotero.Attachments.importFromFile" in texts[0]
-    assert "三轮六模块" in texts[0]
-    assert "paper_one_sentence_conclusion" in texts[0]
+    assert "deep-reading-contract.md" in texts[0]
 
     for root in SKILL_ROOTS:
         skill_text = (root / "SKILL.md").read_text(encoding="utf-8")
         assert "references/literature-operations-contract.md" in skill_text
         assert "_v2`、`_v3`" not in skill_text
+
+
+def test_deep_reading_contract_and_entrypoints_are_synchronized() -> None:
+    contracts = [root / "references" / "deep-reading-contract.md" for root in SKILL_ROOTS]
+    texts = [path.read_text(encoding="utf-8") for path in contracts]
+    assert texts[0] == texts[1] == texts[2]
+    for marker in (
+        "### 摘要",
+        "### 引言",
+        "### 方法",
+        "### 数据",
+        "### 结果",
+        "### 讨论",
+        "### 结论",
+        "professor_briefing_status",
+        "Reviewer B",
+        "阅读总结.md",
+    ):
+        assert marker in texts[0]
+
+    entrypoints = (
+        SKILL_ROOTS[0] / "subskills" / "deep-reading" / "SKILL.md",
+        SKILL_ROOTS[1] / "subskills" / "literature-matrix" / "SKILL.md",
+        SKILL_ROOTS[2] / "subskills" / "deep-reading" / "SKILL.md",
+    )
+    for path in entrypoints:
+        text = path.read_text(encoding="utf-8")
+        assert "deep-reading-contract.md" in text
+        assert "七章节" in text
+
+    report_templates = (
+        SKILL_ROOTS[0] / "templates" / "深度阅读报告模板_deep_reading_report.md",
+        SKILL_ROOTS[1] / "templates" / "深度阅读报告模板_deep_reading_report.md",
+        SKILL_ROOTS[2] / "templates" / "reading_card.md",
+    )
+    for path in report_templates:
+        assert path.exists(), path
+        assert "派生视图" in path.read_text(encoding="utf-8")
 
 
 def test_candidate_matrix_and_claim_templates_cover_shared_contract() -> None:

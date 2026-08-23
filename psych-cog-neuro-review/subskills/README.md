@@ -15,13 +15,14 @@
 2. `evidence-search`：认知神经科学理论、范式、指标和实证证据检索。
 3. `zotero-ingest`：Zotero 入库和 PDF/题录核验。
 4. `literature-screen`：认知神经科学文献分类和评级。
-5. `paradigm-design`：实验范式提取、比较和质量评价。
-6. `neuro-methods-design`：EEG/ERP、fMRI、PSG、眼动、NIRS、心理生理等方法评价。
-7. `neuro-data-analysis`：预处理与分析方案提取和透明性评价。
-8. `mechanism-synthesis`：行为—神经/生理机制整合。
-9. `source-alignment`：机制主张与原文证据对齐。
-10. `manuscript-write`：认知神经科学综述正文写作。
-11. `submission-review`：顶刊预备强度的模拟综述审稿。
+5. `deep-reading`：唯一逐篇全文提取入口，完成三轮七章节及神经科学覆盖层审计。
+6. `paradigm-design`：跨研究范式比较和质量评价。
+7. `neuro-methods-design`：跨研究神经/生理方法评价。
+8. `neuro-data-analysis`：跨研究预处理与分析透明性评价。
+9. `mechanism-synthesis`：消费已深读事实，完成行为—神经/生理机制整合。
+10. `source-alignment`：复核机制主张与原文证据，不重新提取全文。
+11. `manuscript-write`：消费通过gate的三表事实和派生阅读总结。
+12. `submission-review`：顶刊预备强度的模拟综述审稿。
 
 ## 统一结构要求
 

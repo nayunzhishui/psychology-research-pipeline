@@ -7,7 +7,7 @@ description: Local subskill under psych-cog-neuro-review for extracting and eval
 
 ## 目标
 
-从认知神经科学文献中提取预处理、分析和统计信息，评价其透明性、可重复性和机制解释风险。
+基于深读已提取事实，跨研究评价预处理、分析和统计透明性、可重复性与机制解释风险。
 
 ## 适用场景
 
@@ -20,7 +20,7 @@ description: Local subskill under psych-cog-neuro-review for extracting and eval
 
 ## 执行步骤
 
-1. 提取预处理步骤：滤波、伪迹、分段、基线、配准、平滑、分期、眼动事件、通道处理等。
+1. 读取三表中的预处理步骤；缺失单篇事实时退回 `../deep-reading/`，不在本步骤建立平行提取。
 2. 提取分析策略：ROI、时间窗、频段、网络、行为指标、混合模型、校正方法和效应量。
 3. 判断探索性与验证性分析是否区分。
 4. 评价报告透明性、可重复性和统计风险。

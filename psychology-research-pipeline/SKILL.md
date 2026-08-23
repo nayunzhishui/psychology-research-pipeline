@@ -22,7 +22,7 @@ description: End-to-end, Chinese-first workflow for auditable empirical psycholo
 
 ## 文献操作核心合同
 
-任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法选型或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。合同规定：内置浏览器检索为默认路线、外置浏览器为兼容回退、历轮全部已见题录差集、父条目与附件分离、PDF 队列和下载后挂载、研究家族、Reviewer B、主张级证据和三轮模拟审稿。实证覆盖层只能增加估计对象、测量、数据和分析门禁，不能降低公共合同。
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法选型或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文深读时再读取 `references/deep-reading-contract.md` 并调用 `subskills/deep-reading/`。公共合同规定检索路线、历轮题录差集、父条目与附件分离、研究家族、三表、Reviewer B和教授汇报级三轮七章节阅读；实证覆盖层只能增加估计对象、测量、数据和分析门禁。
 
 ## 启动
 
@@ -90,7 +90,7 @@ python scripts/pipeline.py verify-task --run-dir <运行目录> --task-id <任�
 2. **01 标准与协议**：冻结假设、结局、纳排、伦理、开放科学、偏离政策和适用报告规范。
 3. **02 证据检索**：根据已读证据和证据槽缺口冻结数据库专用检索式，保存不可变原始导出，并对历轮全部已见题录求差集。
 4. **03 Zotero与全文获取**：只导入筛选保留的新增父条目；附件状态、缺 PDF 队列、实际下载失败项和下载后挂载分别核验。
-5. **04 筛选与小综述**：先识别研究家族，再分层阅读全文、设计适配质量评价、Reviewer B 独立复核和主张—来源逐对入账。
+5. **04 筛选、深读与小综述**：筛选先识别研究家族并分级；3–4级全文转入唯一深读入口完成三轮七章节审计、三表入账、设计适配质量评价和 Reviewer B 独立复核，再按研究综合。
 6. **05 方法设计**：冻结样本、量表计分、缺失、估计量、协变量、聚类、乘法性、稳健性和模型比较。
 7. **06 数据管理**：核验 ID、波次连接、重复、范围、异常编码、反向计分、缺失、流失、分布和隐私风险。
 8. **07 统计分析**：只按冻结计划运行；保存代码、软件版本、随机种子、输入哈希、输出和偏离。
@@ -150,6 +150,7 @@ python scripts/pipeline.py autopilot --run-dir <运行目录>
 ## 按需读取
 
 - 所有文献检索、下载、阅读、证据、补检索、方法选择与模拟审稿：先读取 `references/literature-operations-contract.md`。
+- 3–4级全文逐篇阅读和教授汇报准备：读取 `references/deep-reading-contract.md` 并调用 `subskills/deep-reading/`。
 - 阶段输入、输出、字段与 gate：读取 `references/stage-contracts.md`。
 - 五层架构与人工门禁：读取 `references/research-system-architecture.md`。
 - 六个研究角色与有界 Loop：读取 `references/controlled-research-roles.md`。

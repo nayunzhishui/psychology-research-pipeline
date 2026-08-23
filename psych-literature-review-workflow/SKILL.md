@@ -33,7 +33,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 2. `evidence-search`：正式综述检索和检索饱和记录。
 3. `zotero-ingest`：结构化题录批量导入父条目、Zotero/PDF 状态核验和下载后挂载；Connector 仅作单篇补充。
 4. `literature-screen`：分类、纳排和 1–4 级相关性评级。
-5. `literature-matrix`：全文阅读矩阵和证据提取。
+5. `literature-matrix`：唯一逐篇深读入口，完成三轮七章节审计、三表入账和教授汇报准备。
 6. `star-map`：基于阅读矩阵和激活扩散权重制作 HTML 文献星图。
 7. `source-alignment`：正文—参考文献—原文证据对齐。
 8. `manuscript-write`：APA 综述正文写作。
@@ -50,7 +50,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 
 ## 文献操作核心合同
 
-任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。合同规定默认采用内置浏览器检索、外置浏览器兼容回退、历轮全部已见题录差集、父条目与附件分离、PDF 队列与挂载、研究家族、Reviewer B 和主张级证据。通用综述覆盖层继续负责综述类型、PRISMA/范围综述透明性、质量工具、饱和度和理论综合，不得降低公共合同。
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文深读时再读取 `references/deep-reading-contract.md` 并调用 `subskills/literature-matrix/`。通用综述覆盖层继续负责综述类型、PRISMA/范围综述透明性、质量工具、饱和度和理论综合，不得降低公共合同。
 
 ## 4. 本地文件命名
 
@@ -171,7 +171,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 1. 综述主题重要、边界清晰、理论贡献明确。
 2. 检索策略、数据库、时间、检索式和限制条件可追溯。
 3. 纳排标准、筛选记录和排除理由透明。
-4. 文献阅读矩阵、证据覆盖台账、质量评价和主张证据对应表完整；全文纳入项按分层规则完成适用的三轮六模块。
+4. 文献阅读矩阵、证据覆盖台账、质量评价和主张证据对应表完整；用于正式论证的3–4级全文通过三轮七章节与教授汇报gate。
 5. 证据综合能处理矛盾、空白和边界条件。
 6. 文献星图和权重规则基于矩阵，不凭空添加关系。
 7. 每个关键主张都有来源、页码/章节/表图或原文位置支持。

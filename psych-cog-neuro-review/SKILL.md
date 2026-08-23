@@ -35,13 +35,14 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 2. `evidence-search`：认知神经科学理论、范式、指标和实证证据检索。
 3. `zotero-ingest`：结构化题录批量导入父条目、Zotero/PDF 状态核验和下载后挂载；Connector 仅作单篇补充。
 4. `literature-screen`：认知神经科学文献分类和评级。
-5. `paradigm-design`：实验范式提取、比较和质量评价。
-6. `neuro-methods-design`：EEG/ERP、fMRI、PSG、眼动、NIRS、心理生理等方法评价。
-7. `neuro-data-analysis`：预处理与分析方案提取和透明性评价。
-8. `mechanism-synthesis`：行为—神经/生理机制整合。
-9. `source-alignment`：机制主张与原文证据对齐。
-10. `manuscript-write`：认知神经科学综述正文写作。
-11. `submission-review`：顶刊预备强度的模拟综述审稿。
+5. `deep-reading`：唯一逐篇全文提取入口，完成三轮七章节及神经科学覆盖层审计。
+6. `paradigm-design`：跨研究实验范式比较和质量评价。
+7. `neuro-methods-design`：EEG/ERP、fMRI、PSG、眼动、NIRS、心理生理等跨研究方法评价。
+8. `neuro-data-analysis`：跨研究预处理与分析透明性评价。
+9. `mechanism-synthesis`：消费已深读事实，完成行为—神经/生理机制整合。
+10. `source-alignment`：复核机制主张与原文证据对齐。
+11. `manuscript-write`：认知神经科学综述正文写作。
+12. `submission-review`：顶刊预备强度的模拟综述审稿。
 
 ### templates/ checklists/ rubrics/ examples/
 
@@ -52,7 +53,7 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 
 ## 文献操作核心合同
 
-任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。合同规定默认采用内置浏览器检索、外置浏览器兼容回退、历轮全部已见题录差集、父条目与附件分离、PDF 队列与挂载、研究家族、Reviewer B 和主张级证据。认知神经覆盖层继续负责模态、范式、预处理、分析灵活性、反向推断和机制上限，不得降低公共合同。
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文深读时再读取 `references/deep-reading-contract.md` 并调用 `subskills/deep-reading/`。认知神经覆盖层继续负责模态、范式、预处理、分析灵活性、反向推断和机制上限，不得降低公共合同。
 
 ## 4. 本地文件命名
 
@@ -145,7 +146,7 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 | 02 | 证据检索 | `检索式记录_queries.md`, `数据库检索记录_database_search_log.csv`, `候选文献表_candidate_records.csv` |
 | 03 | Zotero/全文获取 | `Zotero入库清单_zotero_manifest.csv`, `PDF全文清单_pdf_manifest.csv`, `缺PDF下载队列_freepaper.csv`, `未能正常下载PDF清单.csv`, `全文获取报告_acquisition_report.md` |
 | 04 | 分类与筛查 | `文献筛选表_literature_screening.csv`, `相关性评级表_relevance_ratings.csv` |
-| 05 | 证据矩阵 | `文献阅读矩阵_literature_matrix.csv/xlsx/md`, `机制矩阵_neural_mechanism_matrix.csv`, `质量评价表_quality_appraisal.csv` |
+| 05 | 深读与证据矩阵 | `文献阅读矩阵_literature_matrix.csv/xlsx/md`, `机制矩阵_neural_mechanism_matrix.csv`, `质量评价表_quality_appraisal.csv`, 必要的逐篇阅读总结 |
 | 06 | 机制模型 | `机制模型说明_mechanism_model.md`, `主张证据对应表_claim_evidence_map.csv` |
 | 07 | 范式与方法评价 | `实验范式评价_paradigm_evaluation.md`, `神经生理方法评价_neuro_methods_evaluation.md` |
 | 08 | 预处理与分析评价 | `预处理透明性评价_preprocessing_transparency.md`, `分析方法评价_analysis_methods_evaluation.md` |
@@ -171,7 +172,7 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 
 1. 机制问题重要、边界清晰、理论贡献明确。
 2. 检索策略、数据库、时间、检索式和限制条件可追溯。
-3. 文献筛选、方法质量评价和机制矩阵完整。
+3. 文献筛选、方法质量评价和机制矩阵完整；用于正式论证的3–4级全文通过三轮七章节和教授汇报gate。
 4. 神经/生理方法、预处理与分析透明性可评价。
 5. 行为结果、主观量表、神经/生理指标和理论机制分层整合。
 6. 每个脑区、网络、ERP 成分、睡眠阶段、眼动指标、NIRS 指标或心理生理指标主张都有来源支持。

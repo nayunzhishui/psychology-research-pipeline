@@ -127,72 +127,20 @@ batch,zotero_item_key,doi,url,title,download_status,failure_reason,last_checked
 
 固定顺序：定标冻结 → 字段对齐 → 研究家族预识别 → 分层精读与主张入账 → 设计适配质量评价 → 独立 Reviewer B → 按研究综合。
 
-### 分层阅读
-
-按用途和相关性决定阅读深度，不按期刊声望、引用数或结果方向分层：
-
-1. **1级：明显排除或弱相关**。只读题名、摘要和关键词，记录排除理由，不进入证据综合。
-2. **2级：背景或相邻构念**。读摘要、引言、讨论/结论和关键参考文献，提取背景用途与边界；不能承担核心效应主张。
-3. **3级：重要理论、测量或方法文献**。执行三轮用途匹配的全文定向阅读，重点核验对应理论、量表、方法、适用条件和限制。
-4. **4级：核心直接证据**。完整执行三轮六模块深读，进入阅读矩阵、证据账本、主张表和 Reviewer B 复核。
-
-摘要只能形成 `blocked` 或待全文核验记录，不能确认效应、方法细节或强主张。所有全文纳入论文至少完成与其用途匹配的三轮阅读；没有全文者保持 `blocked`。
-
-### 三轮六模块
-
-“六模块”不要求机械阅读全文六次。默认用三轮覆盖全部模块；只有结果冲突、精确统计量引用、复杂模型/元分析/测量学、研究家族歧义或 Reviewer 冲突时，才增加定向复核。
-
-1. **第一轮：论文定位与理论网络**。阅读题名、作者、年份、期刊、DOI、摘要、关键词、引言、理论框架、研究问题/假设、讨论/结论和参考文献表。记录论文问题、理论动机、作者声称的创新、与项目关系、证据角色、初步构念匹配/主张上限，以及需追踪的原始理论、量表、方法、同研究报告和遗漏直接证据。
-2. **第二轮：方法、数据与结果核验**。阅读样本/招募、数据来源、波次/间隔、纳排/失访/缺失、构念操作化、量表信效度与计分、数据清理、协变量/聚类、统计模型/估计对象、结果、表图、附录/补充材料、零/相反结果和敏感性分析。记录效应量、区间、精确 p、模型诊断、稳健性及准确页码/表图位置。
-3. **第三轮：批判性复核与写作转化**。反核摘要—结果—结论一致性，判断替代解释、混杂、各偏倚域、同一研究家族、支持/零/相反/混合证据、本项目允许与禁止的表述、`claim_ceiling`、谨慎转述、段落用途和待 Reviewer B 事项。
-
-三轮状态使用 `not-started`、`in-progress`、`complete`、`blocked` 或 `not-applicable`；只有适用轮次均完成、关键证据位置可追溯且未把待核验项写成事实时，才能标记深读完成。
+筛选只负责纳排、分类、1–4级阅读优先级和深读路由；不得在筛选步骤内重复承担全文提取、跨研究综合或写作。3–4级全文阅读必须完整读取同目录 `deep-reading-contract.md`，按三轮七章节合同执行；摘要只能形成 `blocked` 或待全文核验记录。
 
 ### 稳定标识与家族
 
 每篇报告保留唯一 `candidate_id` 和 `report_id`；同一队列共享 `study_id` 和 `study_family_id`。按队列名称、作者群、国家/地区、机构、招募年份、样本量、年龄、波次、量表和随访期识别多报告。不能确认时使用 `family-uncertain-<candidate_id>`，不能留空或把全部未知报告并入一个家族。
 
-### 阅读矩阵
+### 三表与深读档案
 
-公共最低字段：
+- 阅读矩阵负责论文内容、方法、数据、结果、质量、用途和章节状态。
+- 证据账本负责报告身份、题录、全文/勘误状态、研究家族和核验链。
+- 唯一主张表负责一个 `claim_id × candidate_id/report_id` 配对的证据位置、表述上限、写作卡和 Reviewer 状态。
+- 逐篇阅读总结仅是三表和已核验PDF的人类可读派生视图，不是第四套事实源；具体生成范围、命名、字段映射和教授汇报gate见 `deep-reading-contract.md`。
 
-```text
-study_id,candidate_id,report_id,study_family_id,citation,design,country,
-sample_n,age_or_grade,waves,wave_intervals,constructs,measures,analysis_model,
-estimand_level,primary_results,null_opposite_mixed_results,effect_estimates,
-bias_selection,bias_measurement,bias_temporality,bias_confounding,
-bias_missingness,bias_analysis,bias_reporting,applicability,fulltext_location,
-family_status,reviewer_a_status,reviewer_b_status,adjudication_status,
-claim_ceiling,construct_match,screening_status,verified_at,source_pdf,
-reading_level,reading_scope,pass1_orientation_status,pass2_methods_results_status,
-pass3_critical_writing_status,research_question,study_hypotheses,claimed_novelty,
-theory_framework,data_source,data_cleaning_exclusions,
-measurement_reliability_validity,scoring_details,missing_data_handling,covariates,
-model_diagnostics,robustness_sensitivity,key_references_to_trace,
-relation_to_project_results,paragraph_level_use
-```
-
-领域 skill 应追加其专用字段，不能用一个自由文本总评替代结构化样本、测量、分析、结果、偏倚和位置字段。
-
-### 证据账本与主张表
-
-研究/报告级题录、来源和复核状态进入唯一证据账本；主张—来源多对多关系进入唯一 `主张证据对应表_claim_evidence_map.csv`。每行只表示一个 `claim_id × candidate_id/report_id` 配对。
-
-主张表最低字段：
-
-```text
-claim_id,claim_text,claim_type,candidate_id,study_id,report_id,study_family_id,
-support_status,claim_ceiling,support_carrier_type,support_carrier_value,
-fulltext_location,construct_match,estimand_level,result_direction,
-reviewer_status,reviewer_reason,verified_at,effect_estimate,standard_error,
-ci_95,p_value,paper_one_sentence_conclusion,paragraph_function,
-cautious_paraphrase,comparison_or_companion_sources,
-relation_to_project_results,prohibited_wording
-```
-
-写作卡不另建逐篇文件，直接由主张表的上述字段承担：`paper_one_sentence_conclusion`记录论文级一句话结论，`paragraph_function`记录定义/铺垫/支持/对照/限制/方法等段落功能，`cautious_paraphrase`记录可采用的谨慎转述，`comparison_or_companion_sources`记录需并列或对照的来源，`relation_to_project_results`记录与本项目结果的关系，`prohibited_wording`记录不得如何表述。
-
-阅读矩阵、证据账本和主张表共同描述论文并支持写作：矩阵负责论文内容、方法、结果、质量和用途；账本负责来源身份、题录、全文/勘误状态、研究家族和核验链；主张表负责一个主张与一个来源的证据位置、表述上限、写作卡和 Reviewer 状态。三者不能互相替代，但联合后应能从正文主张回到报告、PDF位置和来源状态。
+领域 skill 可以追加专用字段和门槛，但不能降低公共合同，也不能用一个自由文本总评替代结构化事实。
 
 允许的固定值：
 

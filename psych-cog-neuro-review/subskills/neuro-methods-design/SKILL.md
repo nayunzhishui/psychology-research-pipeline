@@ -7,7 +7,7 @@ description: Local subskill under psych-cog-neuro-review for evaluating cognitiv
 
 ## 目标
 
-提取和评价认知神经科学文献中的 EEG/ERP、fMRI、PSG、眼动、NIRS、心理生理和行为任务方法，服务综述中的方法质量判断。
+基于深读已提取事实，跨研究比较和评价 EEG/ERP、fMRI、PSG、眼动、NIRS、心理生理和行为任务方法。
 
 ## 适用场景
 
@@ -20,7 +20,7 @@ description: Local subskill under psych-cog-neuro-review for evaluating cognitiv
 
 ## 执行步骤
 
-1. 提取研究使用的模态、设备、采样率、任务、指标和分析单元。
+1. 读取三表中的模态、设备、采样率、任务、指标和分析单元；缺失单篇事实时退回 `../deep-reading/`，不在本步骤建立平行提取。
 2. 记录关键参数：EEG 电极/ERP 时间窗、fMRI ROI/全脑、PSG 分期、眼动指标、NIRS 通道、心理生理指标。
 3. 记录预处理、伪迹处理、试次数/排除、ROI 预设或全脑探索、多重比较、时间窗/频带选择、特征工程、交叉验证和数据泄漏风险。
 4. 评价方法与机制问题的匹配度，区分可检测到指标与能识别目标机制；检查反向推断和跨模态尺度错配。

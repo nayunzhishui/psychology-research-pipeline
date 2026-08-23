@@ -14,13 +14,14 @@
 1. `project-scope`：选题、研究问题、假设、变量模型。
 2. `evidence-search`：理论、方法、量表和实证依据检索。
 3. `zotero-ingest`：Chrome + Zotero Connector 入库和 PDF/题录核验。
-4. `literature-screen`：实证论文所需文献分类、筛选、小综述和证据矩阵。
-5. `methods-design`：样本、量表、任务、伦理、开放科学和分析计划。
-6. `data-analysis`：数据审计、统计分析、结果解释和偏离记录。
-7. `reporting-standards`：STROBE、CONSORT/SPIRIT、APA JARS、测量研究、开放科学报告规范。
-8. `manuscript-write`：APA 实证论文写作。
-9. `source-alignment`：正文主张、参考文献、统计数字、表图和方法描述对齐。
-10. `submission-review`：顶刊预备强度的模拟投稿审稿和修改矩阵。
+4. `literature-screen`：题录分类、纳排、相关性评级和1–4级深读路由。
+5. `deep-reading`：3–4级全文的三轮七章节深读、三表入账和教授汇报准备。
+6. `methods-design`：样本、量表、任务、伦理、开放科学和分析计划。
+7. `data-analysis`：数据审计、统计分析、结果解释和偏离记录。
+8. `reporting-standards`：STROBE、CONSORT/SPIRIT、APA JARS、测量研究、开放科学报告规范。
+9. `manuscript-write`：消费已通过gate的三表事实，完成APA实证论文写作。
+10. `source-alignment`：复核正文主张、参考文献、统计数字、表图和方法描述，不重新提取全文。
+11. `submission-review`：顶刊预备强度的模拟投稿审稿和修改矩阵。
 
 ## 统一结构要求
 
