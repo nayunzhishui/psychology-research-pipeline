@@ -40,6 +40,54 @@ CORE_CLAIM_FIELDS = {
     "estimand_level",
     "result_direction",
     "reviewer_status",
+    "paper_one_sentence_conclusion",
+    "paragraph_function",
+    "cautious_paraphrase",
+    "comparison_or_companion_sources",
+    "relation_to_project_results",
+    "prohibited_wording",
+}
+
+CORE_MATRIX_FIELDS = {
+    "reading_level",
+    "reading_scope",
+    "pass1_orientation_status",
+    "pass2_methods_results_status",
+    "pass3_critical_writing_status",
+    "research_question",
+    "study_hypotheses",
+    "claimed_novelty",
+    "theory_framework",
+    "data_source",
+    "data_cleaning_exclusions",
+    "measurement_reliability_validity",
+    "scoring_details",
+    "missing_data_handling",
+    "covariates",
+    "model_diagnostics",
+    "robustness_sensitivity",
+    "key_references_to_trace",
+    "relation_to_project_results",
+    "paragraph_level_use",
+}
+
+CORE_LEDGER_FIELDS = {
+    "candidate_id",
+    "report_id",
+    "study_id",
+    "study_family_id",
+    "title",
+    "doi",
+    "database",
+    "search_id",
+    "source_record_id",
+    "fulltext_status",
+    "correction_status",
+    "retraction_status",
+    "family_status",
+    "fulltext_location",
+    "reviewer_status",
+    "verified_at",
 }
 
 
@@ -58,6 +106,8 @@ def test_literature_contract_is_identical_and_routed_by_all_main_skills() -> Non
     assert "历轮全部已见题录" in texts[0]
     assert "Reviewer B" in texts[0]
     assert "Zotero.Attachments.importFromFile" in texts[0]
+    assert "三轮六模块" in texts[0]
+    assert "paper_one_sentence_conclusion" in texts[0]
 
     for root in SKILL_ROOTS:
         skill_text = (root / "SKILL.md").read_text(encoding="utf-8")
@@ -65,7 +115,7 @@ def test_literature_contract_is_identical_and_routed_by_all_main_skills() -> Non
         assert "_v2`、`_v3`" not in skill_text
 
 
-def test_candidate_and_claim_templates_cover_shared_identifiers() -> None:
+def test_candidate_matrix_and_claim_templates_cover_shared_contract() -> None:
     candidate_templates = (
         SKILL_ROOTS[0] / "templates" / "候选文献表模板_candidate_records.csv",
         SKILL_ROOTS[1] / "templates" / "候选文献表模板_candidate_records.csv",
@@ -76,11 +126,25 @@ def test_candidate_and_claim_templates_cover_shared_identifiers() -> None:
         SKILL_ROOTS[1] / "templates" / "主张证据对应表模板_claim_evidence_map.csv",
         SKILL_ROOTS[2] / "templates" / "claim_evidence_map.csv",
     )
+    matrix_templates = (
+        SKILL_ROOTS[0] / "templates" / "文献阅读矩阵模板_literature_matrix.csv",
+        SKILL_ROOTS[1] / "templates" / "文献阅读矩阵模板_literature_matrix.csv",
+        SKILL_ROOTS[2] / "templates" / "literature_matrix.csv",
+    )
+    ledger_templates = (
+        SKILL_ROOTS[0] / "templates" / "证据覆盖台账模板_evidence_ledger.csv",
+        SKILL_ROOTS[1] / "templates" / "证据覆盖台账模板_evidence_ledger.csv",
+        SKILL_ROOTS[2] / "templates" / "evidence_ledger.csv",
+    )
 
     for path in candidate_templates:
         assert CORE_CANDIDATE_FIELDS <= _header(path), path
     for path in claim_templates:
         assert CORE_CLAIM_FIELDS <= _header(path), path
+    for path in matrix_templates:
+        assert CORE_MATRIX_FIELDS <= _header(path), path
+    for path in ledger_templates:
+        assert CORE_LEDGER_FIELDS <= _header(path), path
 
 
 def test_zotero_subskills_do_not_prefer_connector_for_batch_ingest() -> None:

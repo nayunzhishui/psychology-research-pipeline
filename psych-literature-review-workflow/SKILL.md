@@ -143,7 +143,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 | 02 | 正式检索 | `检索式记录_queries.md`, `检索记录_search_log.csv`, `候选文献表_candidate_records.csv`, `检索饱和记录_search_saturation_log.csv` |
 | 03 | Zotero/全文获取 | `Zotero入库清单_zotero_manifest.csv`, `PDF全文清单_pdf_manifest.csv`, `缺PDF下载队列_freepaper.csv`, `未能正常下载PDF清单.csv`, `全文获取报告_acquisition_report.md` |
 | 04 | 文献筛选 | `文献筛选表_literature_screening.csv`, `相关性评级表_relevance_ratings.csv`, `排除理由登记表_exclusion_reason_register.csv` |
-| 05 | 阅读矩阵 | `文献阅读矩阵_literature_matrix.csv/xlsx/md`, `质量评价表_quality_appraisal.csv`, `主张证据对应表_claim_evidence_map.csv` |
+| 05 | 阅读矩阵 | `文献阅读矩阵_literature_matrix.csv/xlsx/md`, `证据覆盖台账_evidence_ledger.csv`, `质量评价表_quality_appraisal.csv`, `主张证据对应表_claim_evidence_map.csv` |
 | 06 | 证据综合 | `证据综合备忘录_synthesis_memo.md`, `矛盾与空白登记表_contradiction_gap_register.csv` |
 | 07 | 文献星图 | `文献星图_literature_star_map.html`, `星图权重表_star_map_weights.csv`, `星图说明_star_map_notes.md` |
 | 08 | 综述框架 | `综述框架_review_outline.md`, `章节主张表_section_claims.md`, `图表计划_figure_table_plan.md` |
@@ -171,7 +171,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 1. 综述主题重要、边界清晰、理论贡献明确。
 2. 检索策略、数据库、时间、检索式和限制条件可追溯。
 3. 纳排标准、筛选记录和排除理由透明。
-4. 文献阅读矩阵、质量评价、主张证据对应表完整。
+4. 文献阅读矩阵、证据覆盖台账、质量评价和主张证据对应表完整；全文纳入项按分层规则完成适用的三轮六模块。
 5. 证据综合能处理矛盾、空白和边界条件。
 6. 文献星图和权重规则基于矩阵，不凭空添加关系。
 7. 每个关键主张都有来源、页码/章节/表图或原文位置支持。

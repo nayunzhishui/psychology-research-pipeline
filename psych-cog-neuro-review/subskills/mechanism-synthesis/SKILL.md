@@ -20,16 +20,17 @@ description: Local subskill under psych-cog-neuro-review for cognitive neuroscie
 
 ## 执行步骤
 
-1. 按证据层级整理：行为、主观、神经、心理生理、理论模型。
+1. 开始整合前，确认核心证据已按公共合同完成三轮六模块，并记录理论问题、方法/数据/结果、表图/补充材料、参考文献网络、偏倚边界和写作用途；再按行为、主观、神经、心理生理、理论模型分层整理。
 2. 区分描述、个体间关联、时间预测、实验操纵、纵向个体内变化和因果效应；神经激活、相关、中介或时间先后本身不证明机制。
 3. 提取支持、零、相反和混合证据，连同任务、对照、模态、预处理、ROI/全脑、校正、解析灵活性和边界条件。
-4. 每个机制主张以一个 `claim_id × candidate_id/report_id` 配对写入唯一主张表，记录证据位置、构念匹配、估计层级、结果方向、Reviewer 状态和 `claim_ceiling`。
+4. 每个机制主张以一个 `claim_id × candidate_id/report_id` 配对写入唯一主张表，记录证据位置、构念匹配、估计层级、结果方向、Reviewer状态、`claim_ceiling`、论文一句话结论、段落功能、谨慎转述、并列/对照来源和禁止措辞。
 5. 对脑区/网络/成分主张执行反向推断检查；跨模态整合注明空间、时间与测量层级不可直接互换。
 6. Reviewer B 独立复核后，按研究家族而非报告数综合并更新机制模型。
 
 ## 输出文件
 
 - `机制矩阵_neural_mechanism_matrix.csv`
+- `证据覆盖台账_evidence_ledger.csv`
 - `机制模型说明_mechanism_model.md`
 - `主张证据对应表_claim_evidence_map.csv`
 - `矛盾与空白登记表_contradiction_gap_register.csv`

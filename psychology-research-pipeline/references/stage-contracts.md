@@ -42,7 +42,7 @@
 
 ### 04_synthesis — `04_文献筛选与小综述`
 
-必需：`文献筛选表_literature_screening.csv`、`文献阅读矩阵_literature_matrix.csv`、`小综述_mini_review.md`、`主张证据对应表_claim_evidence_map.csv`。
+必需：`文献筛选表_literature_screening.csv`、`文献阅读矩阵_literature_matrix.csv`、`证据覆盖台账_evidence_ledger.csv`、`小综述_mini_review.md`、`主张证据对应表_claim_evidence_map.csv`。
 
 通过条件：纳排理由、同一研究多报告关联、证据位置、相关性与方法质量分开记录；矛盾和零结果未被删除；核心直接证据完成六遍精读；Reviewer B 真正独立。主张表每行仅一个 `claim_id × candidate_id/report_id` 配对，并包含公共合同要求的 `support_status,claim_ceiling,support_carrier_type,support_carrier_value,fulltext_location,construct_match,estimand_level,result_direction,reviewer_status`。`strict` 与 `top-journal-prep` 必须存在去重清单、研究家族识别清单和状态为 `ready` 的证据覆盖审计；任一核心 slot 缺口或 Reviewer B 未完成均阻断。
 
