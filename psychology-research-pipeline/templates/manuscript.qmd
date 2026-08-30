@@ -9,7 +9,16 @@ execute:
   freeze: true
 ---
 
-> 构建门禁：仅允许读取 `08_结果与图表` 中独立核验的结果，以及证据账本中 `claim-verified` 的主张。
+> 构建门禁：仅允许读取独立核验的结果与三表中达到写作gate的主张。先填写论证包和图表计划；`AUTHOR_INPUT_NEEDED`或`EVIDENCE_BLOCKED`未清除时不得标记投稿预备完成。
+
+## 写作控制页（投稿时删除）
+
+- 文章类型与适用报告规范：{{ARTICLE_TYPE_AND_REPORTING_STANDARD}}
+- 一句话研究问题：{{ONE_SENTENCE_RESEARCH_QUESTION}}
+- 一句话中心贡献：{{ONE_SENTENCE_CONTRIBUTION}}
+- 核心 claim_id / 结果输出：{{CORE_CLAIMS_AND_OUTPUTS}}
+- 反证、替代解释与禁止措辞：{{COUNTEREVIDENCE_AND_BOUNDARIES}}
+- 表图—主张映射：{{DISPLAY_CLAIM_MAP}}
 
 # 摘要
 
@@ -19,6 +28,8 @@ execute:
 
 {{CLAIM_VERIFIED_INTRODUCTION}}
 
+> 顺序：重要问题 → 已知及边界 → 精确缺口 → 当前研究 → 可判定问题/假设与贡献。
+
 # 方法
 
 {{FROZEN_METHODS}}
@@ -27,9 +38,17 @@ execute:
 
 {{VERIFIED_RESULTS}}
 
+> 按研究问题报告主要、次要、探索性及零/相反/混合结果；正文不复抄整张表。
+
 # 讨论
 
 {{CLAIM_VERIFIED_DISCUSSION}}
+
+> 依次区分结果事实、解释、既有证据、替代解释、局限/外推、理论与实践意义。
+
+# 结论
+
+{{BOUNDED_CONCLUSION}}
 
 # 声明
 

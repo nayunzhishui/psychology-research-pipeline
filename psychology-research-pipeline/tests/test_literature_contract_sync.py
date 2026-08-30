@@ -46,6 +46,11 @@ CORE_CLAIM_FIELDS = {
     "comparison_or_companion_sources",
     "relation_to_project_results",
     "prohibited_wording",
+    "paragraph_id",
+    "argument_role",
+    "warrant_text",
+    "counterevidence_handling",
+    "drafting_status",
 }
 
 CORE_MATRIX_FIELDS = {
@@ -83,6 +88,15 @@ CORE_MATRIX_FIELDS = {
     "introduction_gap",
     "procedure_ethics",
     "discussion_interpretation",
+    "paper_type",
+    "reporting_standard_applicable",
+    "author_claim",
+    "results_demonstrate",
+    "reader_inference",
+    "source_package_status",
+    "consistency_audit_status",
+    "briefing_2min",
+    "anticipated_professor_questions",
 }
 
 CORE_LEDGER_FIELDS = {
@@ -166,6 +180,32 @@ def test_deep_reading_contract_and_entrypoints_are_synchronized() -> None:
         assert "派生视图" in path.read_text(encoding="utf-8")
 
 
+def test_writing_contract_and_manuscript_entrypoints_are_synchronized() -> None:
+    contracts = [
+        root / "references" / "evidence-grounded-writing-contract.md"
+        for root in SKILL_ROOTS
+    ]
+    texts = [path.read_text(encoding="utf-8") for path in contracts]
+    assert texts[0] == texts[1] == texts[2]
+    for marker in (
+        "写作前论证包",
+        "文章类型路由",
+        "主张 → 证据综合 → 推理桥梁",
+        "作者主张",
+        "认知神经科学综述",
+        "不计算总分",
+    ):
+        assert marker in texts[0]
+
+    for root in SKILL_ROOTS:
+        main_text = (root / "SKILL.md").read_text(encoding="utf-8")
+        manuscript_text = (
+            root / "subskills" / "manuscript-write" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        assert "references/evidence-grounded-writing-contract.md" in main_text
+        assert "evidence-grounded-writing-contract.md" in manuscript_text
+
+
 def test_candidate_matrix_and_claim_templates_cover_shared_contract() -> None:
     candidate_templates = (
         SKILL_ROOTS[0] / "templates" / "候选文献表模板_candidate_records.csv",
@@ -196,6 +236,32 @@ def test_candidate_matrix_and_claim_templates_cover_shared_contract() -> None:
         assert CORE_MATRIX_FIELDS <= _header(path), path
     for path in ledger_templates:
         assert CORE_LEDGER_FIELDS <= _header(path), path
+
+
+def test_writing_templates_support_paragraph_level_argument_audit() -> None:
+    source_alignment_templates = (
+        SKILL_ROOTS[0] / "templates" / "来源对齐表模板_source_alignment_table.csv",
+        SKILL_ROOTS[1] / "templates" / "来源对齐表模板_source_alignment_table.csv",
+        SKILL_ROOTS[2] / "templates" / "来源对齐表模板_source_alignment_table.csv",
+    )
+    required = {
+        "paragraph_id",
+        "claim_id",
+        "argument_role",
+        "warrant_text",
+        "counterevidence_handling",
+        "reviewer_status",
+    }
+    for path in source_alignment_templates:
+        assert required <= _header(path), path
+
+    cog_templates = (
+        SKILL_ROOTS[2] / "templates" / "review_outline.md",
+        SKILL_ROOTS[2] / "templates" / "prewriting_synthesis_plan.md",
+        SKILL_ROOTS[2] / "templates" / "review_methods_plan.md",
+    )
+    for path in cog_templates:
+        assert "REM 与情绪记忆" not in path.read_text(encoding="utf-8"), path
 
 
 def test_zotero_subskills_do_not_prefer_connector_for_batch_ingest() -> None:

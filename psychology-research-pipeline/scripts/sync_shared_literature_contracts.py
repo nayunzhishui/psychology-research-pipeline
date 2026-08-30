@@ -12,6 +12,7 @@ TARGET_ROOTS = (
 CONTRACTS = (
     "literature-operations-contract.md",
     "deep-reading-contract.md",
+    "evidence-grounded-writing-contract.md",
 )
 
 

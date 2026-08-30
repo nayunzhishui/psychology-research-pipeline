@@ -20,11 +20,11 @@ description: Local subskill under psych-cog-neuro-review for aligning cognitive 
 
 ## 执行步骤
 
-1. 拆分正文中的机制主张、方法主张、结果主张和理论解释；本步骤只复核既有提取，不重新承担逐篇全文阅读。
+1. 按稳定`paragraph_id`拆分机制、方法、结果和理论主张；本步骤只复核既有提取，不重新承担逐篇全文阅读。
 2. 每条主张按一个 `claim_id × candidate_id/report_id` 配对绑定研究家族、原文页码/表图和证据载体。
 3. 使用公共合同的 `confirmed/partial/rejected/blocked`、`claim_ceiling`、`construct_match`、`estimand_level`、`result_direction` 和 Reviewer 状态。
-4. 核查脑区、网络、ERP 成分、睡眠阶段、眼动指标、NIRS 指标和心理生理指标是否准确。
-5. 检查机制措辞是否超过设计、模态和分析允许的 ceiling；对反向推断、跨模态错配、rejected/blocked、单独 partial 或 Reviewer B 未通过项给出降级、删除、补证据或复核动作。
+4. 核查每段的机制主张、跨层证据、推理桥梁、反证处理和推进功能，以及脑区、网络、成分、睡眠阶段、眼动、NIRS和心理生理指标是否准确。
+5. 检查机制措辞是否超过设计、模态和分析允许的 ceiling；对反向推断、跨模态错配、缺少warrant/反证处理、rejected/blocked、单独 partial 或 Reviewer B 未通过项给出动作。
 
 ## 输出文件
 

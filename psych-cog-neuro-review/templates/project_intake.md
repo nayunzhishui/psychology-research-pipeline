@@ -22,8 +22,8 @@
 ## 3. 研究主题与边界
 
 - 核心主题：
-- 优先主题：REM sleep and emotional memory / 其他：
-- 是否加载 topic pack：`topic_packs/rem_emotional_memory/` 是 / 否 / 不适用
+- 优先主题：
+- 是否加载现有 topic pack：否 / 是，名称与理由：
 - 核心概念：
 - 相邻但不等同概念：
 - 明确排除的主题：

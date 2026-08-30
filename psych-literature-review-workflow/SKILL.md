@@ -50,7 +50,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 
 ## 文献操作核心合同
 
-任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文深读时再读取 `references/deep-reading-contract.md` 并调用 `subskills/literature-matrix/`。通用综述覆盖层继续负责综述类型、PRISMA/范围综述透明性、质量工具、饱和度和理论综合，不得降低公共合同。
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文深读时再读取 `references/deep-reading-contract.md` 并调用 `subskills/literature-matrix/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`。通用综述覆盖层继续负责综述类型、PRISMA/范围综述透明性、质量工具、证据综合和理论贡献，不得降低公共合同。
 
 ## 4. 本地文件命名
 

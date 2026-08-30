@@ -139,6 +139,7 @@ batch,zotero_item_key,doi,url,title,download_status,failure_reason,last_checked
 - 证据账本负责报告身份、题录、全文/勘误状态、研究家族和核验链。
 - 唯一主张表负责一个 `claim_id × candidate_id/report_id` 配对的证据位置、表述上限、写作卡和 Reviewer 状态。
 - 逐篇阅读总结仅是三表和已核验PDF的人类可读派生视图，不是第四套事实源；具体生成范围、命名、字段映射和教授汇报gate见 `deep-reading-contract.md`。
+- 正式正文写作、章节重写和一区预备结构审计必须读取 `evidence-grounded-writing-contract.md`；写作只消费三表、已验证结果和通过gate的综合，不得先写后找来源。
 
 领域 skill 可以追加专用字段和门槛，但不能降低公共合同，也不能用一个自由文本总评替代结构化事实。
 

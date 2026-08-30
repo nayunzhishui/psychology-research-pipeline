@@ -22,7 +22,7 @@ description: End-to-end, Chinese-first workflow for auditable empirical psycholo
 
 ## 文献操作核心合同
 
-任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法选型或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文深读时再读取 `references/deep-reading-contract.md` 并调用 `subskills/deep-reading/`。公共合同规定检索路线、历轮题录差集、父条目与附件分离、研究家族、三表、Reviewer B和教授汇报级三轮七章节阅读；实证覆盖层只能增加估计对象、测量、数据和分析门禁。
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法选型或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文深读时再读取 `references/deep-reading-contract.md` 并调用 `subskills/deep-reading/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`。公共合同规定检索路线、历轮题录差集、父条目与附件分离、研究家族、三表、Reviewer B、教授汇报级阅读和证据约束写作；实证覆盖层只能增加估计对象、测量、数据和分析门禁。
 
 ## 启动
 
@@ -151,6 +151,7 @@ python scripts/pipeline.py autopilot --run-dir <运行目录>
 
 - 所有文献检索、下载、阅读、证据、补检索、方法选择与模拟审稿：先读取 `references/literature-operations-contract.md`。
 - 3–4级全文逐篇阅读和教授汇报准备：读取 `references/deep-reading-contract.md` 并调用 `subskills/deep-reading/`。
+- 正式正文起草、章节重写与一区预备结构审计：读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`。
 - 阶段输入、输出、字段与 gate：读取 `references/stage-contracts.md`。
 - 五层架构与人工门禁：读取 `references/research-system-architecture.md`。
 - 六个研究角色与有界 Loop：读取 `references/controlled-research-roles.md`。

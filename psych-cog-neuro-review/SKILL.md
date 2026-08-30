@@ -53,7 +53,7 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 
 ## 文献操作核心合同
 
-任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文深读时再读取 `references/deep-reading-contract.md` 并调用 `subskills/deep-reading/`。认知神经覆盖层继续负责模态、范式、预处理、分析灵活性、反向推断和机制上限，不得降低公共合同。
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文深读时再读取 `references/deep-reading-contract.md` 并调用 `subskills/deep-reading/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`。认知神经覆盖层继续负责模态、范式、预处理、分析灵活性、反向推断、机制上限和跨模态综合，不得降低公共合同。
 
 ## 4. 本地文件命名
 

@@ -21,11 +21,11 @@ description: Local subskill under psych-literature-review-workflow for sentence/
 
 ## 执行步骤
 
-1. 拆分正文中的定义性、理论性、事实性、方法性、结论性主张。
+1. 按稳定`paragraph_id`拆分正文中的定义性、理论性、事实性、方法性和结论性主张。
 2. 每条主张按一个 `claim_id × candidate_id/report_id` 配对绑定研究家族、页码/章节/段落/表图和证据载体。
 3. 使用公共合同的 `confirmed/partial/rejected/blocked`、`claim_ceiling`、`construct_match`、`estimand_level`、`result_direction` 和 Reviewer 状态。
-4. 对 rejected、blocked、单独 partial、超表述上限或 Reviewer B 未通过的主张提出删除、降级、补证据、复核或重写建议。
-5. 核查正文引用与参考文献一致性。
+4. 核查每段的主张、跨研究证据、推理桥梁、反证处理和推进功能；对 rejected、blocked、单独 partial、缺少warrant/反证处理、超表述上限或 Reviewer B 未通过项提出动作。
+5. 核查正文引用与参考文献一致性，以及同一研究多报告、原始/二手来源角色和独立证据计数。
 
 ## 输出文件
 

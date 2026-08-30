@@ -1,6 +1,6 @@
 # 综述正文大纲模板 / Review Outline
 
-> 使用前先确定目标风格：中文核心综述 / 外文 Q1 review 预备稿 / 双轨输出。每个正文段落建议加稳定编号，如 `P001`，方便后续生成段落—来源对应矩阵。
+> 使用前先确定综述类型、目标期刊与风格：中文核心综述 / 外文 Q1 review 预备稿 / 双轨输出。每个正文段落加稳定编号，如 `P001`，并绑定主张表中的`claim_id`。
 
 ## A. 中文核心综述轨道
 
@@ -19,7 +19,7 @@
 
 ### 关键词
 
-REM sleep；emotional memory；memory consolidation；affective neuroscience；EEG/ERP；fMRI；心理学综述
+{{核心心理过程}}；{{目标机制}}；{{任务/范式}}；{{神经/生理模态}}；{{人群}}；认知神经科学综述
 
 ### 1. 引言
 
@@ -30,52 +30,50 @@ REM sleep；emotional memory；memory consolidation；affective neuroscience；E
 
 ### 2. 核心概念与理论框架
 
-- REM sleep / 快速眼动睡眠
-- emotional memory / 情绪记忆
-- memory consolidation / 记忆巩固
-- fear extinction / 恐惧消退
-- 睡眠依赖性记忆巩固模型
-- 杏仁核—海马—前额叶网络模型
+- 核心心理构念与相邻构念的边界
+- 行为任务与测量指标
+- 候选心理过程、时间过程与理论模型
+- 候选脑区、网络、成分或生理系统
+- 理论中的可证伪机制链与替代模型
 
 ### 3. 行为研究证据
 
-- 记忆准确率、反应时、再认/回忆、d′、bias
-- 正性、负性、中性材料差异
-- 睡眠操控和任务差异
+- 主要行为结局、效应量与不确定性
+- 任务、刺激、条件和时间点差异
+- 操纵、对照和人群差异
 - 行为证据中的一致结果与分歧结果
 
 ### 4. 神经机制证据
 
-- PSG 与 REM 指标
-- EEG/ERP 指标
-- fMRI 与脑网络证据
-- 行为—脑电—影像证据整合
+- 适用的EEG/ERP、MEG、fMRI、fNIRS、PSG、眼动或心理生理指标
+- 采集、预处理、分析与校正差异
+- 行为—主观—神经/生理证据整合
 - 直接证据、间接证据和推断性解释的区分
 
 ### 5. 影响因素与边界条件
 
-- 年龄与发展阶段
-- 临床状态与睡眠状态
-- 材料类型与任务范式
-- 整夜睡眠、小睡、睡眠剥夺和实验室测量差异
-- 文化与语言因素
+- 年龄、发展阶段与临床状态
+- 性别/性别测量、文化与语言
+- 材料、任务、对照和时间结构
+- 模态、设备、采集与预处理
+- 样本、情境和外部效度
 
 ### 6. 现有研究不足
 
-- 概念边界不清
-- 任务范式异质性
-- REM 指标测量不一致
-- 样本量和可重复性问题
-- 神经机制解释过度
-- 中英文研究整合不足
+- 概念和估计对象不清
+- 任务、模态与分析异质性
+- 采集/预处理/排除/多重比较报告不足
+- 样本量、数据泄漏和可重复性问题
+- 反向推断或机制解释过度
+- 研究家族和语言/地区覆盖不足
 
 ### 7. 未来研究方向
 
-- 更清晰的纵向和实验设计
-- 多模态指标整合
-- 临床与高风险群体研究
-- 预注册、开放数据与可重复性
-- 中文语境和本土样本研究
+- 更能区分候选机制的实验、纵向或干预设计
+- 预注册的多模态、交叉验证和独立重复
+- 关键边界人群与情境
+- 开放数据、代码、材料与可重复性
+- 由现有证据缺口触发的可检验预测
 
 ### 8. 结论
 
@@ -97,7 +95,7 @@ REM sleep；emotional memory；memory consolidation；affective neuroscience；E
 
 ### Keywords
 
-REM sleep; emotional memory; memory consolidation; affective neuroscience; polysomnography; EEG; fMRI
+{{core process}}; {{candidate mechanism}}; {{task/paradigm}}; {{modality}}; {{population}}; cognitive neuroscience review
 
 ### 1. Introduction
 
@@ -114,35 +112,34 @@ REM sleep; emotional memory; memory consolidation; affective neuroscience; polys
 
 ### 3. Conceptual and Theoretical Background
 
-- REM sleep and sleep architecture
-- Emotional memory and memory consolidation
-- Affective neuroscience framework
+- Construct and estimand boundaries
+- Behavioral tasks and measurement models
+- Competing process and neural mechanism accounts
 
 ### 4. Behavioral Evidence
 
-- Recognition and recall
-- Valence-specific memory
-- Task and timing differences
+- Primary behavioral outcomes
+- Task, condition, population and timing differences
+- Supporting, null, opposite and mixed evidence
 
 ### 5. Neural and Physiological Mechanisms
 
-- PSG and REM physiology
-- EEG/ERP evidence
-- fMRI and brain-network evidence
+- Modality-specific neural and physiological evidence
+- Acquisition, preprocessing and analysis comparability
 - Cross-method convergence and divergence
 
 ### 6. Moderators and Boundary Conditions
 
-- Developmental stage
-- Clinical status
-- Task and material characteristics
-- Nap, overnight sleep, and sleep-deprivation designs
+- Developmental and clinical context
+- Task, stimulus, comparison and timing
+- Modality, acquisition, preprocessing and analysis
+- Population and external validity
 
 ### 7. Methodological Limitations and Open Questions
 
-- Task heterogeneity
-- REM measurement inconsistency
-- Small-sample neuroimaging limitations
+- Construct, task and modality heterogeneity
+- Incomplete acquisition/preprocessing/statistical reporting
+- Sample size, flexibility, leakage and reproducibility
 - Reverse inference and causal overstatement
 
 ### 8. Integrative Framework
