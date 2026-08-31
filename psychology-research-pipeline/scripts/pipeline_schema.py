@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import csv
 import json
 from pathlib import Path
 
@@ -10,6 +11,16 @@ from pathlib import Path
 SCHEMA_VERSION = 2
 PLACEHOLDER = "__REQUIRED__"
 RUN_ROOT = "实证论文运行"
+
+
+def _template_header(template_name: str, fallback: list[str]) -> list[str]:
+    """Return the maintained worksheet header used when creating a new run."""
+    template = Path(__file__).resolve().parents[1] / "templates" / template_name
+    if not template.is_file():
+        return fallback
+    with template.open("r", encoding="utf-8-sig", newline="") as handle:
+        header = next(csv.reader(handle), [])
+    return header or fallback
 
 STAGES = [
     {"id": "00_scope", "dir": "00_项目定标", "required": [
@@ -63,14 +74,60 @@ CSV_HEADERS = {
     "Zotero入库清单_zotero_manifest.csv": ["candidate_id", "zotero_item_key", "title", "year", "doi", "collection", "attachment_key", "attachment_status", "validation_status", "source_url", "notes"],
     "PDF全文清单_pdf_manifest.csv": ["candidate_id", "file_name", "sha256", "page_count", "signature_valid", "metadata_match", "status", "notes"],
     "文献筛选表_literature_screening.csv": ["candidate_id", "stage", "decision", "reason", "reviewer_basis", "full_text_available", "decided_at"],
-    "文献阅读矩阵_literature_matrix.csv": ["study_id", "candidate_id", "citation", "design", "country", "sample", "waves", "intervals", "constructs", "measures", "analysis", "main_findings", "effect_data", "limitations", "quality", "doi", "zotero_item_key", "evidence_location"],
-    "主张证据对应表_claim_evidence_map.csv": ["claim_id", "claim_text", "claim_type", "study_ids", "support_level", "contradictions", "verification_status", "manuscript_destination"],
+    "文献阅读矩阵_literature_matrix.csv": _template_header(
+        "文献阅读矩阵模板_literature_matrix.csv",
+        ["study_id", "candidate_id", "citation", "design", "country", "sample", "waves", "intervals", "constructs", "measures", "analysis", "main_findings", "effect_data", "limitations", "quality", "doi", "zotero_item_key", "evidence_location"],
+    ),
+    "主张证据对应表_claim_evidence_map.csv": _template_header(
+        "主张证据对应表模板_claim_evidence_map.csv",
+        ["claim_id", "claim_text", "claim_type", "study_ids", "support_level", "contradictions", "verification_status", "manuscript_destination"],
+    ),
     "测量工具表_measurement_table.csv": ["construct_id", "工具中文名", "工具英文名", "版本", "波次", "题项数", "维度", "计分", "反向题", "有效范围", "缺失规则", "信度", "效度", "中文版来源", "授权状态", "跨波可比", "备注"],
     "数据字典_data_dictionary.csv": ["变量名", "变量中文名", "波次", "变量角色", "数据类型", "取值范围", "缺失值编码", "计分规则", "反向计分", "所属量表", "来源", "备注"],
     "数据清理记录_cleaning_log.csv": ["change_id", "timestamp", "source_file", "record_scope", "variable", "original", "revised", "rule", "reason", "code_location", "review_status"],
     "分析偏离记录_analysis_deviation_log.csv": ["deviation_id", "timestamp", "planned", "actual", "reason", "impact", "exploratory", "manuscript_disclosure", "decision"],
-    "来源对齐表_source_alignment_table.csv": ["claim_id", "正文位置", "正文主张", "主张类型", "来源或输出", "证据位置", "支持程度", "是否过度推断", "风险等级", "处理状态", "修改建议"],
+    "来源对齐表_source_alignment_table.csv": _template_header(
+        "来源对齐表模板_source_alignment_table.csv",
+        ["claim_id", "正文位置", "正文主张", "主张类型", "来源或输出", "证据位置", "支持程度", "是否过度推断", "风险等级", "处理状态", "修改建议"],
+    ),
     "修改矩阵_revision_matrix.csv": ["comment_id", "severity", "source", "location", "comment", "response", "action", "artifact", "status", "evidence"],
+}
+
+# New runs receive the full maintained worksheets above. Existing schema-v2
+# runs may use the original compact worksheets. The gate therefore accepts one
+# complete minimum contract, rather than mixing old and new column names and
+# making both layouts impossible to satisfy.
+CSV_REQUIRED_HEADER_ALTERNATIVES = {
+    "文献阅读矩阵_literature_matrix.csv": [
+        [
+            "study_id", "candidate_id", "citation", "design", "constructs", "measures",
+            "analysis", "main_findings", "evidence_location",
+        ],
+        [
+            "study_id", "candidate_id", "citation", "design", "constructs", "measures",
+            "analysis_model", "primary_results", "fulltext_location",
+        ],
+    ],
+    "主张证据对应表_claim_evidence_map.csv": [
+        [
+            "claim_id", "claim_text", "claim_type", "study_ids", "support_level",
+            "verification_status", "manuscript_destination",
+        ],
+        [
+            "claim_id", "claim_text", "claim_type", "candidate_id", "support_status",
+            "claim_ceiling", "fulltext_location", "reviewer_status",
+        ],
+    ],
+    "来源对齐表_source_alignment_table.csv": [
+        [
+            "claim_id", "正文位置", "正文主张", "主张类型", "来源或输出", "证据位置",
+            "支持程度", "是否过度推断", "处理状态",
+        ],
+        [
+            "paragraph_id", "claim_id", "正文位置", "support_status", "claim_ceiling",
+            "reviewer_status", "验证状态",
+        ],
+    ],
 }
 
 MARKDOWN_SECTIONS = {
@@ -88,7 +145,7 @@ MARKDOWN_SECTIONS = {
     "统计分析报告_analysis_report.md": ["环境与输入", "样本和描述", "测量模型", "主要模型", "次要与探索性分析", "诊断与稳健性", "偏离"],
     "结果表格_results_tables.md": ["样本流", "描述统计", "测量模型", "主要模型", "组间检验", "稳健性"],
     "结果写作稿_results.md": ["参与者与流失", "描述与测量", "主要结果", "次要结果", "稳健性", "探索性结果与偏离"],
-    "图表计划_figure_table_plan.md": ["正文表", "正文图", "补充材料", "隐私与可访问性"],
+    "图表计划_figure_table_plan.md": ["图件合同", "正文表", "正文图", "补充材料", "图注与来源对齐", "最终尺寸、版权与可访问性", "状态与阻断"],
     "稳健性检查_robustness_checks.md": ["预设检查", "结果", "与主结论关系", "未解决风险"],
     "论文正文_manuscript.md": ["题目", "摘要", "引言", "方法", "结果", "讨论", "声明", "表图与补充材料"],
     "APA参考文献_apa_references.md": ["核验规则", "参考文献"],
@@ -127,6 +184,24 @@ def template_text(file_name: str) -> str:
         }, ensure_ascii=False, indent=2) + "\n"
     if suffix == ".bib":
         return "% 使用经核验的 Zotero/BibTeX 记录替换占位符。\n" + PLACEHOLDER + "\n"
+    if file_name == "图表计划_figure_table_plan.md":
+        return (
+            "# 图表计划\n\n"
+            "## 图件合同\n\n"
+            "| figure_id | claim_ids | 核心问题与take-home message | 来源数据或输出 | "
+            "分析单位与n | estimand与不确定性 | 变换与视觉编码 | 图注与证据位置 | "
+            "尺寸、可访问性与版权 | provenance | status |\n"
+            "|---|---|---|---|---|---|---|---|---|---|---|\n"
+            f"| {PLACEHOLDER} | {PLACEHOLDER} | {PLACEHOLDER} | {PLACEHOLDER} | "
+            f"{PLACEHOLDER} | {PLACEHOLDER} | {PLACEHOLDER} | {PLACEHOLDER} | "
+            f"{PLACEHOLDER} | {PLACEHOLDER} | planned |\n\n"
+            "## 正文表\n\n" + PLACEHOLDER + "\n\n"
+            "## 正文图\n\n" + PLACEHOLDER + "\n\n"
+            "## 补充材料\n\n" + PLACEHOLDER + "\n\n"
+            "## 图注与来源对齐\n\n" + PLACEHOLDER + "\n\n"
+            "## 最终尺寸、版权与可访问性\n\n" + PLACEHOLDER + "\n\n"
+            "## 状态与阻断\n\n" + PLACEHOLDER + "\n"
+        )
     sections = MARKDOWN_SECTIONS[file_name]
     title = Path(file_name).stem.split("_")[0]
     return "# " + title + "\n\n" + "\n\n".join(f"## {section}\n\n{PLACEHOLDER}" for section in sections) + "\n"

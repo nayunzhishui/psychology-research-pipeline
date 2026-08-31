@@ -229,6 +229,10 @@ def test_figure_contract_and_figure_entrypoints_are_synchronized() -> None:
         "通用心理学综述",
         "认知神经科学综述",
         "不设置固定图数",
+        "qa-passed",
+        "版权、再利用与图像生成",
+        "参与者`n`",
+        "森林图",
     ):
         assert marker in texts[0]
 

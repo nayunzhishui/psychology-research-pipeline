@@ -16,7 +16,8 @@ SKILL = Path(__file__).resolve().parents[1]
 SCRIPTS = SKILL / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
-from pipeline_schema import CSV_HEADERS, RUN_ROOT, SCHEMA_VERSION, STAGE_IDS, STAGES  # noqa: E402
+from pipeline_gate import validate_file  # noqa: E402
+from pipeline_schema import CSV_HEADERS, MARKDOWN_SECTIONS, RUN_ROOT, SCHEMA_VERSION, STAGE_IDS, STAGES, template_text  # noqa: E402
 
 
 class PipelineTests(unittest.TestCase):
@@ -35,6 +36,54 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual("11_review", STAGE_IDS[-1])
         self.assertTrue(all("_" in stage["dir"] for stage in STAGES))
         self.assertNotIn("01_scope", {stage["dir"] for stage in STAGES})
+
+    def test_new_runs_use_professional_literature_and_figure_contracts(self) -> None:
+        self.assertTrue({
+            "analysis_model", "primary_results", "fulltext_location",
+            "professor_briefing_status", "figure_claim_audit",
+        } <= set(CSV_HEADERS["文献阅读矩阵_literature_matrix.csv"]))
+        self.assertTrue({
+            "candidate_id", "support_status", "claim_ceiling", "reviewer_status",
+            "paragraph_function", "figure_ids",
+        } <= set(CSV_HEADERS["主张证据对应表_claim_evidence_map.csv"]))
+        self.assertEqual(
+            ["图件合同", "正文表", "正文图", "补充材料", "图注与来源对齐", "最终尺寸、版权与可访问性", "状态与阻断"],
+            MARKDOWN_SECTIONS["图表计划_figure_table_plan.md"],
+        )
+        figure_plan = template_text("图表计划_figure_table_plan.md")
+        self.assertIn("分析单位与n", figure_plan)
+        self.assertIn("provenance", figure_plan)
+        self.assertIn("planned", figure_plan)
+
+    def test_gate_accepts_complete_legacy_or_professional_literature_layout(self) -> None:
+        layouts = {
+            "文献阅读矩阵_literature_matrix.csv": [
+                "study_id", "candidate_id", "citation", "design", "country", "sample", "waves",
+                "intervals", "constructs", "measures", "analysis", "main_findings", "effect_data",
+                "limitations", "quality", "doi", "zotero_item_key", "evidence_location",
+            ],
+            "主张证据对应表_claim_evidence_map.csv": [
+                "claim_id", "claim_text", "claim_type", "study_ids", "support_level",
+                "contradictions", "verification_status", "manuscript_destination",
+            ],
+            "来源对齐表_source_alignment_table.csv": [
+                "claim_id", "正文位置", "正文主张", "主张类型", "来源或输出", "证据位置",
+                "支持程度", "是否过度推断", "风险等级", "处理状态", "修改建议",
+            ],
+        }
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for file_name, legacy_headers in layouts.items():
+                for version, headers in (
+                    ("legacy", legacy_headers),
+                    ("professional", CSV_HEADERS[file_name]),
+                ):
+                    path = root / file_name
+                    with path.open("w", encoding="utf-8", newline="") as handle:
+                        writer = csv.DictWriter(handle, fieldnames=headers)
+                        writer.writeheader()
+                        writer.writerow({header: f"{version}-verified" for header in headers})
+                    self.assertEqual([], validate_file(path), (file_name, version))
 
     def test_machine_contracts_and_project_pack_are_versioned(self) -> None:
         expected = {

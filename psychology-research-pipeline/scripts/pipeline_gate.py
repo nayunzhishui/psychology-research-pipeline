@@ -11,7 +11,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from pipeline_schema import CSV_HEADERS, PLACEHOLDER, SCHEMA_VERSION, STAGE_BY_ID, STAGE_IDS, STAGES, relative_artifacts
+from pipeline_schema import CSV_HEADERS, CSV_REQUIRED_HEADER_ALTERNATIVES, PLACEHOLDER, SCHEMA_VERSION, STAGE_BY_ID, STAGE_IDS, STAGES, relative_artifacts
 
 
 SEMANTIC_GROUPS = {
@@ -65,10 +65,16 @@ def validate_file(path: Path) -> list[str]:
         errors.append(f"too little content: {path.name}")
     elif suffix == ".csv":
         headers, rows = read_csv(path)
-        expected = set(CSV_HEADERS.get(path.name, []))
-        missing = expected - set(headers)
-        if missing:
-            errors.append(f"missing CSV columns in {path.name}: {sorted(missing)}")
+        header_set = set(headers)
+        alternatives = CSV_REQUIRED_HEADER_ALTERNATIVES.get(path.name)
+        if alternatives:
+            if not any(set(option) <= header_set for option in alternatives):
+                formatted = " OR ".join(str(sorted(option)) for option in alternatives)
+                errors.append(f"CSV columns in {path.name} match no supported contract: {formatted}")
+        else:
+            missing = set(CSV_HEADERS.get(path.name, [])) - header_set
+            if missing:
+                errors.append(f"missing CSV columns in {path.name}: {sorted(missing)}")
         if not rows:
             errors.append(f"no data rows: {path.name}")
     elif suffix == ".json":
