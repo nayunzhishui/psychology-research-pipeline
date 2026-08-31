@@ -19,6 +19,8 @@ execute:
 - 核心 claim_id / 结果输出：{{CORE_CLAIMS_AND_OUTPUTS}}
 - 反证、替代解释与禁止措辞：{{COUNTEREVIDENCE_AND_BOUNDARIES}}
 - 表图—主张映射：{{DISPLAY_CLAIM_MAP}}
+- 核心图figure contract（问题/来源输出/分析单位/n/估计量/区间/变换/图注/导出）：{{FIGURE_CONTRACTS}}
+- 反向提纲（段首—段末—图题）：{{REVERSE_OUTLINE}}
 
 # 摘要
 
@@ -39,6 +41,8 @@ execute:
 {{VERIFIED_RESULTS}}
 
 > 按研究问题报告主要、次要、探索性及零/相反/混合结果；正文不复抄整张表。
+
+> 核心图必须回到正式输出，图注独立说明分析单位、准确n、误差/区间、检验和边界；最终版面检查可读性与颜色冗余编码。
 
 # 讨论
 

@@ -17,7 +17,7 @@ description: Local subskill under psych-literature-review-workflow for sentence/
 
 ## 输入
 
-综述正文、参考文献、文献阅读矩阵、唯一主张证据对应表、PDF 全文或网页原文。开始前完整读取 `../../references/literature-operations-contract.md`。
+综述正文、参考文献、文献阅读矩阵、唯一主张证据对应表、PDF 全文或网页原文。开始前完整读取 `../../references/literature-operations-contract.md`；涉及图表时同时读取`../../references/evidence-figure-contract.md`。
 
 ## 执行步骤
 
@@ -25,7 +25,7 @@ description: Local subskill under psych-literature-review-workflow for sentence/
 2. 每条主张按一个 `claim_id × candidate_id/report_id` 配对绑定研究家族、页码/章节/段落/表图和证据载体。
 3. 使用公共合同的 `confirmed/partial/rejected/blocked`、`claim_ceiling`、`construct_match`、`estimand_level`、`result_direction` 和 Reviewer 状态。
 4. 核查每段的主张、跨研究证据、推理桥梁、反证处理和推进功能；对 rejected、blocked、单独 partial、缺少warrant/反证处理、超表述上限或 Reviewer B 未通过项提出动作。
-5. 核查正文引用与参考文献一致性，以及同一研究多报告、原始/二手来源角色和独立证据计数。
+5. 核查正文引用与参考文献一致性，以及同一研究多报告、原始/二手来源角色和独立证据计数；每张证据图、理论图或流程图按`figure_id`绑定`claim_id`、研究家族/正式记录、图注和正文首次引用。
 
 ## 输出文件
 
@@ -45,6 +45,8 @@ description: Local subskill under psych-literature-review-workflow for sentence/
 - 原文位置是否可追溯？
 - 是否存在过度推断？
 - APA 正文引用与参考文献是否一致？
+- 图内、图注、正文和提取记录是否一致，支持/零/相反/混合证据是否被忠实显示？
+- 最终版面尺寸是否可读，颜色是否有形状/线型/标签等冗余编码？
 
 ## 失败与停止条件
 

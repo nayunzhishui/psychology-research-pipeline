@@ -20,7 +20,7 @@ description: Local subskill under psychology-research-pipeline for top-journal-p
 - 论文正文、参考文献、方法设计方案、统计分析报告、来源对齐表。
 - 目标期刊或候选期刊列表。
 - 报告规范检查表、开放科学材料、数据/代码/材料可用性说明。
-- 开始前完整读取 `../../references/literature-operations-contract.md`，复用现有模拟审稿意见和唯一修改矩阵。
+- 开始前完整读取 `../../references/literature-operations-contract.md`；审查图件时同时读取`../../references/evidence-figure-contract.md`，复用现有模拟审稿意见和唯一修改矩阵。
 
 ## 执行步骤
 
@@ -28,7 +28,7 @@ description: Local subskill under psychology-research-pipeline for top-journal-p
 2. Reviewer 1、2、3在互不可见的上下文中分别审查理论贡献；设计/测量/统计/来源；主编风险/跨章节一致性/期刊适配。各报告冻结后才允许比较和综合。
 3. 若无法获得真正独立上下文，明确标记`single-reviewer-adversarial-audit`，不得冒充三位独立Reviewer或把独立审稿gate写成通过。
 4. 每个实质问题分配稳定`issue_id`、正文/输出指针、证据指针、严重度、是否阻断、影响和可验证的解决标准；不设置问题数量配额。
-5. 汇总只合并重复问题，不抹去分歧。全部问题写入同一修改矩阵，修改后复跑来源、数字、报告规范和跨章节最终审计；未解决项保持blocker，再生成作者回复草稿。
+5. 汇总只合并重复问题，不抹去分歧。全部问题写入同一修改矩阵，修改后复跑来源、数字、报告规范、图件完整性/最终尺寸和跨章节最终审计；未解决项保持blocker，再生成作者回复草稿。
 
 ## 输出文件
 
@@ -48,6 +48,8 @@ description: Local subskill under psychology-research-pipeline for top-journal-p
 - 是否核查目标期刊官网要求？
 - 是否明确标注模拟审稿性质？
 - 是否列出必须修改、建议修改和可暂缓修改的问题？
+- 每张核心图是否有必要、能独立回答问题、可回到正式输出，并在最终版面可读？
+- 图、图注、正文和source data是否一致且不存在误导性视觉编码？
 
 ## 失败与停止条件
 

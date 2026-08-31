@@ -51,6 +51,8 @@ CORE_CLAIM_FIELDS = {
     "warrant_text",
     "counterevidence_handling",
     "drafting_status",
+    "figure_ids",
+    "figure_role",
 }
 
 CORE_MATRIX_FIELDS = {
@@ -97,6 +99,10 @@ CORE_MATRIX_FIELDS = {
     "consistency_audit_status",
     "briefing_2min",
     "anticipated_professor_questions",
+    "key_figure_ids",
+    "figure_claim_audit",
+    "figure_data_traceability",
+    "figure_redraw_or_reuse_plan",
 }
 
 CORE_LEDGER_FIELDS = {
@@ -177,7 +183,9 @@ def test_deep_reading_contract_and_entrypoints_are_synchronized() -> None:
     )
     for path in report_templates:
         assert path.exists(), path
-        assert "派生视图" in path.read_text(encoding="utf-8")
+        template_text = path.read_text(encoding="utf-8")
+        assert "派生视图" in template_text
+        assert "关键图反向审计" in template_text
 
 
 def test_writing_contract_and_manuscript_entrypoints_are_synchronized() -> None:
@@ -204,6 +212,41 @@ def test_writing_contract_and_manuscript_entrypoints_are_synchronized() -> None:
         ).read_text(encoding="utf-8")
         assert "references/evidence-grounded-writing-contract.md" in main_text
         assert "evidence-grounded-writing-contract.md" in manuscript_text
+
+
+def test_figure_contract_and_figure_entrypoints_are_synchronized() -> None:
+    contracts = [
+        root / "references" / "evidence-figure-contract.md"
+        for root in SKILL_ROOTS
+    ]
+    texts = [path.read_text(encoding="utf-8") for path in contracts]
+    assert texts[0] == texts[1] == texts[2]
+    for marker in (
+        "figure_id,claim_ids,figure_question",
+        "颜色不作为唯一编码",
+        "关键图反向阅读",
+        "实证心理学",
+        "通用心理学综述",
+        "认知神经科学综述",
+        "不设置固定图数",
+    ):
+        assert marker in texts[0]
+
+    for root in SKILL_ROOTS:
+        main_text = (root / "SKILL.md").read_text(encoding="utf-8")
+        manuscript_text = (
+            root / "subskills" / "manuscript-write" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        source_text = (
+            root / "subskills" / "source-alignment" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        review_text = (
+            root / "subskills" / "submission-review" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        assert "references/evidence-figure-contract.md" in main_text
+        assert "evidence-figure-contract.md" in manuscript_text
+        assert "evidence-figure-contract.md" in source_text
+        assert "evidence-figure-contract.md" in review_text
 
 
 def test_candidate_matrix_and_claim_templates_cover_shared_contract() -> None:
@@ -251,6 +294,10 @@ def test_writing_templates_support_paragraph_level_argument_audit() -> None:
         "warrant_text",
         "counterevidence_handling",
         "reviewer_status",
+        "figure_id",
+        "figure_source_pointer",
+        "figure_caption_audit",
+        "figure_final_size_status",
     }
     for path in source_alignment_templates:
         assert required <= _header(path), path

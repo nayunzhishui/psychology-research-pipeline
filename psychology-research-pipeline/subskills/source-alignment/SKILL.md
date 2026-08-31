@@ -19,14 +19,14 @@ description: Local subskill under psychology-research-pipeline for claim-source-
 
 - 论文正文、参考文献、文献阅读矩阵、主张证据对应表。
 - 统计分析报告、原始输出、结果表格、图表和方法设计方案。
-- 开始前完整读取 `../../references/literature-operations-contract.md`，以唯一主张证据对应表为事实源。
+- 开始前完整读取 `../../references/literature-operations-contract.md`；涉及图表时同时读取`../../references/evidence-figure-contract.md`，以唯一主张证据对应表和正式分析输出为事实源。
 
 ## 执行步骤
 
 1. 按稳定`paragraph_id`拆分正文中的事实性、理论性、方法性、结果性和解释性主张。
 2. 每条文献主张按一个 `claim_id × candidate_id/report_id` 配对绑定研究家族、页码/章节/表图、证据载体和 Reviewer 状态；数据主张绑定正式输出位置。
 3. 使用公共合同的 `confirmed/partial/rejected/blocked`、`claim_ceiling`、`construct_match`、`estimand_level` 和 `result_direction`，不再维护另一套 direct/unsupported 状态体系。
-4. 核查每段的主张、证据、推理桥梁、反证处理和段落功能，以及 p 值、效应量、置信区间、样本量、模型拟合和表图数字。
+4. 核查每段的主张、证据、推理桥梁、反证处理和段落功能，以及 p 值、效应量、置信区间、样本量、模型拟合和表图数字；每张图按`figure_id`绑定`claim_id`、正式输出、分析单位、估计量、图注和正文首次引用。
 5. 对 rejected、blocked、单独 partial、缺少warrant/反证处理、措辞超过 ceiling 或 Reviewer B 未通过的主张给出删除、降级、补证据、复核或重写建议。
 6. 输出投稿前对齐审计结论。
 
@@ -48,6 +48,8 @@ description: Local subskill under psychology-research-pipeline for claim-source-
 - 每个关键主张是否有来源或数据输出支撑？
 - 文献页码/章节/表图是否可追溯？
 - 统计数字是否与输出一致？
+- 图内、图注、正文和source data是否使用相同样本量、方向、误差定义、术语与比较？
+- 最终版面尺寸是否可读，视觉编码是否符合估计对象且颜色不是唯一信息载体？
 - 讨论是否超出研究设计允许的推论？
 - APA 正文引用与参考文献是否一致？
 

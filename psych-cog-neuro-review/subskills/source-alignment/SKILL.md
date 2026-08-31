@@ -16,7 +16,7 @@ description: Local subskill under psych-cog-neuro-review for aligning cognitive 
 
 ## 输入
 
-综述正文、参考文献、文献阅读矩阵、机制矩阵、方法评价、唯一主张证据对应表、PDF 全文或网页原文。开始前完整读取 `../../references/literature-operations-contract.md`。
+综述正文、参考文献、文献阅读矩阵、机制矩阵、方法评价、唯一主张证据对应表、PDF 全文或网页原文。开始前完整读取 `../../references/literature-operations-contract.md`；涉及脑图、波形、时频图或机制图时同时读取`../../references/evidence-figure-contract.md`。
 
 ## 执行步骤
 
@@ -24,7 +24,7 @@ description: Local subskill under psych-cog-neuro-review for aligning cognitive 
 2. 每条主张按一个 `claim_id × candidate_id/report_id` 配对绑定研究家族、原文页码/表图和证据载体。
 3. 使用公共合同的 `confirmed/partial/rejected/blocked`、`claim_ceiling`、`construct_match`、`estimand_level`、`result_direction` 和 Reviewer 状态。
 4. 核查每段的机制主张、跨层证据、推理桥梁、反证处理和推进功能，以及脑区、网络、成分、睡眠阶段、眼动、NIRS和心理生理指标是否准确。
-5. 检查机制措辞是否超过设计、模态和分析允许的 ceiling；对反向推断、跨模态错配、缺少warrant/反证处理、rejected/blocked、单独 partial 或 Reviewer B 未通过项给出动作。
+5. 检查机制措辞是否超过设计、模态和分析允许的 ceiling；每张图按`figure_id`绑定`claim_id`、研究家族/来源结果、模态参数、阈值/颜色尺度、图注和正文首次引用；对反向推断、跨模态错配、缺少warrant/反证处理、rejected/blocked、单独 partial 或 Reviewer B 未通过项给出动作。
 
 ## 输出文件
 
@@ -44,6 +44,8 @@ description: Local subskill under psych-cog-neuro-review for aligning cognitive 
 - 原文位置是否可追溯？
 - 是否存在过度推断？
 - 指标名称和结果方向是否准确？
+- 脑图/波形/时频图的空间、阈值、时间窗/频带、极性、颜色尺度和`n`是否与来源及图注一致？
+- 示意图是否明确标记为illustrative且未冒充实证定位或因果机制？
 
 ## 失败与停止条件
 

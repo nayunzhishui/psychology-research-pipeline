@@ -16,7 +16,7 @@ description: Local subskill under psych-cog-neuro-review for top-journal-prep si
 
 ## 输入
 
-综述正文、参考文献、综述协议、检索记录、筛选记录、机制矩阵、方法评价、预处理透明性评价、来源对齐表、目标期刊或候选期刊列表。开始前完整读取 `../../references/literature-operations-contract.md`，复用现有审稿意见和唯一修改矩阵。
+综述正文、参考文献、综述协议、检索记录、筛选记录、机制矩阵、方法评价、预处理透明性评价、来源对齐表、目标期刊或候选期刊列表。开始前完整读取 `../../references/literature-operations-contract.md`；审查脑图、波形、时频图或机制图时同时读取`../../references/evidence-figure-contract.md`，复用现有审稿意见和唯一修改矩阵。
 
 ## 执行步骤
 
@@ -24,7 +24,7 @@ description: Local subskill under psych-cog-neuro-review for top-journal-prep si
 2. Reviewer 1、2、3在互不可见的上下文中分别审查机制贡献；检索/家族/范式/模态/预处理/统计/来源；主编风险/跨章节一致性/开放科学/期刊适配。各报告冻结后才允许比较和综合。
 3. 若无法获得真正独立上下文，明确标记`single-reviewer-adversarial-audit`，不得冒充三位独立Reviewer或把独立审稿gate写成通过。
 4. 每个实质问题给稳定`issue_id`、正文/机制证据指针、严重度、是否阻断、影响和可验证的解决标准；不设置问题数量配额。
-5. 汇总保留Reviewer分歧并写入同一修改矩阵；修改后复跑机制来源、模态方法、推断边界和跨章节最终审计，未解决项保持blocker。
+5. 汇总保留Reviewer分歧并写入同一修改矩阵；修改后复跑机制来源、模态方法、推断边界、图像完整性/最终尺寸和跨章节最终审计，未解决项保持blocker。
 
 ## 输出文件
 
@@ -43,6 +43,8 @@ description: Local subskill under psych-cog-neuro-review for top-journal-prep si
 - 是否核查目标期刊官网要求？
 - 是否明确标注模拟审稿性质？
 - 是否区分必须修改、建议修改和可暂缓修改？
+- 脑图/波形/时频图是否完整报告空间、阈值、时间窗/频带、极性、颜色尺度、`n`和处理步骤？
+- 机制图是否区分已支持、条件性、冲突和未知，且未以视觉确定性放大反向推断？
 
 ## 失败与停止条件
 

@@ -30,7 +30,7 @@
 
 ### 第二轮：方法、数据与结果核验
 
-阅读样本与程序、测量、数据来源、清理与排除、缺失与失访、协变量/聚类、统计模型与估计对象、结果、表图、附录和补充材料。记录主要、次要、零、相反和混合结果，效应估计、不确定性、模型诊断、稳健性和准确PDF位置。
+阅读样本与程序、测量、数据来源、清理与排除、缺失与失访、协变量/聚类、统计模型与估计对象、结果、表图、附录和补充材料。记录主要、次要、零、相反和混合结果，效应估计、不确定性、模型诊断、稳健性和准确PDF位置。对承担核心结论的表图执行`references/evidence-figure-contract.md`的关键图反向阅读：重建其问题、分析单位、样本量、视觉编码、估计量、区间、排除/变换、正文—图注一致性及作者解释上限。
 
 ### 第三轮：批判复核与写作转化
 
@@ -58,7 +58,7 @@
 
 ### 结果
 
-记录主要、次要、零、相反和混合结果；量化主张尽量记录估计值、SE/95% CI/精确p、样本量、模型拟合/诊断、稳健性及表图/补充材料位置。不得只摘显著结果。
+记录主要、次要、零、相反和混合结果；量化主张尽量记录估计值、SE/95% CI/精确p、样本量、模型拟合/诊断、稳健性及表图/补充材料位置。逐张判断关键图实际显示什么、没有显示什么、图注是否足以解释样本/误差/检验、图与正文数字是否一致、是否存在截轴/选择性面板/缺失连线/不当颜色尺度。不得只摘显著结果或只写“见图X”。
 
 ### 讨论
 
@@ -91,12 +91,19 @@ reader_inference,source_package_status,consistency_audit_status,
 briefing_2min,anticipated_professor_questions
 ```
 
+承担核心结论的图还应记录：
+
+```text
+key_figure_ids,figure_claim_audit,figure_data_traceability,
+figure_redraw_or_reuse_plan
+```
+
 章节状态沿用`not-started/in-progress/complete/blocked/not-applicable`。旧“六遍”或“三轮完成”只写入`legacy_reading_status`，迁移后默认`professor_briefing_status=needs-section-audit`，不得自动升级。
 
 只有满足以下条件，`professor_briefing_status`才能为`ready`：
 
 1. 与用途相关的七章节状态均为`complete`或有可解释的`not-applicable`；
-2. 关键事实、数字和判断具有PDF页码及尽可能具体的表图/补充材料位置；
+2. 关键事实、数字和判断具有PDF页码及尽可能具体的表图/补充材料位置，核心图已完成问题—数据—估计—图注—结论反核；
 3. 零、相反、混合结果和替代解释未被删除；
 4. 三表身份一致，研究家族状态明确或显式`family-uncertain-<candidate_id>`；
 5. 准备进入正文的关键主张达到`agreed`或`adjudicated`；
@@ -107,7 +114,7 @@ briefing_2min,anticipated_professor_questions
 ## 6. 三表字段映射
 
 - 摘要、引言、方法、数据、结果、讨论的论文级事实和章节状态进入矩阵。
-- 论文类型、适用报告规范、作者主张、结果事实、读者推断、全文包和跨章节一致性进入矩阵。
+- 论文类型、适用报告规范、作者主张、结果事实、读者推断、全文包、跨章节一致性和关键图反向审计进入矩阵。
 - 题录、PDF、勘误/撤稿、家族和复核来源进入账本。
 - 一句话结论、谨慎转述、并列/对照来源、段落功能、禁止措辞、证据位置和Reviewer状态进入主张表。
 - 同一主张多来源或同一论文多主张均拆为一个`claim_id × candidate_id/report_id`一行。

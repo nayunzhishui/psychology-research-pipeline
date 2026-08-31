@@ -40,11 +40,13 @@
 
 ## 7. 图表计划
 
-| figure_table_id | 类型 | 标题 | 输入文件 | 主要信息 | 状态 |
-|---|---|---|---|---|---|
-| T1 | 表格 | 核心研究特征表 | literature_matrix.csv | 样本、设计、任务、结果 | planned |
-| T2 | 表格 | 神经机制证据矩阵 | neural_mechanism_matrix.csv | 脑区/网络/指标/结果 | planned |
-| F1 | 图 | {{核心机制整合模型}} | claim_evidence_map.csv | 已支持、条件性、冲突与未知路径及边界条件 | planned |
+| figure_table_id | 类型 | figure_question / take_home_message | claim_ids | 来源数据或记录 | 分析单位与n | 估计量/不确定性或证据状态 | 面板/图注/无障碍与导出 | provenance_class | 状态 |
+|---|---|---|---|---|---|---|---|---|---|
+| T1 | 表格 | 核心研究在样本、设计、任务和结果上如何分布 |  | literature_matrix.csv | study family | not-applicable | 自足表注；不重复正文 | synthesized | planned |
+| T2 | 表格 | 哪些机制证据支持、冲突或未知 |  | neural_mechanism_matrix.csv | study family | 支持/零/相反/混合 | 标明模态与方法边界 | synthesized | planned |
+| F1 | 机制图 | {{核心机制问题与一句话结论}} |  | claim_evidence_map.csv | study family | 已支持/条件性/冲突/未知 | 线型+标签冗余编码；图注列来源与边界；矢量导出 | illustrative | planned |
+
+脑图、波形或时频图另须记录空间/电极、阈值与校正、时间窗/频带、基线、极性、颜色尺度、排除/变换和source data；示意图不得冒充实证定位。
 
 ## 8. 段落 ID 与引用策略
 

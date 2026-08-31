@@ -13,6 +13,7 @@ CONTRACTS = (
     "literature-operations-contract.md",
     "deep-reading-contract.md",
     "evidence-grounded-writing-contract.md",
+    "evidence-figure-contract.md",
 )
 
 
