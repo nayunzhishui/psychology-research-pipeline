@@ -30,6 +30,7 @@ description: Local subskill for close reading of one level-3 or level-4 cognitiv
    - 核对候选编号、阅读层级、研究家族；
    - 核对 PDF 身份；
    - 项目还没有知识库的，先按 `../knowledge-vault/SKILL.md` 的“第一次建库”初始化，只做一次；
+   - 证据提纲还没有骨架的，先按 `../../references/deep-reading-contract.md` 第 7 节建骨架，标“初稿”，请用户确认；
    - 没有全文的，标“受阻”，停在这一步。
 2. **第一轮：定位。** 读题录、摘要、引言、讨论、结论和参考文献，边读边记“事实 + 页码”。
 3. **第二轮：方法、数据与结果。**

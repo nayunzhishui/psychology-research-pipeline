@@ -157,10 +157,10 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 | 02 | 正式检索 | `检索式记录_queries.md`, `检索记录_search_log.csv`, `候选文献表_candidate_records.csv`, `检索饱和记录_search_saturation_log.csv` |
 | 03 | Zotero/全文获取 | `Zotero入库清单_zotero_manifest.csv`, `PDF全文清单_pdf_manifest.csv`, `缺PDF下载队列_freepaper.csv`, `未能正常下载PDF清单.csv`, `全文获取报告_acquisition_report.md` |
 | 04 | 文献筛选 | `文献筛选表_literature_screening.csv`, `相关性评级表_relevance_ratings.csv`, `排除理由登记表_exclusion_reason_register.csv` |
-| 05 | 精读与阅读矩阵 | 阅读笔记（知识库 `文献/`）, `文献阅读矩阵_literature_matrix.csv` 及脚本生成的阅读页 `.xlsx`, `证据覆盖台账_evidence_ledger.csv`, `质量评价表_quality_appraisal.csv`, 证据提纲中挂上的证据 |
+| 05 | 精读与阅读矩阵 | 阅读笔记（知识库 `文献/`）, `文献阅读矩阵_literature_matrix.csv` 及脚本生成的阅读页 `.xlsx`, `证据覆盖台账_evidence_ledger.csv`, `质量评价表_quality_appraisal.csv`, 证据提纲中挂上的证据（提纲骨架在第一次精读前建好，见 `references/deep-reading-contract.md` 第 7 节） |
 | 06 | 证据综合 | `证据综合备忘录_synthesis_memo.md`, `矛盾与空白登记表_contradiction_gap_register.csv` |
 | 07 | 文献星图 | `文献星图_literature_star_map.html`, `星图权重表_star_map_weights.csv`, `星图说明_star_map_notes.md` |
-| 08 | 综述框架 | `综述框架_review_outline.md`, 证据提纲（每章一个 `第N章 证据提纲.md`，按章、节、段、主张排；导出 `证据提纲总表.xlsx` 和 `主张证据对应表_claim_evidence_map.csv`）, `图表计划_figure_table_plan.md` |
+| 08 | 综述框架 | `综述框架_review_outline.md`, 证据提纲定稿（骨架在精读前已建，这里按证据修订主张和段落；每章一个 `第N章 证据提纲.md`，按章、节、段、主张排；导出 `证据提纲总表.xlsx` 和 `主张证据对应表_claim_evidence_map.csv`）, `图表计划_figure_table_plan.md` |
 | 09 | 综述正文 | `综述正文_manuscript.md`, `综述正文_manuscript.docx`, `APA参考文献_apa_references.md` |
 | 10 | 引用对齐 | `来源对齐表_source_alignment_table.csv`, `未支持主张清单_unsupported_claims.md`, `引用风险报告_citation_risk_report.md` |
 | 11 | 模拟投稿审稿 | `模拟审稿意见_simulated_reviews.md`, `修改矩阵_revision_matrix.csv`, `作者回复草稿_response_to_reviewers.md` |

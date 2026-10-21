@@ -158,8 +158,8 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 | 02 | 证据检索 | `检索式记录_queries.md`, `数据库检索记录_database_search_log.csv`, `候选文献表_candidate_records.csv` |
 | 03 | Zotero/全文获取 | `Zotero入库清单_zotero_manifest.csv`, `PDF全文清单_pdf_manifest.csv`, `缺PDF下载队列_freepaper.csv`, `未能正常下载PDF清单.csv`, `全文获取报告_acquisition_report.md` |
 | 04 | 分类与筛查 | `文献筛选表_literature_screening.csv`, `相关性评级表_relevance_ratings.csv` |
-| 05 | 精读与证据矩阵 | 阅读笔记（知识库 `文献/`）, `文献阅读矩阵_literature_matrix.csv` 及脚本生成的阅读页 `.xlsx`, `机制矩阵_neural_mechanism_matrix.csv`, `质量评价表_quality_appraisal.csv` |
-| 06 | 机制模型 | `机制模型说明_mechanism_model.md`, 证据提纲（每章一个 `第N章 证据提纲.md`；导出 `证据提纲总表.xlsx` 和 `主张证据对应表_claim_evidence_map.csv`） |
+| 05 | 精读与证据矩阵 | 阅读笔记（知识库 `文献/`）, `文献阅读矩阵_literature_matrix.csv` 及脚本生成的阅读页 `.xlsx`, `机制矩阵_neural_mechanism_matrix.csv`, `质量评价表_quality_appraisal.csv`, 证据提纲中挂上的证据（提纲骨架在第一次精读前建好，见 `references/deep-reading-contract.md` 第 7 节） |
+| 06 | 机制模型 | `机制模型说明_mechanism_model.md`, 证据提纲定稿（骨架在精读前已建，这里按证据修订；每章一个 `第N章 证据提纲.md`；导出 `证据提纲总表.xlsx` 和 `主张证据对应表_claim_evidence_map.csv`） |
 | 07 | 范式与方法评价 | `实验范式评价_paradigm_evaluation.md`, `神经生理方法评价_neuro_methods_evaluation.md` |
 | 08 | 预处理与分析评价 | `预处理透明性评价_preprocessing_transparency.md`, `分析方法评价_analysis_methods_evaluation.md` |
 | 09 | 正文写作 | `综述正文_manuscript.md`, `综述正文_manuscript.docx`, `APA参考文献_apa_references.md` |
