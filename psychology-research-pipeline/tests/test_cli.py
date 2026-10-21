@@ -477,8 +477,14 @@ class PipelineCliTests(unittest.TestCase):
             self.assertIn("RI_conflict", model_text)
             self.assertIn("RI_conflict ~~ 0*w_depression_T1", model_text)
             self.assertIn("RI_conflict ~~ 0*w_nssi_T3", model_text)
+            self.assertIn('lavaan::lavInspect(fit_riclpm, "converged")', model_text)
+            self.assertIn("lavaan::parameterEstimates", model_text)
+            self.assertIn("data.frame(metric = names(fit_values), value = unname(fit_values))", model_text)
             self.assertIn("group.equal", Path(generated["code_files"][3]).read_text(encoding="utf-8"))
-            self.assertIn("zero-heavy", Path(generated["code_files"][4]).read_text(encoding="utf-8"))
+            distribution_text = Path(generated["code_files"][4]).read_text(encoding="utf-8")
+            self.assertIn("zero-heavy", distribution_text)
+            self.assertIn("dplyr::mutate(dat", distribution_text)
+            self.assertNotIn("%>%", distribution_text)
 
             if os.name == "nt":
                 fake_rscript = project / "fake-rscript.cmd"
@@ -703,6 +709,7 @@ class PipelineCliTests(unittest.TestCase):
             self.assertIn("scalar_model", measurement)
             self.assertIn("delta_cfi", measurement)
             self.assertIn("x1_t1 ~~ x1_t2", measurement)
+            self.assertIn("lavaan::fitMeasures", measurement)
 
     def test_verified_model_output_becomes_machine_readable_results(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

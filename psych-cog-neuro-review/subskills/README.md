@@ -15,14 +15,15 @@
 2. `evidence-search`：认知神经科学理论、范式、指标和实证证据检索。
 3. `zotero-ingest`：Zotero 入库和 PDF/题录核验。
 4. `literature-screen`：认知神经科学文献分类和评级。
-5. `deep-reading`：唯一逐篇全文提取入口，完成三轮七章节及神经科学覆盖层审计。
+5. `deep-reading`：唯一逐篇精读入口：三轮阅读、七章节和神经科学覆盖层检查，写中文阅读笔记、填矩阵、把证据挂进证据提纲。
 6. `paradigm-design`：跨研究范式比较和质量评价。
 7. `neuro-methods-design`：跨研究神经/生理方法评价。
 8. `neuro-data-analysis`：跨研究预处理与分析透明性评价。
 9. `mechanism-synthesis`：消费已深读事实，完成行为—神经/生理机制整合。
 10. `source-alignment`：复核机制主张与原文证据，不重新提取全文。
-11. `manuscript-write`：消费通过gate的三表事实和派生阅读总结。
+11. `manuscript-write`：逐段对照证据提纲，消费阅读笔记和通过 gate 的三表事实。
 12. `submission-review`：顶刊预备强度的模拟综述审稿。
+13. `knowledge-vault`：Obsidian 知识库：建库、概念卡、双链和激活扩散。
 
 ## 统一结构要求
 

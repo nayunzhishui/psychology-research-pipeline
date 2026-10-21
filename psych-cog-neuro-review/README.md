@@ -81,7 +81,9 @@ psych-cog-neuro-review/
 │   ├── literature_matrix.csv
 │   ├── neural_mechanism_matrix.csv
 │   ├── quality_appraisal.csv
-│   ├── reading_card.md
+│   ├── reading_card.md          阅读笔记模板（中文正文，放进知识库 文献/）
+│   ├── concept_card.md          概念卡模板（知识库节点）
+│   ├── evidence_outline.md      证据提纲模板（按章、节、段、主张）
 │   ├── prewriting_synthesis_plan.md
 │   ├── evidence_gap_register.csv
 │   ├── claim_evidence_map.csv

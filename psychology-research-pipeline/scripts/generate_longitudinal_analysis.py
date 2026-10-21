@@ -216,7 +216,7 @@ fit_sex_configural <- lavaan::cfa(configural_model, data = dat, group = "{group}
 fit_sex_metric <- lavaan::cfa(metric_model, data = dat, group = "{group}", estimator = "{estimator}", missing = "{missing}", std.lv = TRUE)
 fit_sex_scalar <- lavaan::cfa(scalar_model, data = dat, group = "{group}", estimator = "{estimator}", missing = "{missing}", std.lv = TRUE)
 sex_fits <- list(configural = fit_sex_configural, metric = fit_sex_metric, scalar = fit_sex_scalar)
-sex_fit_table <- do.call(rbind, lapply(names(sex_fits), function(name) cbind(model = name, as.data.frame(t(fitMeasures(sex_fits[[name]], c("cfi", "rmsea", "srmr")))))))
+sex_fit_table <- do.call(rbind, lapply(names(sex_fits), function(name) cbind(model = name, as.data.frame(t(lavaan::fitMeasures(sex_fits[[name]], c("cfi", "rmsea", "srmr")))))))
 sex_fit_table$delta_cfi <- c(NA, diff(sex_fit_table$cfi))
 sex_fit_table$delta_rmsea <- c(NA, diff(sex_fit_table$rmsea))
 sex_fit_table$delta_srmr <- c(NA, diff(sex_fit_table$srmr))
@@ -268,7 +268,7 @@ fit_configural <- lavaan::cfa(configural_model, data = dat, estimator = "{estima
 fit_metric <- lavaan::cfa(metric_model, data = dat, estimator = "{estimator}", missing = "{missing}", std.lv = TRUE)
 fit_scalar <- lavaan::cfa(scalar_model, data = dat, estimator = "{estimator}", missing = "{missing}", std.lv = TRUE)
 fits <- list(configural = fit_configural, metric = fit_metric, scalar = fit_scalar)
-fit_table <- do.call(rbind, lapply(names(fits), function(name) cbind(model = name, as.data.frame(t(fitMeasures(fits[[name]], c("cfi", "rmsea", "srmr")))))))
+fit_table <- do.call(rbind, lapply(names(fits), function(name) cbind(model = name, as.data.frame(t(lavaan::fitMeasures(fits[[name]], c("cfi", "rmsea", "srmr")))))))
 fit_table$delta_cfi <- c(NA, diff(fit_table$cfi))
 fit_table$delta_rmsea <- c(NA, diff(fit_table$rmsea))
 write.csv(fit_table, "../measurement_invariance_fit.csv", row.names = FALSE)
@@ -298,10 +298,11 @@ riclpm_model <- '
 {model}
 '
 fit_riclpm <- lavaan::sem(riclpm_model, data = dat, estimator = "{estimator}", missing = "{missing}"{cluster_arg})
-if (!lavInspect(fit_riclpm, "converged")) stop("RI-CLPM did not converge")
-if (any(lavInspect(fit_riclpm, "post.check") == FALSE)) stop("RI-CLPM post-estimation check failed")
-write.csv(parameterEstimates(fit_riclpm, standardized = TRUE, ci = TRUE), "../ri_clpm_parameters.csv", row.names = FALSE)
-write.csv(as.data.frame(t(fitMeasures(fit_riclpm))), "../ri_clpm_fit.csv", row.names = FALSE)
+if (!lavaan::lavInspect(fit_riclpm, "converged")) stop("RI-CLPM did not converge")
+if (any(lavaan::lavInspect(fit_riclpm, "post.check") == FALSE)) stop("RI-CLPM post-estimation check failed")
+write.csv(lavaan::parameterEstimates(fit_riclpm, standardized = TRUE, ci = TRUE), "../ri_clpm_parameters.csv", row.names = FALSE)
+fit_values <- lavaan::fitMeasures(fit_riclpm)
+write.csv(data.frame(metric = names(fit_values), value = unname(fit_values)), "../ri_clpm_fit.csv", row.names = FALSE)
 saveRDS(fit_riclpm, "../ri_clpm_fit.rds")
 '''
     if group:
@@ -362,7 +363,7 @@ jsonlite::write_json(list(
 # Generate occurrence and positive-part variables for preregistered two-part sensitivity analyses.
 zero_heavy <- c({', '.join(json.dumps(name) for name in zero_constructs)})
 ''' + "\n".join(
-        f'dat <- dat %>% mutate({name}_any_{wave} = as.integer({config["variables"][wave]} > 0), {name}_positive_{wave} = ifelse({config["variables"][wave]} > 0, {config["variables"][wave]}, NA_real_))'
+        f'dat <- dplyr::mutate(dat, {name}_any_{wave} = as.integer({config["variables"][wave]} > 0), {name}_positive_{wave} = ifelse({config["variables"][wave]} > 0, {config["variables"][wave]}, NA_real_))'
         for name, config in spec["constructs"].items() if name in zero_constructs for wave in spec["waves"]
     ) + '''
 binary_fits <- list()
@@ -399,9 +400,10 @@ dat_school <- cbind(dat, school_matrix)
 school_terms <- vapply(c({', '.join(json.dumps(name) for name in construct_vars)}), function(variable) paste(variable, "~", paste(colnames(school_matrix), collapse = " + ")), character(1))
 school_model <- paste(riclpm_model, paste(school_terms, collapse = "\\n"), sep = "\\n")
 fit_school <- lavaan::sem(school_model, data = dat_school, estimator = "{estimator}", missing = "{missing}")
-if (!lavInspect(fit_school, "converged")) stop("School fixed-effect sensitivity model did not converge")
-write.csv(parameterEstimates(fit_school, standardized = TRUE, ci = TRUE), "../school_fixed_effect_parameters.csv", row.names = FALSE)
-write.csv(as.data.frame(t(fitMeasures(fit_school))), "../school_fixed_effect_fit.csv", row.names = FALSE)
+if (!lavaan::lavInspect(fit_school, "converged")) stop("School fixed-effect sensitivity model did not converge")
+write.csv(lavaan::parameterEstimates(fit_school, standardized = TRUE, ci = TRUE), "../school_fixed_effect_parameters.csv", row.names = FALSE)
+fit_values <- lavaan::fitMeasures(fit_school)
+write.csv(data.frame(metric = names(fit_values), value = unname(fit_values)), "../school_fixed_effect_fit.csv", row.names = FALSE)
 '''
     else:
         fixed_effect_code = "# No fixed-effect sensitivity variable configured.\n"

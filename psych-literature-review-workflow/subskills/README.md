@@ -15,13 +15,14 @@
 2. `evidence-search`：正式综述检索和饱和停止日志。
 3. `zotero-ingest`：Chrome + Zotero Connector 入库。
 4. `literature-screen`：分类、纳排和 1–4 级相关性评级。
-5. `literature-matrix`：唯一逐篇深读入口，负责三轮七章节审计、三表入账和教授汇报准备。
-6. `star-map`：基于阅读矩阵和激活扩散权重制作 HTML 文献星图。
+5. `literature-matrix`：唯一逐篇精读入口：三轮阅读、七章节检查，写中文阅读笔记、填阅读矩阵、把证据挂进证据提纲。
+6. `star-map`：基于阅读矩阵和知识库的激活扩散边表制作 HTML 文献星图。
 7. `source-alignment`：复核正文—参考文献—原文证据对齐，不重新提取全文。
-8. `manuscript-write`：消费通过gate的三表事实和派生阅读总结，完成APA综述正文写作。
+8. `manuscript-write`：逐段对照证据提纲，消费阅读笔记和通过 gate 的三表事实，完成APA综述正文写作。
 9. `submission-review`：顶刊预备强度的模拟综述审稿。
 10. `mini-review`：早期小综述或课程小综述。
 11. `old-workflow-migration`：旧版流程迁移和兼容，不作为第四个主 skill。
+12. `knowledge-vault`：Obsidian 知识库：建库、概念卡、双链和激活扩散。
 
 ## 统一结构要求
 

@@ -20,9 +20,19 @@ description: End-to-end, Chinese-first workflow for auditable empirical psycholo
 - 先建不可变原始来源与证据账本，再建可重建 RAG 索引；检索命中不等于可靠证据。
 - 遇到关键阻断条件，生成 `停止原因与补救清单_stop_reason_and_fix.md`，不得生成“可投稿”结论。
 
+## 给人看的产出
+
+- 给人读的东西一律中文，按文章结构排，先结论后细节，能点开原文：
+  - 阅读笔记：读完 PDF 直接写成段落，每个数字都带可点开的 PDF 页码，放在 Obsidian 知识库里；
+  - 阅读矩阵：另有脚本生成的阅读页，前几列给人看，点一下就能打开笔记和 PDF；
+  - 证据提纲：主张和证据按引言、方法、结果、讨论，一段一段从上往下写。
+- 知识库边读边长：第一次精读时初始化；之后每读完一篇，这篇涉及的概念、工具、结局（或变量）、方法和样本，库里没有的建卡，已有的补上关联和证据；每批跑一次激活扩散。
+- 表格的数据列沿用英文键名，供脚本和门禁使用；人看的视图由脚本转成中文。
+- 项目自己写了规则（AGENTS.md、字段说明、模板）时，以项目为准。
+
 ## 文献操作核心合同
 
-任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法选型或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文深读时再读取 `references/deep-reading-contract.md` 并调用 `subskills/deep-reading/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`；读取论文关键图、规划/重绘图表、写图注或审计最终图件时再读取 `references/evidence-figure-contract.md`。公共合同规定检索路线、历轮题录差集、父条目与附件分离、研究家族、三表、Reviewer B、教授汇报级阅读、证据约束写作和可追溯出图；实证覆盖层只能增加估计对象、测量、数据和分析门禁。
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法选型或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文精读时再读取 `references/deep-reading-contract.md` 和 `references/reading-note-style.md` 并调用 `subskills/deep-reading/`；建知识库、新建概念节点或更新激活扩散时读取 `references/knowledge-vault-contract.md` 并调用 `subskills/knowledge-vault/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`；读取论文关键图、规划/重绘图表、写图注或审计最终图件时再读取 `references/evidence-figure-contract.md`。公共合同规定检索路线、历轮题录差集、父条目与附件分离、研究家族、三表、Reviewer B、教授汇报级阅读、证据约束写作和可追溯出图；实证覆盖层只能增加估计对象、测量、数据和分析门禁。
 
 ## 启动
 
@@ -90,7 +100,7 @@ python scripts/pipeline.py verify-task --run-dir <运行目录> --task-id <任�
 2. **01 标准与协议**：冻结假设、结局、纳排、伦理、开放科学、偏离政策和适用报告规范。
 3. **02 证据检索**：根据已读证据和证据槽缺口冻结数据库专用检索式，保存不可变原始导出，并对历轮全部已见题录求差集。
 4. **03 Zotero与全文获取**：只导入筛选保留的新增父条目；附件状态、缺 PDF 队列、实际下载失败项和下载后挂载分别核验。
-5. **04 筛选、深读与小综述**：筛选先识别研究家族并分级；3–4级全文转入唯一深读入口完成三轮七章节审计、三表入账、设计适配质量评价和 Reviewer B 独立复核，再按研究综合。
+5. **04 筛选、深读与小综述**：筛选先识别研究家族并分级；3–4级全文转入唯一精读入口：三轮阅读、七章节检查，写中文阅读笔记、填阅读矩阵、把证据挂进证据提纲，再做设计适配质量评价和 Reviewer B 独立复核，然后按研究综合。
 6. **05 方法设计**：冻结样本、量表计分、缺失、估计量、协变量、聚类、乘法性、稳健性和模型比较。
 7. **06 数据管理**：核验 ID、波次连接、重复、范围、异常编码、反向计分、缺失、流失、分布和隐私风险。
 8. **07 统计分析**：只按冻结计划运行；保存代码、软件版本、随机种子、输入哈希、输出和偏离。
@@ -150,7 +160,9 @@ python scripts/pipeline.py autopilot --run-dir <运行目录>
 ## 按需读取
 
 - 所有文献检索、下载、阅读、证据、补检索、方法选择与模拟审稿：先读取 `references/literature-operations-contract.md`。
-- 3–4级全文逐篇阅读和教授汇报准备：读取 `references/deep-reading-contract.md` 并调用 `subskills/deep-reading/`。
+- 3–4级全文逐篇阅读和教授汇报准备：读取 `references/deep-reading-contract.md` 和 `references/reading-note-style.md` 并调用 `subskills/deep-reading/`。
+- Obsidian 知识库、概念卡和激活扩散：读取 `references/knowledge-vault-contract.md` 并调用 `subskills/knowledge-vault/`。
+- 证据提纲（按引言、方法、结果、讨论排的主张与证据）：模板 `templates/证据提纲模板_evidence_outline.md`，导出用 `scripts/export_evidence_outline.py`；阅读矩阵的阅读页用 `scripts/format_reading_matrix.py` 生成。
 - 正式正文起草、章节重写与一区预备结构审计：读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`。
 - 关键图反向阅读、图表规划/重绘、图注和投稿前视觉审计：读取 `references/evidence-figure-contract.md`。
 - 阶段输入、输出、字段与 gate：读取 `references/stage-contracts.md`。

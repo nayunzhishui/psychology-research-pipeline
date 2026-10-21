@@ -162,9 +162,13 @@ def test_deep_reading_contract_and_entrypoints_are_synchronized() -> None:
         "### 结论",
         "professor_briefing_status",
         "Reviewer B",
-        "阅读总结.md",
+        "阅读笔记",
+        "证据提纲",
+        "reading-note-style.md",
+        "knowledge-vault-contract.md",
     ):
         assert marker in texts[0]
+    assert "阅读总结.md" not in texts[0]
 
     entrypoints = (
         SKILL_ROOTS[0] / "subskills" / "deep-reading" / "SKILL.md",
@@ -174,18 +178,70 @@ def test_deep_reading_contract_and_entrypoints_are_synchronized() -> None:
     for path in entrypoints:
         text = path.read_text(encoding="utf-8")
         assert "deep-reading-contract.md" in text
+        assert "reading-note-style.md" in text
         assert "七章节" in text
 
-    report_templates = (
-        SKILL_ROOTS[0] / "templates" / "深度阅读报告模板_deep_reading_report.md",
-        SKILL_ROOTS[1] / "templates" / "深度阅读报告模板_deep_reading_report.md",
+    note_templates = (
+        SKILL_ROOTS[0] / "templates" / "阅读笔记模板_reading_note.md",
+        SKILL_ROOTS[1] / "templates" / "阅读笔记模板_reading_note.md",
         SKILL_ROOTS[2] / "templates" / "reading_card.md",
     )
-    for path in report_templates:
+    for path in note_templates:
         assert path.exists(), path
         template_text = path.read_text(encoding="utf-8")
-        assert "派生视图" in template_text
-        assert "关键图反向审计" in template_text
+        assert "一句话结论" in template_text
+        assert "关键图表怎么读" in template_text
+        assert "#page=" in template_text
+        assert "派生视图" not in template_text
+    for root in SKILL_ROOTS[:2]:
+        retired = root / "templates" / "深度阅读报告模板_deep_reading_report.md"
+        assert not retired.exists(), retired
+
+
+def test_reading_note_style_and_vault_contracts_are_synchronized() -> None:
+    for name, markers in (
+        ("reading-note-style.md", ("不许出现的写法", "常用译名", "#page=")),
+        ("knowledge-vault-contract.md", ("激活扩散", "userIgnoreFilters", "关联")),
+    ):
+        texts = [(root / "references" / name).read_text(encoding="utf-8") for root in SKILL_ROOTS]
+        assert texts[0] == texts[1] == texts[2], name
+        for marker in markers:
+            assert marker in texts[0], (name, marker)
+
+
+def test_shared_reading_scripts_are_synchronized() -> None:
+    for name in (
+        "format_reading_matrix.py",
+        "export_evidence_outline.py",
+        "init_knowledge_vault.py",
+        "spreading_activation.py",
+    ):
+        texts = [(root / "scripts" / name).read_text(encoding="utf-8") for root in SKILL_ROOTS]
+        assert texts[0] == texts[1] == texts[2], name
+
+
+def test_outline_concept_and_vault_entrypoints_exist() -> None:
+    outline_templates = (
+        SKILL_ROOTS[0] / "templates" / "证据提纲模板_evidence_outline.md",
+        SKILL_ROOTS[1] / "templates" / "证据提纲模板_evidence_outline.md",
+        SKILL_ROOTS[2] / "templates" / "evidence_outline.md",
+    )
+    for path in outline_templates:
+        text = path.read_text(encoding="utf-8")
+        assert "#### 主张" in text, path
+        assert "**证据**" in text, path
+    concept_templates = (
+        SKILL_ROOTS[0] / "templates" / "概念卡模板_concept_card.md",
+        SKILL_ROOTS[1] / "templates" / "概念卡模板_concept_card.md",
+        SKILL_ROOTS[2] / "templates" / "concept_card.md",
+    )
+    for path in concept_templates:
+        text = path.read_text(encoding="utf-8")
+        assert "## 关联" in text, path
+        assert "spreading_activation.py" in text, path
+    for root in SKILL_ROOTS:
+        assert (root / "subskills" / "knowledge-vault" / "SKILL.md").exists(), root
+        assert "knowledge-vault-contract.md" in (root / "SKILL.md").read_text(encoding="utf-8"), root
 
 
 def test_writing_contract_and_manuscript_entrypoints_are_synchronized() -> None:

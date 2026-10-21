@@ -1,6 +1,6 @@
 interface:
   display_name: "心理学实证论文工作流"
-  short_description: "可审计的心理学实证研究、统计分析与投稿预备"
+  short_description: "可审计的心理学实证研究、统计分析与投稿预备；精读写中文阅读笔记，阅读矩阵有给人看的阅读页，证据按论文结构写进证据提纲，可接 Obsidian 知识库。"
   default_prompt: "使用 $psychology-research-pipeline 将我的数据和研究问题推进为可审计的心理学实证论文包。"
 
 policy:

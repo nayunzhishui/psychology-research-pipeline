@@ -1,37 +1,100 @@
 ---
 name: empirical-deep-reading
-description: Local subskill for professor-level three-pass, seven-section reading of level-3 and level-4 empirical psychology papers. Use only inside psychology-research-pipeline after screening and full-text verification.
+description: Local subskill for close reading of one level-3 or level-4 empirical psychology paper at a time, producing a Chinese reading note, one reading-matrix row and evidence linked into the manuscript evidence outline. Use only inside psychology-research-pipeline after screening and full-text verification.
 ---
 
-# 实证论文深度阅读
+# 实证论文的精读与阅读笔记
 
-## 职责
+## 目标
 
-这是本工作流唯一的逐篇全文提取入口。开始前完整读取 `../../references/literature-operations-contract.md` 和 `../../references/deep-reading-contract.md`。筛选负责分级，本 skill 负责深读；跨研究综合、正文写作和来源复核分别留给后续阶段。
+把一篇 3–4 级全文读透，产出三样东西：
+1. 一篇给人读的阅读笔记；
+2. 阅读矩阵里的一行；
+3. 挂到论文证据提纲（引言、方法、结果、讨论）里的证据。
 
-## 输入与门禁
+这是本工作流唯一的逐篇精读入口。
 
-- 已冻结的研究问题、构念边界、纳排口径和证据槽。
-- 题录身份、研究家族状态及可核验全文。
-- 现有阅读矩阵、证据账本和唯一主张表。
-- 仅处理4级全文和实际承担理论、测量、方法、关键反例或正文主张的3级全文；无全文者标记 `blocked`。
+## 开始前读
 
-## 执行
+同一会话里已经读过的，不用重复读：
+1. `../../references/literature-operations-contract.md`；
+2. `../../references/deep-reading-contract.md`：三轮阅读、七章节检查清单、四样东西的分工；
+3. `../../references/reading-note-style.md`：笔记写成什么样；
+4. `../../references/knowledge-vault-contract.md`：第一次写笔记，或要新建节点时读；
+5. 项目的规则和模板，有的话以项目为准；以及样板笔记。
 
-1. 先标记论文类型、本轮用途和适用报告规范，再按公共合同完成三轮阅读和摘要、引言、方法、数据、结果、讨论、结论七章节审计；核心结论由表图承担时同时读取`../../references/evidence-figure-contract.md`并完成关键图反向阅读。
-2. 实证覆盖层必须核验构念操作化、样本与招募、波次/间隔、信效度与计分、缺失/失访、协变量/聚类、估计对象、模型诊断、稳健性以及与本项目结果的关系。
-3. 将作者主张、结果事实和本项目推断分开记录；论文级事实写入阅读矩阵，身份/全文包/家族写入证据账本，准备写作的单一主张及写作卡写入主张表；不得只写MD。
-4. 4级全文以及被正式论证使用的3级全文，使用 `../../templates/深度阅读报告模板_deep_reading_report.md` 生成派生阅读总结。
-5. Reviewer B 独立复核；未达到 `agreed` 或 `adjudicated` 的关键主张不得无标记进入正文。
+开读之前，已经冻结的研究问题、构念边界和证据槽要摆在手边：笔记要回答“这篇对我的研究有什么用”。
+
+## 一篇文献的步骤
+
+1. **开工核对**
+   - 核对候选编号、阅读层级、研究家族；
+   - 核对 PDF 身份：题名、作者、DOI 要与题录一致；
+   - 项目还没有知识库的，先按 `../knowledge-vault/SKILL.md` 的“第一次建库”初始化，只做一次；
+   - 没有全文的，标“受阻”，停在这一步。
+2. **第一轮：定位。** 读题录、摘要、引言、讨论、结论和参考文献，边读边记“事实 + 页码”。
+3. **第二轮：方法、数据与结果。** 包括表图和补充材料。所有结果都记，零结果和相反结果也记；核心图做反向阅读。
+4. **第三轮：批判与写作转化。**
+   - 把“作者声称”“结果显示”“我的推断”分开；
+   - 对照七章节检查清单确认查清。
+5. **写阅读笔记**，按模板和写作规范写：
+   - 先写“研究怎么做”和“主要发现”；
+   - 再写“这篇和我的研究有什么关系”和“对我的论文有什么用”；
+   - 最后写“30 秒看懂”。
+6. **连知识库**：知识库靠这一步一篇一篇长起来，不能省。按 `../knowledge-vault/SKILL.md` 的“每写完一篇笔记”做七步：
+   - 列节点、查重、新建；
+   - 补关联、写证据；
+   - 连回笔记、记一笔。
+7. **填阅读矩阵**，写一行：
+   - 受控取值；
+   - 给人看的几列：一句话结论、研究概况、主要章节（写论文哪一部分，如“引言第 2 段”“讨论第 3 段”）、证据强度、笔记路径；
+   - 七章节和三轮状态。
+8. **挂证据提纲**
+   - 引言主张挂“支持”“相反”等证据；
+   - 讨论主张把本研究结果和这篇并排挂上；
+   - 找不到合适的主张时，记进决策记录，不自己加主张。
+9. **收尾**
+   - 在笔记的“提取记录”里写执行人和日期，状态写“已读全文，单人提取”；
+   - 需要第二人核对的，交给核对人。
+
+一次任务只做一篇 4 级文献，或最多三篇 3 级文献。
+
+## 每批结束后
+
+每读完一批（或每天结束时）运行一次，不必每篇都跑。`<skill>` 指本 skill 的目录。
+
+```text
+python <skill>/scripts/format_reading_matrix.py --矩阵 <阅读矩阵> --知识库 <主题>知识库 --文章结构 <论文结构.md> --全文目录 <PDF文件夹>
+python <skill>/scripts/export_evidence_outline.py --提纲目录 <证据提纲文件夹> --知识库 <主题>知识库 --输出csv <主张证据对应表_claim_evidence_map.csv>
+python <skill>/scripts/spreading_activation.py --知识库 <主题>知识库
+```
+
+第三个脚本（激活扩散）约每 10 篇或每周运行一次即可。
+
+## 实证覆盖层
+
+在公共要求之外，要核验：
+- 构念是怎么操作化的；
+- 样本与招募；
+- 波次和间隔；
+- 信效度与计分；
+- 缺失与失访；
+- 协变量和聚类；
+- 估计对象；
+- 模型诊断与稳健性；
+- 这篇与本研究的假设、测量、分析和结果的关系。
 
 ## 完成条件
 
-- 三表身份一致且七章节状态可追溯。
-- 关键数字、零/反向/混合结果和限制具有PDF位置。
-- `professor_briefing_status=ready` 仅在公共合同全部条件满足后设置。
-- 未达到gate时保留 `needs-section-audit`、`blocked` 或 `A-only/B-pending`，不得沿用旧“六遍完成”直接宣称通过。
+- 笔记、矩阵、账本里的身份一致；七章节状态可以追溯。
+- 知识库已按七步更新，笔记“提取记录”里写明新建和更新了哪些节点。
+- 关键数字、零结果、相反结果、混合结果和局限都有 PDF 页码。
+- `professor_briefing_status` 只有在公共合同的全部条件满足后，才能标为“就绪”。
+- 没达到条件时，保留“待章节核查”“受阻”或“单人提取，待第二人核对”，不能沿用旧标签直接宣称通过。
 
-## 输出
+## 不能做的
 
-- 原位更新现有阅读矩阵、证据账本和主张表。
-- 按需生成最少数量的 `candidate_id_首位作者年份_中文短题名_阅读总结.md`。
+- 不伪造页码、结果、样本、工具、统计方法或证据强度。
+- 没有全文，不写笔记，不做强引用。
+- 不把摘要当全文。
+- 不只记支持性的结果。

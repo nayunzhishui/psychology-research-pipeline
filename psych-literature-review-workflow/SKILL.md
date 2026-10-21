@@ -33,13 +33,14 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 2. `evidence-search`：正式综述检索和检索饱和记录。
 3. `zotero-ingest`：结构化题录批量导入父条目、Zotero/PDF 状态核验和下载后挂载；Connector 仅作单篇补充。
 4. `literature-screen`：分类、纳排和 1–4 级相关性评级。
-5. `literature-matrix`：唯一逐篇深读入口，完成三轮七章节审计、三表入账和教授汇报准备。
+5. `literature-matrix`：唯一逐篇精读入口：三轮阅读、七章节检查，写中文阅读笔记、填阅读矩阵、把证据挂进证据提纲。
 6. `star-map`：基于阅读矩阵和激活扩散权重制作 HTML 文献星图。
 7. `source-alignment`：正文—参考文献—原文证据对齐。
 8. `manuscript-write`：APA 综述正文写作。
 9. `submission-review`：顶刊预备强度的模拟综述审稿。
 10. `mini-review`：早期小综述或课程小综述。
 11. `old-workflow-migration`：旧版综述流程迁移和兼容，不作为主入口。
+12. `knowledge-vault`：Obsidian 知识库：建库、概念卡、笔记与概念的双链、激活扩散。
 
 ### templates/ checklists/ rubrics/ examples/
 
@@ -50,7 +51,17 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 
 ## 文献操作核心合同
 
-任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文深读时再读取 `references/deep-reading-contract.md` 并调用 `subskills/literature-matrix/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`；读取关键图、制作证据地图/理论图/流程图、写图注或审计最终图件时再读取 `references/evidence-figure-contract.md`。通用综述覆盖层继续负责综述类型、PRISMA/范围综述透明性、质量工具、证据综合和理论贡献，不得降低公共合同。
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文精读时再读取 `references/deep-reading-contract.md` 和 `references/reading-note-style.md` 并调用 `subskills/literature-matrix/`；建知识库、新建概念节点或更新激活扩散时读取 `references/knowledge-vault-contract.md` 并调用 `subskills/knowledge-vault/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`；读取关键图、制作证据地图/理论图/流程图、写图注或审计最终图件时再读取 `references/evidence-figure-contract.md`。通用综述覆盖层继续负责综述类型、PRISMA/范围综述透明性、质量工具、证据综合和理论贡献，不得降低公共合同。
+
+## 给人看的产出
+
+- 给人读的东西一律中文，按文章结构排，先结论后细节，能点开原文：
+  - 阅读笔记：读完 PDF 直接写成段落，每个数字都带可点开的 PDF 页码，放在 Obsidian 知识库里；
+  - 阅读矩阵：另有脚本生成的阅读页，前几列给人看，点一下就能打开笔记和 PDF；
+  - 证据提纲：主张和证据按章、节、段从上往下写。
+- 知识库边读边长：第一次精读时初始化；之后每读完一篇，这篇涉及的概念、工具、结局（或变量）、方法和样本，库里没有的建卡，已有的补上关联和证据；每批跑一次激活扩散。
+- 表格的数据列沿用英文键名，供脚本和门禁使用；人看的视图由脚本转成中文。
+- 项目自己写了规则（AGENTS.md、字段说明、模板）时，以项目为准。
 
 ## 4. 本地文件命名
 
@@ -71,6 +82,8 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 ```
 
 若因软件或脚本限制必须使用纯英文名，必须在 `日志/决策记录_decisions.md` 中记录原因，并提供中文对照。
+
+例外：知识库里的阅读笔记和概念卡只用中文名（如“Kerber 2026 人格功能与日常情绪事件动态”“身份认同”），因为 Obsidian 的双链靠文件名；证据提纲用“第N章 证据提纲.md”。
 
 ## 5. 运行模式
 
@@ -107,6 +120,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 综述运行/<日期>_<简短主题>/
 ├── 状态记录_state.json
 ├── 文件清单_manifest.json
+├── <主题>知识库/        Obsidian 知识库：阅读笔记、概念卡、视图；库的根目录就是本运行目录
 ├── 日志/
 │   ├── 决策记录_decisions.md
 │   └── 事件记录_events.jsonl
@@ -143,10 +157,10 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 | 02 | 正式检索 | `检索式记录_queries.md`, `检索记录_search_log.csv`, `候选文献表_candidate_records.csv`, `检索饱和记录_search_saturation_log.csv` |
 | 03 | Zotero/全文获取 | `Zotero入库清单_zotero_manifest.csv`, `PDF全文清单_pdf_manifest.csv`, `缺PDF下载队列_freepaper.csv`, `未能正常下载PDF清单.csv`, `全文获取报告_acquisition_report.md` |
 | 04 | 文献筛选 | `文献筛选表_literature_screening.csv`, `相关性评级表_relevance_ratings.csv`, `排除理由登记表_exclusion_reason_register.csv` |
-| 05 | 阅读矩阵 | `文献阅读矩阵_literature_matrix.csv/xlsx/md`, `证据覆盖台账_evidence_ledger.csv`, `质量评价表_quality_appraisal.csv`, `主张证据对应表_claim_evidence_map.csv` |
+| 05 | 精读与阅读矩阵 | 阅读笔记（知识库 `文献/`）, `文献阅读矩阵_literature_matrix.csv` 及脚本生成的阅读页 `.xlsx`, `证据覆盖台账_evidence_ledger.csv`, `质量评价表_quality_appraisal.csv`, 证据提纲中挂上的证据 |
 | 06 | 证据综合 | `证据综合备忘录_synthesis_memo.md`, `矛盾与空白登记表_contradiction_gap_register.csv` |
 | 07 | 文献星图 | `文献星图_literature_star_map.html`, `星图权重表_star_map_weights.csv`, `星图说明_star_map_notes.md` |
-| 08 | 综述框架 | `综述框架_review_outline.md`, `章节主张表_section_claims.md`, `图表计划_figure_table_plan.md` |
+| 08 | 综述框架 | `综述框架_review_outline.md`, 证据提纲（每章一个 `第N章 证据提纲.md`，按章、节、段、主张排；导出 `证据提纲总表.xlsx` 和 `主张证据对应表_claim_evidence_map.csv`）, `图表计划_figure_table_plan.md` |
 | 09 | 综述正文 | `综述正文_manuscript.md`, `综述正文_manuscript.docx`, `APA参考文献_apa_references.md` |
 | 10 | 引用对齐 | `来源对齐表_source_alignment_table.csv`, `未支持主张清单_unsupported_claims.md`, `引用风险报告_citation_risk_report.md` |
 | 11 | 模拟投稿审稿 | `模拟审稿意见_simulated_reviews.md`, `修改矩阵_revision_matrix.csv`, `作者回复草稿_response_to_reviewers.md` |
@@ -171,7 +185,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 1. 综述主题重要、边界清晰、理论贡献明确。
 2. 检索策略、数据库、时间、检索式和限制条件可追溯。
 3. 纳排标准、筛选记录和排除理由透明。
-4. 文献阅读矩阵、证据覆盖台账、质量评价和主张证据对应表完整；用于正式论证的3–4级全文通过三轮七章节与教授汇报gate。
+4. 阅读笔记、文献阅读矩阵、证据覆盖台账、质量评价和证据提纲完整（主张证据对应表由提纲导出）；用于正式论证的3–4级全文通过三轮七章节与教授汇报gate。
 5. 证据综合能处理矛盾、空白和边界条件。
 6. 文献星图和权重规则基于矩阵，不凭空添加关系。
 7. 每个关键主张都有来源、页码/章节/表图或原文位置支持。

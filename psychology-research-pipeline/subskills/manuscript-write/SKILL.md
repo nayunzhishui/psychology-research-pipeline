@@ -9,7 +9,7 @@ description: Local subskill under psychology-research-pipeline for APA-style emp
 
 把已冻结的研究问题、方法、已验证统计结果和已复核文献主张写成APA兼容实证稿。开始前完整读取 `../../references/evidence-grounded-writing-contract.md`；涉及表图规划、图注或视觉审计时同时读取`../../references/evidence-figure-contract.md`。报告规范由 `../reporting-standards/` 选择，来源、数字和图件由后续对齐阶段复核。
 
-正式起草必须具备研究问题/估计对象、方法冻结稿、已验证结果、阅读矩阵、证据账本、唯一主张表和目标文章类型。逐篇阅读总结只是派生视图。材料不全时只能生成带`AUTHOR_INPUT_NEEDED`或`EVIDENCE_BLOCKED`的结构稿。
+正式起草必须具备研究问题/估计对象、方法冻结稿、已验证结果、阅读笔记、阅读矩阵、证据账本、证据提纲（按引言、方法、结果、讨论逐段列出主张与证据）和目标文章类型。起草时逐段对照证据提纲写，提纲里的“可以写成”和“不能写成”是措辞上限。材料不全时只能生成带`AUTHOR_INPUT_NEEDED`或`EVIDENCE_BLOCKED`的结构稿。
 
 ## 实证覆盖层
 

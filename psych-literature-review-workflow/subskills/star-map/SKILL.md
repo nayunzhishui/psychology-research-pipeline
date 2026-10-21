@@ -18,9 +18,11 @@ description: Local subskill under psych-literature-review-workflow for building 
 
 `文献阅读矩阵_literature_matrix.csv/xlsx`、`质量评价表_quality_appraisal.csv`、`主张证据对应表_claim_evidence_map.csv`、`检索饱和记录_search_saturation_log.csv`。
 
+项目有 Obsidian 知识库时，先运行 `../../scripts/spreading_activation.py`，再用知识库 `视图/概念网络边表.csv` 作为概念之间的边：其中的“合并强度”就是激活扩散权重，规则见 `../../references/knowledge-vault-contract.md` 第 4 节。
+
 ## 执行步骤
 
-1. 从矩阵中提取节点：文献、理论、构念、变量、测量、方法、人群、发现、争议和空白。
+1. 从矩阵和知识库中提取节点：文献、理论、构念、变量、测量、方法、人群、发现、争议和空白；知识库里已有的概念节点直接沿用其名称，不另起名。
 2. 生成边：共同构念、理论归属、方法相似、变量路径、证据支持、结果矛盾和空白连接。
 3. 分列记录主题相关度、设计适配质量、理论贡献、方法价值、连接度、新近性和来源权威性；不得把新近性、权威性或引用数折算成证据质量。
 4. 输出 HTML 星图、节点表、边表和权重说明。

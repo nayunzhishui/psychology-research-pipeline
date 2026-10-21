@@ -35,7 +35,7 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 2. `evidence-search`：认知神经科学理论、范式、指标和实证证据检索。
 3. `zotero-ingest`：结构化题录批量导入父条目、Zotero/PDF 状态核验和下载后挂载；Connector 仅作单篇补充。
 4. `literature-screen`：认知神经科学文献分类和评级。
-5. `deep-reading`：唯一逐篇全文提取入口，完成三轮七章节及神经科学覆盖层审计。
+5. `deep-reading`：唯一逐篇精读入口：三轮阅读、七章节和神经科学覆盖层检查，写中文阅读笔记、填阅读矩阵和机制矩阵、把证据挂进证据提纲。
 6. `paradigm-design`：跨研究实验范式比较和质量评价。
 7. `neuro-methods-design`：EEG/ERP、fMRI、PSG、眼动、NIRS、心理生理等跨研究方法评价。
 8. `neuro-data-analysis`：跨研究预处理与分析透明性评价。
@@ -43,6 +43,7 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 10. `source-alignment`：复核机制主张与原文证据对齐。
 11. `manuscript-write`：认知神经科学综述正文写作。
 12. `submission-review`：顶刊预备强度的模拟综述审稿。
+13. `knowledge-vault`：Obsidian 知识库：建库、概念卡、笔记与概念的双链、激活扩散。
 
 ### templates/ checklists/ rubrics/ examples/
 
@@ -53,7 +54,17 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 
 ## 文献操作核心合同
 
-任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文深读时再读取 `references/deep-reading-contract.md` 并调用 `subskills/deep-reading/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`；读取关键神经/生理图、制作机制图/证据图、写图注或审计最终图件时再读取 `references/evidence-figure-contract.md`。认知神经覆盖层继续负责模态、范式、预处理、分析灵活性、反向推断、机制上限、跨模态综合和图像完整性，不得降低公共合同。
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文精读时再读取 `references/deep-reading-contract.md` 和 `references/reading-note-style.md` 并调用 `subskills/deep-reading/`；建知识库、新建概念节点或更新激活扩散时读取 `references/knowledge-vault-contract.md` 并调用 `subskills/knowledge-vault/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`；读取关键神经/生理图、制作机制图/证据图、写图注或审计最终图件时再读取 `references/evidence-figure-contract.md`。认知神经覆盖层继续负责模态、范式、预处理、分析灵活性、反向推断、机制上限、跨模态综合和图像完整性，不得降低公共合同。
+
+## 给人看的产出
+
+- 给人读的东西一律中文，按文章结构排，先结论后细节，能点开原文：
+  - 阅读笔记：读完 PDF 直接写成段落，每个数字都带可点开的 PDF 页码，放在 Obsidian 知识库里；
+  - 阅读矩阵：另有脚本生成的阅读页，前几列给人看，点一下就能打开笔记和 PDF；
+  - 证据提纲：主张和证据按章、节、段从上往下写。
+- 知识库边读边长：第一次精读时初始化；之后每读完一篇，这篇涉及的概念、工具、结局（或变量）、方法和样本，库里没有的建卡，已有的补上关联和证据；每批跑一次激活扩散。
+- 表格的数据列沿用英文键名，供脚本和门禁使用；人看的视图由脚本转成中文。
+- 项目自己写了规则（AGENTS.md、字段说明、模板）时，以项目为准。
 
 ## 4. 本地文件命名
 
@@ -110,6 +121,7 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 认知神经科学运行/<日期>_<简短主题>/
 ├── 状态记录_state.json
 ├── 文件清单_manifest.json
+├── <主题>知识库/        Obsidian 知识库：阅读笔记、概念卡、视图；库的根目录就是本运行目录
 ├── 日志/
 │   ├── 决策记录_decisions.md
 │   └── 事件记录_events.jsonl
@@ -146,8 +158,8 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 | 02 | 证据检索 | `检索式记录_queries.md`, `数据库检索记录_database_search_log.csv`, `候选文献表_candidate_records.csv` |
 | 03 | Zotero/全文获取 | `Zotero入库清单_zotero_manifest.csv`, `PDF全文清单_pdf_manifest.csv`, `缺PDF下载队列_freepaper.csv`, `未能正常下载PDF清单.csv`, `全文获取报告_acquisition_report.md` |
 | 04 | 分类与筛查 | `文献筛选表_literature_screening.csv`, `相关性评级表_relevance_ratings.csv` |
-| 05 | 深读与证据矩阵 | `文献阅读矩阵_literature_matrix.csv/xlsx/md`, `机制矩阵_neural_mechanism_matrix.csv`, `质量评价表_quality_appraisal.csv`, 必要的逐篇阅读总结 |
-| 06 | 机制模型 | `机制模型说明_mechanism_model.md`, `主张证据对应表_claim_evidence_map.csv` |
+| 05 | 精读与证据矩阵 | 阅读笔记（知识库 `文献/`）, `文献阅读矩阵_literature_matrix.csv` 及脚本生成的阅读页 `.xlsx`, `机制矩阵_neural_mechanism_matrix.csv`, `质量评价表_quality_appraisal.csv` |
+| 06 | 机制模型 | `机制模型说明_mechanism_model.md`, 证据提纲（每章一个 `第N章 证据提纲.md`；导出 `证据提纲总表.xlsx` 和 `主张证据对应表_claim_evidence_map.csv`） |
 | 07 | 范式与方法评价 | `实验范式评价_paradigm_evaluation.md`, `神经生理方法评价_neuro_methods_evaluation.md` |
 | 08 | 预处理与分析评价 | `预处理透明性评价_preprocessing_transparency.md`, `分析方法评价_analysis_methods_evaluation.md` |
 | 09 | 正文写作 | `综述正文_manuscript.md`, `综述正文_manuscript.docx`, `APA参考文献_apa_references.md` |

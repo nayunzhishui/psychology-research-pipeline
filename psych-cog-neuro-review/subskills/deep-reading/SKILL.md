@@ -1,32 +1,101 @@
 ---
 name: cog-neuro-deep-reading
-description: Local subskill for professor-level three-pass, seven-section reading of level-3 and level-4 cognitive neuroscience papers. Use only inside psych-cog-neuro-review after screening and full-text verification.
+description: Local subskill for close reading of one level-3 or level-4 cognitive neuroscience paper at a time, producing a Chinese reading note, one reading-matrix row and evidence linked into the review evidence outline. Use only inside psych-cog-neuro-review after screening and full-text verification.
 ---
 
-# 认知神经科学深度阅读
+# 认知神经科学的精读与阅读笔记
 
-## 职责
+## 目标
 
-这是本工作流唯一逐篇全文提取入口。开始前完整读取 `../../references/literature-operations-contract.md` 与 `../../references/deep-reading-contract.md`。单篇事实在此提取；方法子skill做跨研究方法评价，机制综合做跨研究整合，来源对齐只复核。
+把一篇 3–4 级全文读透，产出四样东西：
+1. 一篇给人读的阅读笔记；
+2. 阅读矩阵和机制矩阵里的行；
+3. 挂到证据提纲里的证据；
+4. 必要时更新知识库的概念卡。
 
-## 输入与门禁
+这是本工作流唯一的逐篇精读入口。方法子 skill 负责跨研究的方法评价，机制综合负责跨研究整合，来源对齐只做复核。
 
-- 冻结的综述问题、机制边界、纳排标准和证据槽。
-- 已核验题录、研究家族和可访问全文。
-- 现有阅读矩阵、证据账本、机制矩阵和唯一主张表。
-- 只处理4级全文和实际承担理论、范式、测量、方法、关键反例或正文主张的3级全文。
+## 开始前读
 
-## 执行
+同一会话里已经读过的，不用重复读：
+1. `../../references/literature-operations-contract.md`；
+2. `../../references/deep-reading-contract.md`：三轮阅读、七章节检查清单、四样东西的分工；
+3. `../../references/reading-note-style.md`：笔记写成什么样；
+4. `../../references/knowledge-vault-contract.md`：第一次写笔记，或要新建节点时读；
+5. 项目的规则和模板，有的话以项目为准；以及样板笔记。
 
-1. 先标记论文类型、机制用途和适用报告/模态规范，再完成公共三轮阅读及摘要、引言、方法、数据、结果、讨论、结论七章节审计；核心结论由脑图、波形、时频图或其他表图承担时，同时读取`../../references/evidence-figure-contract.md`并完成关键图反向阅读。
-2. 认知神经覆盖层核验任务/对照/试次、模态与采集、预处理、伪迹/排除、ROI/全脑、时间窗/频带、多重比较、分析灵活性、交叉验证/泄漏、反向推断和跨模态尺度。
-3. 记录行为、主观、神经和生理结果是否收敛，机制措辞不得超过设计与模态允许的 `claim_ceiling`。
-4. 将作者主张、结果事实和本综述机制推断分开记录；论文级事实写入矩阵，身份/全文包/家族写入账本，机制主张与写作卡写入主张表；需要跨研究比较的内容交给后续子skill。
-5. 按 `../../templates/reading_card.md` 为全部4级全文和被正式论证使用的3级全文生成派生阅读总结。
-6. Reviewer B 独立复核；关键主张未达 `agreed/adjudicated` 时不得无标记进入正文。
+## 一篇文献的步骤
+
+1. **开工核对**
+   - 核对候选编号、阅读层级、研究家族；
+   - 核对 PDF 身份；
+   - 项目还没有知识库的，先按 `../knowledge-vault/SKILL.md` 的“第一次建库”初始化，只做一次；
+   - 没有全文的，标“受阻”，停在这一步。
+2. **第一轮：定位。** 读题录、摘要、引言、讨论、结论和参考文献，边读边记“事实 + 页码”。
+3. **第二轮：方法、数据与结果。**
+   - 逐项记下范式、对照条件、试次、采集参数、预处理、伪迹和试次排除、ROI 或全脑、时间窗或频带、多重比较；
+   - 行为、主观、神经和生理结果分开记，零结果和相反结果也记；
+   - 脑图、波形、时频图做反向阅读。
+4. **第三轮：批判与写作转化。**
+   - 把“作者声称”“结果显示”“我的机制推断”分开；
+   - 检查有没有反向推断，有没有跨模态尺度的跳跃；
+   - 对照七章节检查清单确认查清。
+5. **写阅读笔记**，用 `../../templates/reading_card.md`：
+   - 先写“研究怎么做”（含“范式与模态”）和“主要发现”；
+   - 再写评价和用处；
+   - 最后写“30 秒看懂”。
+6. **连知识库**：知识库靠这一步一篇一篇长起来，不能省。按 `../knowledge-vault/SKILL.md` 的“每写完一篇笔记”做七步：
+   - 列节点、查重、新建；
+   - 补关联、写证据；
+   - 连回笔记、记一笔。
+7. **填阅读矩阵和机制矩阵**，各写一行：
+   - 给人看的几列：一句话结论、研究概况、主要章节、其他章节与主张、证据强度、笔记路径；
+   - 七章节状态和三轮状态。
+8. **挂证据提纲**
+   - 在对应主张下加证据行，更新证据概述和证据强度；
+   - 机制主张的措辞，不超过设计和模态允许的上限。
+9. **收尾**
+   - 在笔记的“提取记录”里写执行人和日期，状态写“已读全文，单人提取”；
+   - 需要第二人核对的，交给核对人。
+
+一次任务只做一篇 4 级文献，或最多三篇 3 级文献。
+
+## 每批结束后
+
+每读完一批（或每天结束时）运行一次，不必每篇都跑。`<skill>` 指本 skill 的目录。
+
+```text
+python <skill>/scripts/format_reading_matrix.py --矩阵 <阅读矩阵> --知识库 <主题>知识库 --文章结构 <论文结构.md> --全文目录 <PDF文件夹>
+python <skill>/scripts/export_evidence_outline.py --提纲目录 <证据提纲文件夹> --知识库 <主题>知识库 --输出csv <主张证据对应表_claim_evidence_map.csv>
+python <skill>/scripts/spreading_activation.py --知识库 <主题>知识库
+```
+
+第三个脚本（激活扩散）约每 10 篇或每周运行一次即可。
+
+## 认知神经覆盖层
+
+在公共要求之外，要核验：
+- 任务、对照和试次；
+- 模态与采集；
+- 预处理；
+- 伪迹处理和试次排除；
+- ROI 还是全脑；
+- 时间窗或频带；
+- 多重比较校正；
+- 分析灵活性；
+- 交叉验证和数据泄漏；
+- 反向推断；
+- 跨模态尺度。
 
 ## 完成条件
 
-- 七章节与领域覆盖层均有状态和PDF位置。
-- 零、相反和混合结果、方法不透明处及替代解释未被删去。
-- 只有满足公共合同全部条件时才设置 `professor_briefing_status=ready`。
+- 七章节和领域覆盖层都有状态和 PDF 页码。
+- 知识库已按七步更新，笔记“提取记录”里写明新建和更新了哪些节点。
+- 零、相反和混合结果，方法不透明处，以及替代解释，都没有删。
+- `professor_briefing_status` 只有在公共合同的全部条件满足后，才能标为“就绪”。
+
+## 不能做的
+
+- 不伪造页码、结果、坐标、时间窗、样本或统计方法。
+- 没有全文，不写笔记，不做强引用。
+- 机制措辞不超过设计和模态允许的上限。

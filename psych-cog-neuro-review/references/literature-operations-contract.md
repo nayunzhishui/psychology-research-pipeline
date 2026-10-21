@@ -133,26 +133,27 @@ batch,zotero_item_key,doi,url,title,download_status,failure_reason,last_checked
 
 每篇报告保留唯一 `candidate_id` 和 `report_id`；同一队列共享 `study_id` 和 `study_family_id`。按队列名称、作者群、国家/地区、机构、招募年份、样本量、年龄、波次、量表和随访期识别多报告。不能确认时使用 `family-uncertain-<candidate_id>`，不能留空或把全部未知报告并入一个家族。
 
-### 三表与深读档案
+### 阅读笔记、三表与证据提纲
 
-- 阅读矩阵负责论文内容、方法、数据、结果、质量、用途和章节状态。
+- 阅读笔记是给人读的正文：Codex 读完 PDF 直接写成中文段落，每个数字和关键事实带 PDF 页码。写法见 `reading-note-style.md`，存放和连接方式见 `knowledge-vault-contract.md`。
+- 阅读矩阵负责论文的编码：内容、方法、数据、结果、质量、用途和章节状态。给人看的阅读页由 `scripts/format_reading_matrix.py` 生成。
 - 证据账本负责报告身份、题录、全文/勘误状态、研究家族和核验链。
-- 唯一主张表负责一个 `claim_id × candidate_id/report_id` 配对的证据位置、表述上限、写作卡和 Reviewer 状态。
-- 逐篇阅读总结仅是三表和已核验PDF的人类可读派生视图，不是第四套事实源；具体生成范围、命名、字段映射和教授汇报gate见 `deep-reading-contract.md`。
-- 正式正文写作、章节重写和一区预备结构审计必须读取 `evidence-grounded-writing-contract.md`；写作只消费三表、已验证结果和通过gate的综合，不得先写后找来源。
+- 证据提纲按文章结构列出每一段要写的主张和挂上的证据，是“主张—证据”对应的唯一来源。机器用的唯一主张表（一个 `claim_id × candidate_id/report_id` 配对一行，含证据位置、表述上限、写作卡和 Reviewer 状态）由 `scripts/export_evidence_outline.py` 从提纲导出，不手填。
+- 阅读笔记与矩阵都直接来自 PDF，同一事实两边一致；不一致时回 PDF 核对后一起改。阅读分层、笔记篇幅、字段映射和汇报准备 gate 见 `deep-reading-contract.md`。
+- 正式正文写作、章节重写和一区预备结构审计必须读取 `evidence-grounded-writing-contract.md`；写作只消费阅读笔记、三表、证据提纲、已验证结果和通过 gate 的综合，不得先写后找来源。
 
 领域 skill 可以追加专用字段和门槛，但不能降低公共合同，也不能用一个自由文本总评替代结构化事实。
 
-允许的固定值：
+允许的固定值。括号里是给人看的中文说法：证据提纲和给人看的视图写中文，导出脚本再转成英文键值。
 
-- `claim_type`：`definition`、`theory`、`prevalence`、`direct-empirical`、`measurement`、`method`、`context`、`interpretation`。
-- `support_status`：`confirmed`、`partial`、`rejected`、`blocked`。
-- `claim_ceiling`：`definition`、`descriptive`、`association`、`temporal-prediction`、`within-person-temporal`、`mechanism-candidate`、`causal-effect`。
-- `support_carrier_type`：`text`、`table`、`figure`、`supplement`、`multiple`。
-- `construct_match`：`exact`、`partial`、`adjacent`、`mismatch`、`unclear`。
-- `estimand_level`：`descriptive`、`between-person`、`within-person`、`mixed`、`not-applicable`、`unclear`。
-- `result_direction`：`supports`、`null`、`opposite`、`mixed`、`not-tested`。
-- `reviewer_status`：`A-only/B-pending`、`agreed`、`conflict`、`adjudicated`。
+- `claim_type`（主张类型）：`definition` 定义、`theory` 理论、`prevalence` 患病率、`direct-empirical` 直接实证、`measurement` 测量、`method` 方法、`context` 背景、`interpretation` 解释。
+- `support_status`（支持状态）：`confirmed` 已核实、`partial` 部分支持、`rejected` 不支持、`blocked` 受阻。
+- `claim_ceiling`（主张上限）：`definition` 定义、`descriptive` 描述、`association` 关联、`temporal-prediction` 时间预测、`within-person-temporal` 个体内时间关系、`mechanism-candidate` 机制候选、`causal-effect` 因果效应。
+- `support_carrier_type`（证据载体）：`text` 正文、`table` 表、`figure` 图、`supplement` 补充材料、`multiple` 多处。
+- `construct_match`（构念匹配）：`exact` 完全匹配、`partial` 部分匹配、`adjacent` 邻近、`mismatch` 不匹配、`unclear` 不清楚。
+- `estimand_level`（估计层次）：`descriptive` 描述、`between-person` 个体间、`within-person` 个体内、`mixed` 混合、`not-applicable` 不适用、`unclear` 不清楚。
+- `result_direction`（结果方向）：`supports` 支持、`null` 零结果、`opposite` 相反、`mixed` 混合、`not-tested` 未检验。
+- `reviewer_status`（核对状态）：`A-only/B-pending` 单人提取待核、`agreed` 一致、`conflict` 冲突、`adjudicated` 已裁决。
 
 `partial` 和 `blocked` 不能成为定稿主张的唯一支撑；`rejected` 保留理由。正文措辞不得高于 `claim_ceiling`。`fulltext_location` 至少含 PDF 页码并尽量附章节、段落、表图或补充材料编号。量化主张记录效应估计、SE/95% CI/精确 p 或明确零结果；不适用写 `not-applicable`。
 
