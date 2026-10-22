@@ -132,7 +132,7 @@ def main() -> None:
     write_if_missing(
         kb / "视图" / "节点总览.base",
         base_file([f'file.inFolder("{kb_name}/{folder}")' for folder in node_folders], "or",
-                  "节点总览", ["file.name", "类型", "英文名", "上位", "状态"]),
+                  "节点总览", ["file.name", "类型", "英文名", "上位", "讲义", "状态"]),
         created,
     )
 
