@@ -5,6 +5,7 @@
 - 阅读：前几列先给人看（文献、一句话结论、研究概况、主要章节、证据强度等），
   其余编码字段按组排在后面并默认折叠；等级代码自动带上中文说明；
   按文章结构分组，每组前加小节标题行。点“文献”打开阅读笔记，点“全文”打开 PDF。
+  格子里的双链（如 [[正文.pdf#page=3|第 3 页]]）只显示文字“第 3 页”，因为 Excel 打不开双链。
 - 说明：每个字段的中文名和分组，以及等级代码的含义。
 输入是 xlsx 时，原来的数据留在“数据”工作表，脚本不改动它；输入是 CSV 时，数据仍以 CSV 为准。
 
@@ -123,6 +124,22 @@ WIDE = {"一句话结论": 60, "研究概况": 40, "证据强度": 36, "其他�
 HUMAN_WIDTH = {"文献": 18, "主要章节": 16, "阅读深度": 9, "状态": 18, "全文": 8}
 STATUS_FILL = [("受阻", "F8CBAD"), ("冲突", "F8CBAD"), ("待核", "FFF2CC"), ("待第二人", "FFF2CC"),
                ("已核实", "C6EFCE"), ("核对通过", "C6EFCE"), ("就绪", "C6EFCE")]
+
+
+WIKILINK = re.compile(r"!?\[\[([^\]|]+?)(?:\|([^\]]+))?\]\]")
+
+
+def plain(text: str) -> str:
+    """把双链换成显示文字：[[路径#page=3|第 3 页]] → 第 3 页；没有显示文字的取文件名。"""
+    def repl(match: re.Match) -> str:
+        target, alias = match.group(1), match.group(2)
+        if alias:
+            return alias
+        name, _, anchor = target.partition("#")
+        name = Path(name).stem if name else ""
+        page = re.match(r"page=(\d+)", anchor)
+        return f"{name} 第 {page.group(1)} 页" if page else (name or anchor)
+    return WIKILINK.sub(repl, text)
 
 
 def read_rows(path: Path):
@@ -346,7 +363,7 @@ def main() -> None:
         }
         for j, (title, field) in enumerate(columns, 1):
             value = values[title] if field is None else with_label(row[col[field]].strip())
-            cell = ws.cell(r, j, value)
+            cell = ws.cell(r, j, plain(value))
             cell.alignment = wrap
         if note and (uri := obsidian_uri(note)):
             ws.cell(r, 1).hyperlink = uri
@@ -378,7 +395,9 @@ def main() -> None:
     notes_ws.append(["行按文章结构分组；点“文献”打开阅读笔记，点“全文”打开 PDF。本页和“阅读”页由脚本生成，改数据请改“数据”页或原 CSV。"])
     notes_ws.append([])
     notes_ws.append(["分组", "字段", "数据里的列名"])
-    notes_ws.append(["先看这几列", "、".join(human_names), "见 HUMAN"])
+    for name, names in HUMAN:
+        found = [n for n in names if n in col]
+        notes_ws.append(["先看这几列", name, "、".join(found) or "（脚本生成）"])
     for name, _, fields in grouped:
         for f in fields:
             notes_ws.append([name, LABELS.get(f, f), f])

@@ -14,6 +14,10 @@
 证据方向只用：支持、零结果、相反、混合、限定、背景（实证论文的结果主张另可用“本研究结果”）。
 提纲是唯一来源；两个导出文件每次都整体重写，不要手改。
 
+导出时顺带自检，只提示、不改提纲：证据行有没有链到笔记里的发现块、块编号在不在、行末有没有页码；
+已挂证据的主张，状态是否还停在“待填证据”，证据概述、可以写成、不能写成、缺口是否还空着。
+发现的问题写进总表的“待修”页，并在命令行列出。
+
 用法：
   python export_evidence_outline.py --提纲目录 <文件夹> [--知识库 <知识库文件夹>]
       [--输出表 <xlsx>] [--输出csv <主张证据对应表_claim_evidence_map.csv>]
@@ -48,7 +52,7 @@ CLAIM_TYPE = {"定义": "definition", "理论": "theory", "患病率": "prevalen
 FIELD = re.compile(r"^- \*\*(.+?)\*\*[：:]\s*(.*)$")
 EVIDENCE = re.compile(r"^\s+-\s+(支持|零结果|相反|反对|混合|限定|背景|本研究结果)\s*｜\s*(.+)$")
 LINK = re.compile(r"\[\[([^\]|#]+)(?:#([^\]|]*))?(?:\|([^\]]*))?\]\]")
-LOCATION = re.compile(r"[（(]([^（）()]*(?:页|表|图)[^（）()]*)[）)]\s*$")
+LOCATION = re.compile(r"[（(]([^（）()]*(?:页|表|图)[^（）()]*)[）)]\s*[。.；;]?\s*$")
 
 
 def frontmatter(text: str) -> dict[str, str]:
@@ -67,8 +71,38 @@ def load_notes(kb: Path | None) -> dict[str, dict[str, str]]:
         meta = frontmatter(text)
         summary = re.search(r"\*\*一句话结论\*\*[：:]\s*(.+)", text)
         meta["一句话结论"] = summary.group(1).strip() if summary else ""
+        meta["块编号"] = " ".join(sorted(set(re.findall(r"\^([\w-]+)\s*$", text, re.M))))
         notes[path.stem] = meta
     return notes
+
+
+def check(claims: list[dict], notes: dict[str, dict[str, str]], have_kb: bool) -> list[tuple[str, str, str]]:
+    """找出常见的挂接问题，返回（主张编号，问题，涉及的内容）。只提示，不改提纲。"""
+    issues = []
+    for item in claims:
+        f = item["fields"]
+        if item["evidence"]:
+            if "待填证据" in f.get("状态", ""):
+                issues.append((item["id"], "已挂证据，状态还是“待填证据”", ""))
+            empty = [k for k in ("证据概述", "证据强度", "可以写成", "不能写成", "缺口") if not f.get(k)]
+            if empty:
+                issues.append((item["id"], "已挂证据，这几栏还空着：" + "、".join(empty), ""))
+        for _, text in item["evidence"]:
+            link = LINK.search(text)
+            if not link:
+                issues.append((item["id"], "证据行没有链接阅读笔记", text[:60]))
+                continue
+            target, anchor = link.group(1), link.group(2) or ""
+            if not anchor.startswith("^"):
+                issues.append((item["id"], "没有链到笔记里的发现块（如 #^f2）", text[:60]))
+            if have_kb:
+                if target not in notes:
+                    issues.append((item["id"], "链接的阅读笔记不存在", target))
+                elif anchor.startswith("^") and anchor[1:] not in notes[target].get("块编号", "").split():
+                    issues.append((item["id"], f"笔记里找不到块编号 {anchor}", target))
+            if not LOCATION.search(text):
+                issues.append((item["id"], "行末括号里没有页码、表或图", text[:60]))
+    return issues
 
 
 def parse(path: Path) -> list[dict]:
@@ -191,6 +225,16 @@ def main() -> None:
     for row in by_paper.iter_rows(min_row=2):
         for cell in row:
             cell.alignment = wrap
+
+    issues = check(claims, notes, bool(args.kb))
+    if issues:
+        todo = wb.create_sheet("待修")
+        todo.append(["主张编号", "问题", "涉及"])
+        for row in issues:
+            todo.append(list(row))
+        for j, width in enumerate([12, 44, 60], 1):
+            todo.column_dimensions[get_column_letter(j)].width = width
+            todo.cell(1, j).font = Font(bold=True)
     xlsx.parent.mkdir(parents=True, exist_ok=True)
     wb.save(xlsx)
 
@@ -243,6 +287,12 @@ def main() -> None:
                 writer.writerow({key: row.get(key, "") for key in CLAIM_HEADER})
         print(f"主张证据对应表：{out}（{len(rows)} 行）")
     print(f"证据提纲总表：{xlsx}（{len(chapters)} 章，{len(claims)} 条主张）")
+    if issues:
+        print(f"提纲自检：{len(issues)} 处待修，已写进总表的“待修”页。前几处：")
+        for claim_id, problem, detail in issues[:8]:
+            print(f"  主张 {claim_id}：{problem}" + (f"｜{detail}" if detail else ""))
+    elif args.kb:
+        print("提纲自检：没有发现问题")
 
 
 if __name__ == "__main__":
