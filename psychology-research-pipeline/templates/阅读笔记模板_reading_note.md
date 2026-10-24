@@ -19,7 +19,7 @@ DOI:
 aliases: []
 ---
 
-%% 写之前先读 references/reading-note-style.md 和样板笔记。项目有自己的模板时用项目的。“用在”写这篇用在论文哪里，如 ["引言第2段", "讨论第3段", "测量依据"]。写完删掉所有这类灰色提示。 %%
+%% 写之前先读 references/reading-note-style.md 第 0 节，再看示范 references/reading-note-example-d1.md（3 级简版看 reading-note-example-d2.md）和 references/writing-before-after.md。分三个区写：从“30 秒看懂”到“作者怎么解释”是讲解区，只讲这篇做了什么、发现了什么、数字是什么意思，一段最多一句限定；研究的局限和措辞边界写在“我的评价”和“对我的文章有什么用”；核对中发现的小出入写在“疑问与待核”。标题写这篇发现了什么，不写它的限度。页码放在它支持的那句话的句号前，用括号括起来；块编号前空一格。3 级简版只写 reading-note-style.md 第 3 节列出的几节。写完运行 scripts/check_reading_outputs.py，本篇的问题清零再交。项目有自己的模板时用项目的。“用在”写这篇用在论文哪里，如 ["引言第2段", "讨论第3段", "测量依据"]。写完删掉所有这类灰色提示。 %%
 
 # 第一作者 等 年份：中文题名（意译，说清研究了什么）
 

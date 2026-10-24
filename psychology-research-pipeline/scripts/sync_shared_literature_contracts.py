@@ -20,12 +20,19 @@ CONTRACTS = (
     "evidence-figure-contract.md",
     "reading-note-style.md",
     "knowledge-vault-contract.md",
+    # 写作示范和取值表模板：三个 skill 的阅读产出用同一套标准
+    "reading-note-example-d1.md",
+    "reading-note-example-d2.md",
+    "writing-before-after.md",
+    "matrix-vocabulary-template.json",
 )
 SHARED_SCRIPTS = (
     "init_knowledge_vault.py",
     "spreading_activation.py",
     "format_reading_matrix.py",
     "export_evidence_outline.py",
+    "check_reading_outputs.py",
+    "tidy_reading_notes.py",
 )
 
 

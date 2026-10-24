@@ -30,6 +30,7 @@ description: Local subskill for close reading of one level-3 or level-4 empirica
 1. **开工核对**
    - 核对候选编号、阅读层级、研究家族；
    - 核对 PDF 身份：题名、作者、DOI 要与题录一致；
+   - 旧笔记和旧摘录只当线索；
    - 项目还没有知识库的，先按 `../knowledge-vault/SKILL.md` 的“第一次建库”初始化，只做一次；
    - 证据提纲还没有骨架的，先按 `../../references/deep-reading-contract.md` 第 7 节建骨架，标“初稿”，请用户确认；
    - 没有全文的，标“受阻”，停在这一步。
@@ -43,6 +44,8 @@ description: Local subskill for close reading of one level-3 or level-4 empirica
    - 先写“研究怎么做”和“主要发现”；
    - 再写“这篇和我的研究有什么关系”和“对我的论文有什么用”；
    - 最后写“30 秒看懂”。
+
+   写之前先看 `../../references/reading-note-example-d1.md`（3 级看 `reading-note-example-d2.md`）和 `../../references/writing-before-after.md`。按 `reading-note-style.md` 第 0 节分三个区写：讲解区只讲这篇做了什么、发现了什么、数字是什么意思，一段最多一句限定；研究的局限写在“我的评价”；核对中发现的小出入写在“疑问与待核”。先把事实和页码列成底稿，再写成给新同学看的段落。每条发现的段落末尾空一格，加块编号。
 6. **连知识库**：知识库靠这一步一篇一篇长起来，不能省。按 `../knowledge-vault/SKILL.md` 的“每写完一篇笔记”做七步：
    - 列节点、查重、新建或补讲义（动笔前已经做了的，这里只补漏）；
    - 补关联、写证据；
@@ -52,15 +55,17 @@ description: Local subskill for close reading of one level-3 or level-4 empirica
    - 给人看的几列：一句话结论、研究概况、主要章节（写论文哪一部分，如“引言第 2 段”“讨论第 3 段”）、证据强度、笔记路径；
    - 七章节和三轮状态。
 8. **挂证据提纲**
+   - 方向按 `../../references/deep-reading-contract.md` 第 7 节的定义判断：检验了这条主张、结果一致就是“支持”；“限定”只用于结果本身划出了主张成立的边界，不是“这篇有局限”。
    - 引言主张挂“支持”“相反”等证据；
    - 讨论主张把本研究结果和这篇并排挂上；
    - 找不到合适的主张时，记进决策记录，不自己加主张。
 9. **收尾**
+   - 运行 `scripts/check_reading_outputs.py`（命令见 `../../references/reading-note-style.md` 第 7 节），本篇的问题清零；“数字核对”页列出的数字逐条回原文看。
    - 在笔记的“提取记录”里写执行人和日期，状态写“已读全文，单人提取”；
    - 需要第二人核对的，交给核对人。
    - 交接记录写成完整的中文句子：读了哪篇，笔记在哪里，挂到了哪几条主张，还有什么待核。不用内部缩写、代号和“父核”“子任务”这类过程用语，用户要能直接看懂。
 
-一次任务只做一篇 4 级文献，或最多三篇 3 级文献。
+一次任务只做一篇 4 级文献，或最多三篇 3 级文献。不要为了赶进度压缩笔记。
 
 ## 每批结束后
 
@@ -70,9 +75,10 @@ description: Local subskill for close reading of one level-3 or level-4 empirica
 python <skill>/scripts/format_reading_matrix.py --矩阵 <阅读矩阵> --知识库 <主题>知识库 --文章结构 <论文结构.md> --全文目录 <PDF文件夹>
 python <skill>/scripts/export_evidence_outline.py --提纲目录 <证据提纲文件夹> --知识库 <主题>知识库 --输出csv <主张证据对应表_claim_evidence_map.csv>
 python <skill>/scripts/spreading_activation.py --知识库 <主题>知识库
+python <skill>/scripts/check_reading_outputs.py --根 <库根目录> --知识库 <主题>知识库 --模板 <阅读笔记模板> --矩阵 <阅读矩阵> --输出 <自检.xlsx>
 ```
 
-第三个脚本（激活扩散）约每 10 篇或每周运行一次即可。
+第三个脚本（激活扩散）约每 10 篇或每周运行一次即可。第四个是自检，报告里的问题改完再收尾；矩阵问题按项目的取值表改，解释写进单元格批注或笔记。
 
 ## 实证覆盖层
 
@@ -89,6 +95,7 @@ python <skill>/scripts/spreading_activation.py --知识库 <主题>知识库
 
 ## 完成条件
 
+- 自检脚本对本篇报告的问题已清零：没有句号后或连着排的页码，讲解区没有项目代号和内部用语，块编号前有空格，矩阵受控字段都在取值表里。
 - 笔记、矩阵、账本里的身份一致；七章节状态可以追溯。
 - 知识库已按七步更新，新建或补过的节点卡都写成了讲义，笔记里放了补课框，“提取记录”里写明新建和更新了哪些节点。
 - 关键数字、零结果、相反结果、混合结果和局限都有 PDF 页码。
