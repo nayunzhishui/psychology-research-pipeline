@@ -30,11 +30,18 @@ description: Local subskill under psychology-research-pipeline for empirical psy
 5. 原始 CSV、RIS、BibTeX、PubMed XML、Crossref JSON 或 OpenAlex JSON 保持只读；登记平台、日期、过滤器、结果数、导出路径和必要哈希。
 6. 将本轮全部结果追加到唯一候选主表；先按 DOI、PMID/稳定 ID、规范题名+首作者+年份与历轮全部已见题录求差集，再让真正新增题录进入筛选。不能只对 Zotero 或 PDF 查重。
 7. 记录级去重后单独识别同研究多报告；保留报告，只建立 `study_id/study_family_id` 候选关系，不自动合并。
-8. 标注证据用途、构念、设计、撤稿/更正和全文状态；运行覆盖审计。核心 slot 缺口转为下一轮精准问题，而非机械重跑旧检索式。
+8. **引文追踪**：首轮检索初筛后，把核心文献（4 级文献，关键综述和元分析，原始理论、量表和方法文章，直接回答核心问题的研究）登记进引文追踪种子表（模板 `../../templates/引文追踪种子表模板_citation_seeds.csv`），按 `../../references/literature-operations-contract.md` 4.1 做后向和前向追踪；之后每读完一篇核心文献、每轮补检索，都对新增的核心文献做一次。前向用 `scripts/citation_tracking.py`（OpenAlex），最核心的几篇再到 Web of Science 查一次施引文献；索引给的参考文献明显少于 PDF 参考文献表时，按参考文献表补齐。追踪结果和数据库结果一样进候选主表、查重、筛选；一轮没有新纳入文献就停，默认最多两轮。
+9. 标注证据用途、构念、设计、撤稿/更正和全文状态；运行覆盖审计。核心 slot 缺口转为下一轮精准问题，而非机械重跑旧检索式。
 
 ## 默认数据库
 
-核心检索按课题权限选择 PubMed、PsycINFO、Web of Science、CNKI 和期刊官网。Crossref 用于 DOI/出版元数据核验，OpenAlex 用于开放的引文发现与补链，Google Scholar 仅作辅助发现；三者均不得替代核心数据库的可复现检索。Scopus、APA PsycNet、SinoMed、万方或维普仅在用户有权限或课题需要时加入并记录理由。
+核心检索按课题权限选择 PubMed、PsycINFO、Web of Science、CNKI 和期刊官网。Crossref 用于 DOI/出版元数据核验，OpenAlex 用于开放的引文发现与补链（核心文献的前后向引文追踪默认用它，命令见下），Google Scholar 仅作辅助发现；三者均不得替代核心数据库的可复现检索。Scopus、APA PsycNet、SinoMed、万方或维普仅在用户有权限或课题需要时加入并记录理由。
+
+引文追踪的命令（用法和额度说明见脚本开头）：
+
+```text
+python <skill>/scripts/citation_tracking.py --种子表 <引文追踪种子表.csv> --输出目录 <引文追踪原始导出目录> --候选表 <候选文献表.csv> --检索记录 <检索记录.csv>
+```
 
 ## 输出文件
 
@@ -43,7 +50,8 @@ description: Local subskill under psychology-research-pipeline for empirical psy
 - `检索记录_search_log.csv`
 - `候选文献表_candidate_records.csv`
 - `题录导入清单_evidence_import_manifest.json`
-- `种子文献表_seed_papers.csv`
+- `引文追踪种子表_citation_seeds.csv`（种子文献表：哪些核心文献、追过没有）
+- `引文追踪/`：每个种子每个方向的原始导出，以及脚本写出的 `引文追踪结果_<时间>.csv`、`引文追踪新增_<时间>.csv`
 - `文献去重清单_evidence_dedupe_manifest.json`
 - `同研究多报告候选_study_family_candidates.csv`
 - `证据覆盖矩阵_evidence_coverage.csv`
@@ -61,6 +69,7 @@ description: Local subskill under psychology-research-pipeline for empirical psy
 - 是否记录数据库、日期、检索式和结果数？
 - 每个原始导出是否保存路径、格式、记录数和 SHA-256？
 - 是否区分综述、理论、方法、量表和实证文献？
+- 核心文献是否都登记成种子、做完了前后向追踪？种子、方向、日期、轮次、引文索引和停止理由是否都记下了？
 - 是否明确哪些文献只能作背景、哪些可支撑核心假设？
 - 是否检查撤稿/更正，且没有把同一研究的不同报告当作重复记录删除？
 - 核心证据 slot 是否全部达到预设最低数？

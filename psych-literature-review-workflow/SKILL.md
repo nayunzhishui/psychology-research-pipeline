@@ -29,8 +29,8 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 
 ### subskills/
 
-1. `review-scope`：宽方向探索和综述聚焦。
-2. `evidence-search`：正式综述检索和检索饱和记录。
+1. `review-scope`：定题方案（按给定结构读、从文献里长出问题、两者结合）、宽方向探索和综述聚焦。
+2. `evidence-search`：正式综述检索、核心文献的前后向引文追踪和检索饱和记录。
 3. `zotero-ingest`：结构化题录批量导入父条目、Zotero/PDF 状态核验和下载后挂载；Connector 仅作单篇补充。
 4. `literature-screen`：分类、纳排和 1–4 级相关性评级。
 5. `literature-matrix`：唯一逐篇精读入口：三轮阅读、七章节检查，写中文阅读笔记、填阅读矩阵、把证据挂进证据提纲。
@@ -99,12 +99,13 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 ## 6. 启动时必须确认
 
 1. 当前是宽研究方向，还是已经聚焦后的综述主题？
-2. 综述类型：叙述综述、整合型综述、理论综述、范围综述、方法学综述、测量综述、系统综述预备、元分析预备。
-3. 运行模式：`lite`、`standard`、`strict`、`top-journal-prep`。
-4. 目标用途：课程作业、开题、学位论文综述、中文期刊、英文期刊、投稿预备稿。
-5. 核心边界：核心构念、目标人群、年龄段、临床/非临床、研究设计、是否纳入干预、是否纳入神经机制。
-6. 文献获取方式：默认内置浏览器还是外置浏览器回退；可用数据库导出格式；Zotero 目标 collection；PDF 是否由用户下载后批量挂载。
-7. 输出格式：Markdown、DOCX、CSV、Excel、HTML、BibTeX/RIS、APA 参考文献、模拟审稿报告。
+2. 定题方案：用户是否已给定文章结构和综述要回答的问题。三种方案（按给定结构读、从文献里长出问题、两者结合）见 `subskills/review-scope/`；给了结构和问题的默认“两者结合”，只给了主题的默认“从文献里长出问题”。
+3. 综述类型：叙述综述、整合型综述、理论综述、范围综述、方法学综述、测量综述、系统综述预备、元分析预备。
+4. 运行模式：`lite`、`standard`、`strict`、`top-journal-prep`。
+5. 目标用途：课程作业、开题、学位论文综述、中文期刊、英文期刊、投稿预备稿。
+6. 核心边界：核心构念、目标人群、年龄段、临床/非临床、研究设计、是否纳入干预、是否纳入神经机制。
+7. 文献获取方式：默认内置浏览器还是外置浏览器回退；可用数据库导出格式；Zotero 目标 collection；PDF 是否由用户下载后批量挂载。
+8. 输出格式：Markdown、DOCX、CSV、Excel、HTML、BibTeX/RIS、APA 参考文献、模拟审稿报告。
 
 用户已明确回答时，不要重复询问；用户未回答时，可以使用默认值继续，但必须在 `日志/决策记录_decisions.md` 中记录为 assumption。
 
@@ -113,6 +114,8 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 默认数据库：PubMed、PsycINFO、Web of Science、Crossref、Google Scholar（辅助检索，不单独声称完整）、CNKI、期刊官网、Zotero 本地库。
 
 不要默认加入 Scopus、APA PsycNet、Semantic Scholar、OpenAlex、SinoMed、万方或维普。若用户明确要求或项目需要，可作为附加数据库，并在协议中记录理由、检索式、结果数和局限。
+
+OpenAlex 不作为检索数据库，但默认用作引文追踪的引文索引，见 `references/literature-operations-contract.md` 4.1。
 
 ## 8. 默认运行目录
 
@@ -152,12 +155,12 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 
 | 阶段 | 名称 | 主要产物 |
 |---|---|---|
-| 00 | 宽方向探索 | `综述方向聚焦_review_scope.md`, `种子综述文献表_seed_reviews.csv`, `综述方向候选方案_focus_options.md` |
+| 00 | 宽方向探索 | `综述方向聚焦_review_scope.md`（含定题方案）, 选“从文献里长出问题”时另有 `领域地图_field_map.md`, `种子综述文献表_seed_reviews.csv`, `综述方向候选方案_focus_options.md` |
 | 01 | 聚焦与协议 | `综述协议_review_protocol.md`, `概念关系图_concept_map.md`, `纳入排除标准_inclusion_exclusion.md` |
-| 02 | 正式检索 | `检索式记录_queries.md`, `检索记录_search_log.csv`, `候选文献表_candidate_records.csv`, `检索饱和记录_search_saturation_log.csv` |
+| 02 | 正式检索 | `检索式记录_queries.md`, `检索记录_search_log.csv`, `候选文献表_candidate_records.csv`, `引文追踪种子表_citation_seeds.csv`, `检索饱和记录_search_saturation_log.csv` |
 | 03 | Zotero/全文获取 | `Zotero入库清单_zotero_manifest.csv`, `PDF全文清单_pdf_manifest.csv`, `缺PDF下载队列_freepaper.csv`, `未能正常下载PDF清单.csv`, `全文获取报告_acquisition_report.md` |
 | 04 | 文献筛选 | `文献筛选表_literature_screening.csv`, `相关性评级表_relevance_ratings.csv`, `排除理由登记表_exclusion_reason_register.csv` |
-| 05 | 精读与阅读矩阵 | 阅读笔记（知识库 `文献/`）, `文献阅读矩阵_literature_matrix.csv` 及脚本生成的阅读页 `.xlsx`, `证据覆盖台账_evidence_ledger.csv`, `质量评价表_quality_appraisal.csv`, 证据提纲中挂上的证据（提纲骨架在第一次精读前建好，见 `references/deep-reading-contract.md` 第 7 节） |
+| 05 | 精读与阅读矩阵 | 阅读笔记（知识库 `文献/`）, `文献阅读矩阵_literature_matrix.csv` 及脚本生成的阅读页 `.xlsx`, `证据覆盖台账_evidence_ledger.csv`, `质量评价表_quality_appraisal.csv`, `结构改良记录_structure_findings.csv`（阅读中冒出的问题）, 证据提纲中挂上的证据（提纲骨架在第一次精读前建好，见 `references/deep-reading-contract.md` 第 7 节） |
 | 06 | 证据综合 | `证据综合备忘录_synthesis_memo.md`, `矛盾与空白登记表_contradiction_gap_register.csv` |
 | 07 | 文献星图 | `文献星图_literature_star_map.html`, `星图权重表_star_map_weights.csv`, `星图说明_star_map_notes.md` |
 | 08 | 综述框架 | `综述框架_review_outline.md`, 证据提纲定稿（骨架在精读前已建，这里按证据修订主张和段落；每章一个 `第N章 证据提纲.md`，按章、节、段、主张排；导出 `证据提纲总表.xlsx` 和 `主张证据对应表_claim_evidence_map.csv`）, `图表计划_figure_table_plan.md` |

@@ -18,9 +18,10 @@
 | 阶段 | 分 skill | 模板 | 检查表 | 评分表 |
 |---|---|---|---|---|
 | 方向定标 | `cog-neuro-scope` | `方向定标模板_cog_neuro_scope.md` | `认知神经顶刊级总检查表_top_journal_gate.md` | `机制理论贡献评分表_mechanism_contribution.md` |
-| 证据检索 | `evidence-search` | `机制矩阵模板_neural_mechanism_matrix.csv` | `严格停止条件清单_stop_conditions.md` | `机制引用风险评分表_mechanism_citation_risk.md` |
+| 证据检索 | `evidence-search` | `机制矩阵模板_neural_mechanism_matrix.csv`、`引文追踪种子表模板_citation_seeds.csv`；引文追踪脚本 `scripts/citation_tracking.py`，规则见 `references/literature-operations-contract.md` 4.1 | `严格停止条件清单_stop_conditions.md` | `机制引用风险评分表_mechanism_citation_risk.md` |
 | Zotero 入库 | `zotero-ingest` | 无固定模板，按清单输出 | `严格停止条件清单_stop_conditions.md` | 无 |
 | 文献筛选 | `literature-screen` | `机制矩阵模板_neural_mechanism_matrix.csv` | `认知神经顶刊级总检查表_top_journal_gate.md` | `神经生理方法质量评分表_neuro_methods_quality.md` |
+| 精读 | `deep-reading` | `reading_card.md`、`literature_matrix.csv`、`结构改良记录模板_structure_findings.csv`；写法见 `references/reading-note-style.md`，规则见 `references/deep-reading-contract.md` | `认知神经顶刊级总检查表_top_journal_gate.md` | — |
 | 范式评价 | `paradigm-design` | `实验范式评价模板_paradigm_evaluation.md` | `实验范式质量检查表_paradigm_quality.md` | `实验范式质量评分表_paradigm_quality.md` |
 | 神经/生理方法评价 | `neuro-methods-design` | `神经生理方法方案模板_neuro_methods_plan.md` | `EEG_ERP报告检查表_eeg_erp_reporting.md`、`fMRI报告检查表_fmri_reporting.md`、`PSG睡眠研究检查表_psg_sleep_reporting.md`、`眼动研究检查表_eye_tracking_reporting.md`、`NIRS报告检查表_nirs_reporting.md`、`心理生理指标检查表_psychophysiology_reporting.md` | `神经生理方法质量评分表_neuro_methods_quality.md` |
 | 预处理与分析评价 | `neuro-data-analysis` | `预处理计划模板_preprocessing_plan.md`、`统计分析计划模板_statistical_analysis_plan.md` | `预处理与分析检查表_preprocessing_analysis.md` | `预处理透明性评分表_preprocessing_transparency.md` |

@@ -56,9 +56,10 @@ description: Local subskill under psych-literature-review-workflow for close rea
 8. **挂证据提纲**
    - 方向按 `../../references/deep-reading-contract.md` 第 7 节的定义判断：检验了这条主张、结果一致就是“支持”；“限定”只用于结果本身划出了主张成立的边界，不是“这篇有局限”。
    - 在对应主张下加证据行，同时更新证据概述和证据强度；
-   - 找不到合适的主张时，记进结构改良记录，不自己加主张。
+   - 做问题涌现检查（`../../references/deep-reading-contract.md` 第 7 节第 5 条）：新问题、问题的新角度、相反结果、结构问题，以及找不到合适主张的发现，都记进结构改良记录（模板 `../../templates/结构改良记录模板_structure_findings.csv`），不自己加主张。
 9. **收尾**
    - 运行 `scripts/check_reading_outputs.py`（命令见 `../../references/reading-note-style.md` 第 7 节），本篇的问题清零；“数字核对”页列出的数字逐条回原文看。
+   - 这篇是核心文献的，登记进引文追踪种子表，按 `../../references/literature-operations-contract.md` 4.1 做前向和后向追踪；读参考文献时看到的相关文献，也登记进候选表。
    - 在笔记的“提取记录”里写执行人和日期，状态写“已读全文，单人提取”；
    - 需要第二人核对的，交给核对人。
    - 交接记录写成完整的中文句子：读了哪篇，笔记在哪里，挂到了哪几条主张，还有什么待核。不用内部缩写、代号和“父核”“子任务”这类过程用语，用户要能直接看懂。
@@ -77,6 +78,10 @@ python <skill>/scripts/check_reading_outputs.py --根 <库根目录> --知识库
 ```
 
 第三个脚本（激活扩散）约每 10 篇或每周运行一次即可。第四个是自检，报告里的问题改完再收尾；矩阵问题按项目的取值表改，解释写进单元格批注或笔记。
+
+每批结束时还要做两件事：
+- 把这一批的结构改良记录按章节汇总给用户，等用户决定要不要改问题和结构（`../../references/deep-reading-contract.md` 第 7 节第 5 条）；
+- 引文追踪种子表里还有“待做”或“待续”的种子，运行 `python <skill>/scripts/citation_tracking.py --种子表 <引文追踪种子表.csv> --输出目录 <02_正式检索/引文追踪> --候选表 <候选文献表.csv> --检索记录 <检索记录.csv>`，新增的题录照常筛选。
 
 ## 综述覆盖层
 

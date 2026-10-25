@@ -25,17 +25,26 @@ description: Local subskill under psych-cog-neuro-review for cognitive neuroscie
 3. 默认用已合法登录的内置浏览器检索并导出，页面不兼容时回退到授权外置浏览器；记录精确语法、日期、限制、结果数和不可变原始导出。
 4. 将本轮全部结果追加到唯一候选主表，与历轮全部已见题录求差集；不能只对 Zotero/PDF 或已纳入报告查重。
 5. 仅新增记录进入筛选；记录级去重与同研究多报告识别分开，标注理论、范式、方法、机制和背景用途。
-6. 按机制证据槽、方法透明性和增量相关记录更新缺口与停止条件；不因脑区显著性或期望机制方向调整检索。
+6. **引文追踪**：首轮检索初筛后，把核心文献（4 级文献，关键综述和元分析，原始理论、范式或指标的开发研究，直接回答核心机制问题的研究）登记进引文追踪种子表（模板 `../../templates/引文追踪种子表模板_citation_seeds.csv`），按 `../../references/literature-operations-contract.md` 4.1 做后向和前向追踪；之后每读完一篇核心文献、每轮补检索，都对新增的核心文献做一次。前向用 `scripts/citation_tracking.py`（OpenAlex），最核心的几篇再到 Web of Science 查一次施引文献；索引给的参考文献明显少于 PDF 参考文献表时，按参考文献表补齐。追踪结果和数据库结果一样进候选主表、查重、筛选。
+7. 按机制证据槽、方法透明性和增量相关记录更新缺口与停止条件；不因脑区显著性或期望机制方向调整检索。引文追踪一轮没有新纳入文献就停，默认最多两轮，理由写进检索记录。
+
+引文追踪的命令（用法和额度说明见脚本开头）：
+
+```text
+python <skill>/scripts/citation_tracking.py --种子表 <引文追踪种子表.csv> --输出目录 <引文追踪原始导出目录> --候选表 <候选文献表.csv> --检索记录 <检索记录.csv>
+```
 
 ## 默认数据库
 
-PubMed、PsycINFO、Web of Science、Crossref、Google Scholar（辅助）、CNKI、期刊官网、Zotero 本地库。用户明确要求时，可加入 Scopus、APA PsycNet、Semantic Scholar、OpenAlex、SinoMed、万方或维普，并记录理由。
+PubMed、PsycINFO、Web of Science、Crossref、Google Scholar（辅助）、CNKI、期刊官网、Zotero 本地库。用户明确要求时，可加入 Scopus、APA PsycNet、Semantic Scholar、OpenAlex、SinoMed、万方或维普，并记录理由。OpenAlex 不作为检索数据库，但默认用作引文追踪的引文索引。
 
 ## 输出文件
 
 - `检索式记录_queries.md`
 - `数据库检索记录_database_search_log.csv`
 - `候选文献表_candidate_records.csv`
+- `引文追踪种子表_citation_seeds.csv`
+- `引文追踪/`：每个种子每个方向的原始导出，以及脚本写出的 `引文追踪结果_<时间>.csv`、`引文追踪新增_<时间>.csv`
 - `种子方法学文献表_seed_methods.csv`
 - `证据空白备忘录_evidence_gap_memo.md`
 - `缺PDF下载队列_freepaper.csv`（仅在父条目和附件状态核验后生成）
@@ -50,6 +59,7 @@ PubMed、PsycINFO、Web of Science、Crossref、Google Scholar（辅助）、CNK
 - 是否记录每个数据库的检索式和结果数？
 - 是否区分方法学证据与实证证据？
 - 是否记录反向证据和矛盾证据？
+- 核心文献是否都登记成种子、做完了前后向追踪？种子、方向、日期、轮次、引文索引和停止理由是否都记下了？
 - 是否对历轮全部已见题录求差集，并保留检索过但未入库的旧记录？
 
 ## 失败与停止条件
@@ -64,4 +74,4 @@ PubMed、PsycINFO、Web of Science、Crossref、Google Scholar（辅助）、CNK
 
 ## 完成条件
 
-形成检索式、检索记录、候选文献表、种子方法学文献表和证据空白备忘录。
+形成检索式、检索记录、候选文献表、引文追踪种子表、种子方法学文献表和证据空白备忘录。

@@ -10,6 +10,8 @@
 | 工具权限与能力清单 | `references/tool-capabilities.json`、`scripts/tool_registry.py`、`schemas/tool-capability.schema.json` |
 | R 可复现环境、双源题录、PDF 与投稿构建 | `references/reproducibility-and-publishing.md`、`scripts/bootstrap_r_environment.R`、`templates/_targets.R`、`templates/manuscript.qmd` |
 | Crossref/OpenAlex 双源核验 | `scripts/metadata_verify.py` |
+| 核心文献前后向引文追踪（OpenAlex） | `scripts/citation_tracking.py`、`templates/引文追踪种子表模板_citation_seeds.csv`；规则见 `references/literature-operations-contract.md` 4.1 |
+| 阅读中冒出的问题与结构改良 | `templates/结构改良记录模板_structure_findings.csv`；规则见 `references/deep-reading-contract.md` 第 7 节 |
 | PyMuPDF/GROBID 两级 PDF 审计 | `scripts/pdf_ingest.py` |
 | ASReview 排序边界 | `scripts/screening_rank_bridge.py` |
 | RO-Crate 式哈希关系导出 | `scripts/export_ro_crate.py` |

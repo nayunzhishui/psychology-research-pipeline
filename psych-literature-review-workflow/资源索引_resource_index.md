@@ -19,9 +19,9 @@
 |---|---|---|---|---|
 | 方向聚焦 | `review-scope` | `综述方向聚焦模板_review_scope.md` | `叙述综述透明化检查表_narrative_review_transparency.md` | `综述选题质量评分表_review_topic_quality.md` |
 | 综述协议 | `review-scope` / `evidence-search` | `综述协议模板_review_protocol.md` | `PRISMA_2020检查表_prisma_2020.md`、`PRISMA_ScR检查表_prisma_scr.md` | `检索透明性评分表_search_transparency.md` |
-| 检索 | `evidence-search` | `检索记录模板_search_log.csv` | `综述检索透明性检查表_search_transparency.md`、`检索饱和停止条件_search_saturation_stop.md` | `检索透明性评分表_search_transparency.md` |
+| 检索 | `evidence-search` | `检索记录模板_search_log.csv`、`引文追踪种子表模板_citation_seeds.csv`；引文追踪脚本 `scripts/citation_tracking.py`，规则见 `references/literature-operations-contract.md` 4.1 | `综述检索透明性检查表_search_transparency.md`、`检索饱和停止条件_search_saturation_stop.md` | `检索透明性评分表_search_transparency.md` |
 | 筛选 | `literature-screen` | `文献筛选表模板_literature_screening.csv` | `文献筛选检查表_literature_screening.md` | `文献完整性评分表_literature_completeness.md` |
-| 精读与阅读矩阵 | `literature-matrix` | `阅读笔记模板_reading_note.md`、`文献阅读矩阵模板_literature_matrix.csv`；写法见 `references/reading-note-style.md` | `阅读矩阵检查表_literature_matrix.md` | `证据综合质量评分表_synthesis_quality.md` |
+| 精读与阅读矩阵 | `literature-matrix` | `阅读笔记模板_reading_note.md`、`文献阅读矩阵模板_literature_matrix.csv`、`结构改良记录模板_structure_findings.csv`；写法见 `references/reading-note-style.md` | `阅读矩阵检查表_literature_matrix.md` | `证据综合质量评分表_synthesis_quality.md` |
 | 知识库 | `knowledge-vault` | `概念卡模板_concept_card.md`；规则见 `references/knowledge-vault-contract.md`；脚本 `scripts/init_knowledge_vault.py`、`scripts/spreading_activation.py` | `阅读矩阵检查表_literature_matrix.md` | — |
 | 证据提纲 | `literature-matrix` / `manuscript-write` | `证据提纲模板_evidence_outline.md`；导出 `scripts/export_evidence_outline.py`（同时生成 `主张证据对应表_claim_evidence_map.csv`） | `阅读矩阵检查表_literature_matrix.md` | `证据综合质量评分表_synthesis_quality.md` |
 | 文献星图 | `star-map` | `文献星图权重表模板_star_map_weights.csv` | `阅读矩阵检查表_literature_matrix.md` | `证据综合质量评分表_synthesis_quality.md` |

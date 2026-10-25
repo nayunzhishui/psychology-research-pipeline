@@ -31,8 +31,8 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 
 ### subskills/
 
-1. `cog-neuro-scope`：方向与任务定标，明确综述问题和机制边界。
-2. `evidence-search`：认知神经科学理论、范式、指标和实证证据检索。
+1. `cog-neuro-scope`：定题方案（按给定结构读、从文献里长出问题、两者结合）、方向与任务定标，明确综述问题和机制边界。
+2. `evidence-search`：认知神经科学理论、范式、指标和实证证据检索，以及核心文献的前后向引文追踪。
 3. `zotero-ingest`：结构化题录批量导入父条目、Zotero/PDF 状态核验和下载后挂载；Connector 仅作单篇补充。
 4. `literature-screen`：认知神经科学文献分类和评级。
 5. `deep-reading`：唯一逐篇精读入口：三轮阅读、七章节和神经科学覆盖层检查，写中文阅读笔记、填阅读矩阵和机制矩阵、把证据挂进证据提纲。
@@ -100,12 +100,13 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 ## 6. 启动时必须确认
 
 1. 当前是宽方向，还是已经聚焦后的认知神经科学综述主题？
-2. 综述类型：机制综述、理论综述、方法学综述、范式综述、指标综述、范围综述、系统综述预备、元分析预备。
-3. 核心边界：构念、人群、年龄段、临床/非临床、human/animal/computational、实验范式、神经/生理指标。
-4. 目标用途：课程作业、开题、学位论文、中文期刊、英文期刊、投稿预备。
-5. 运行模式：`lite`、`standard`、`strict`、`top-journal-prep`。
-6. 文献获取方式：默认内置浏览器还是外置浏览器回退；可用数据库导出格式；Zotero 目标 collection；PDF 是否由用户下载后批量挂载。
-7. 输出格式：Markdown、DOCX、CSV、Excel、HTML、BibTeX/RIS、APA 参考文献、模拟审稿报告。
+2. 定题方案：用户是否已给定文章结构和综述要回答的问题。三种方案（按给定结构读、从文献里长出问题、两者结合）见 `subskills/cog-neuro-scope/`；给了结构和问题的默认“两者结合”，只给了主题的默认“从文献里长出问题”。
+3. 综述类型：机制综述、理论综述、方法学综述、范式综述、指标综述、范围综述、系统综述预备、元分析预备。
+4. 核心边界：构念、人群、年龄段、临床/非临床、human/animal/computational、实验范式、神经/生理指标。
+5. 目标用途：课程作业、开题、学位论文、中文期刊、英文期刊、投稿预备。
+6. 运行模式：`lite`、`standard`、`strict`、`top-journal-prep`。
+7. 文献获取方式：默认内置浏览器还是外置浏览器回退；可用数据库导出格式；Zotero 目标 collection；PDF 是否由用户下载后批量挂载。
+8. 输出格式：Markdown、DOCX、CSV、Excel、HTML、BibTeX/RIS、APA 参考文献、模拟审稿报告。
 
 用户已明确回答时，不要重复询问；用户未回答时，可以使用默认值继续，但必须记录为 assumption。
 
@@ -114,6 +115,8 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 默认数据库：PubMed、PsycINFO、Web of Science、Crossref、Google Scholar（辅助检索，不单独声称完整）、CNKI、期刊官网、Zotero 本地库。
 
 不要默认加入 Scopus、APA PsycNet、Semantic Scholar、OpenAlex、SinoMed、万方或维普。若用户明确要求，或某一认知神经科学主题确有必要，可作为附加数据库，并在协议中记录理由、检索式、结果数和局限。
+
+OpenAlex 不作为检索数据库，但默认用作引文追踪的引文索引，见 `references/literature-operations-contract.md` 4.1。
 
 ## 8. 默认运行目录
 
@@ -153,12 +156,12 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 
 | 阶段 | 名称 | 主要产物 |
 |---|---|---|
-| 00 | 方向与任务定标 | `方向定标简报_cog_neuro_scope.md`, `机制范围说明_mechanism_scope.md` |
+| 00 | 方向与任务定标 | `方向定标简报_cog_neuro_scope.md`（含定题方案）, `机制范围说明_mechanism_scope.md`, 选“从文献里长出问题”时另有 `领域地图_field_map.md` |
 | 01 | 协议冻结 | `综述协议_review_protocol.md`, `概念关系图_concept_map.md`, `纳入排除标准_inclusion_exclusion.md` |
-| 02 | 证据检索 | `检索式记录_queries.md`, `数据库检索记录_database_search_log.csv`, `候选文献表_candidate_records.csv` |
+| 02 | 证据检索 | `检索式记录_queries.md`, `数据库检索记录_database_search_log.csv`, `候选文献表_candidate_records.csv`, `引文追踪种子表_citation_seeds.csv` |
 | 03 | Zotero/全文获取 | `Zotero入库清单_zotero_manifest.csv`, `PDF全文清单_pdf_manifest.csv`, `缺PDF下载队列_freepaper.csv`, `未能正常下载PDF清单.csv`, `全文获取报告_acquisition_report.md` |
 | 04 | 分类与筛查 | `文献筛选表_literature_screening.csv`, `相关性评级表_relevance_ratings.csv` |
-| 05 | 精读与证据矩阵 | 阅读笔记（知识库 `文献/`）, `文献阅读矩阵_literature_matrix.csv` 及脚本生成的阅读页 `.xlsx`, `机制矩阵_neural_mechanism_matrix.csv`, `质量评价表_quality_appraisal.csv`, 证据提纲中挂上的证据（提纲骨架在第一次精读前建好，见 `references/deep-reading-contract.md` 第 7 节） |
+| 05 | 精读与证据矩阵 | 阅读笔记（知识库 `文献/`）, `文献阅读矩阵_literature_matrix.csv` 及脚本生成的阅读页 `.xlsx`, `机制矩阵_neural_mechanism_matrix.csv`, `质量评价表_quality_appraisal.csv`, `结构改良记录_structure_findings.csv`（阅读中冒出的问题）, 证据提纲中挂上的证据（提纲骨架在第一次精读前建好，见 `references/deep-reading-contract.md` 第 7 节） |
 | 06 | 机制模型 | `机制模型说明_mechanism_model.md`, 证据提纲定稿（骨架在精读前已建，这里按证据修订；每章一个 `第N章 证据提纲.md`；导出 `证据提纲总表.xlsx` 和 `主张证据对应表_claim_evidence_map.csv`） |
 | 07 | 范式与方法评价 | `实验范式评价_paradigm_evaluation.md`, `神经生理方法评价_neuro_methods_evaluation.md` |
 | 08 | 预处理与分析评价 | `预处理透明性评价_preprocessing_transparency.md`, `分析方法评价_analysis_methods_evaluation.md` |
