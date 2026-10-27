@@ -114,6 +114,12 @@ def test_check_note_flags_moved_caveats_labels_formulas_and_check_wording(tmp_pa
     assert row["讲解区内部用语"] == "需核×1"  # “我的评价”里的不算
 
 
+def test_polynomial_terms_are_not_chinese_counts() -> None:
+    assert not cro.CN_NUM.search("另试含三次项的模型")
+    assert not cro.CN_NUM.search("取三次方")
+    assert cro.CN_NUM.search("评估了三次")
+
+
 def test_orphan_heading_and_math_patterns_do_not_flag_ordinary_text() -> None:
     assert not cro.ORPHAN_HEAD.search("发现6 补充分析")
     assert not cro.ORPHAN_HEAD.search("补充材料")
