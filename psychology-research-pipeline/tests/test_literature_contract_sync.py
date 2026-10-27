@@ -215,6 +215,10 @@ def test_shared_reading_scripts_are_synchronized() -> None:
         "export_evidence_outline.py",
         "init_knowledge_vault.py",
         "spreading_activation.py",
+        "check_reading_outputs.py",
+        "tidy_reading_notes.py",
+        "citation_tracking.py",
+        "check_reported_stats.py",
     ):
         texts = [(root / "scripts" / name).read_text(encoding="utf-8") for root in SKILL_ROOTS]
         assert texts[0] == texts[1] == texts[2], name

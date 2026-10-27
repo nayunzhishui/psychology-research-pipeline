@@ -90,3 +90,46 @@ def test_tidy_refuses_backup_inside_the_vault(tmp_path: Path) -> None:
         capture_output=True, text=True, encoding="utf-8", env=env)
     assert result.returncode != 0
     assert "备份目录不能放在库里面" in (result.stderr + result.stdout)
+
+
+def test_check_note_flags_moved_caveats_labels_formulas_and_check_wording(tmp_path: Path) -> None:
+    kb = tmp_path / "知识库"
+    (kb / "文献").mkdir(parents=True)
+    note = (
+        "---\n类型: 文献\n阅读深度: D2\n设计: 横断\n---\n"
+        "# 某某 2025：自评人格功能与抑郁相关\n\n> [!summary] 30 秒看懂\n> 一句话。\n\n"
+        "## 为什么读这篇\n\n正文所报 χ²(1) = 3.96 与 p < .001 不匹配，需核原统计。\n\n"
+        "## 研究怎么做\n\n**教学示例（非研究个案）**：甲乙两人。t 写成 \\(b/SE\\)。\n\n"
+        "### 方法与解释补充\n\n这是相关。\n\n"
+        "## 主要发现\n\n相关 r = .40。 ^f1\n\n## 我的评价\n\n需核的地方写在这里不算。\n\n"
+        "## 对我的文章有什么用\n\n- 背景。\x0c\n"
+    )
+    p = kb / "文献" / "某某 2025.md"
+    p.write_text(note, encoding="utf-8")
+    row = cro.check_note(p, cro.Index(tmp_path, cro.SKIP_DIRS), cro.Pdfs(None), cro.D2_SECTIONS, False, [], [])
+    assert "有收集限定句的小节：方法与解释补充" in row["问题"]
+    assert "1 处教学示例标签不是" in row["问题"]
+    assert "处公式用了" in row["问题"]
+    assert "个控制字符" in row["问题"]
+    assert row["讲解区内部用语"] == "需核×1"  # “我的评价”里的不算
+
+
+def test_orphan_heading_and_math_patterns_do_not_flag_ordinary_text() -> None:
+    assert not cro.ORPHAN_HEAD.search("发现6 补充分析")
+    assert not cro.ORPHAN_HEAD.search("补充材料")
+    assert not cro.BAD_MATH.search("文献 \\[1\\] 和 \\[2\\]")
+    assert cro.BAD_MATH.search("\\[ \\frac{a}{b} \\]")
+    assert not cro.CTRL.search("第一行\r\n第二行")
+
+
+def test_full_method_card_needs_a_formula(tmp_path: Path) -> None:
+    (tmp_path / "知识库" / "方法").mkdir(parents=True)
+    card = tmp_path / "知识库" / "方法" / "线性回归.md"
+    body = "## 是什么\n\n### 直观\n\n" + "回归把结果拆成预测部分和误差。" * 200 + "\n\n## 资料来源\n\n[1] 教材。\n"
+    head = "---\n类型: 方法\n讲义: 完整\n---\n# 线性回归\n\n"
+    card.write_text(head + body, encoding="utf-8")
+    row = cro.check_card(card, cro.Index(tmp_path, cro.SKIP_DIRS), cro.Pdfs(None), cro.Counter(), [])
+    assert "方法讲义没有公式" in row["问题"]
+    card.write_text(head + body.replace("误差。", "误差：$y = b_0 + b_1 x + e$。", 1), encoding="utf-8")
+    row = cro.check_card(card, cro.Index(tmp_path, cro.SKIP_DIRS), cro.Pdfs(None), cro.Counter(), [])
+    assert "方法讲义没有公式" not in row["问题"]

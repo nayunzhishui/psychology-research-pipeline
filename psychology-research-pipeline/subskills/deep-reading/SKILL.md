@@ -35,7 +35,7 @@ description: Local subskill for close reading of one level-3 or level-4 empirica
    - 证据提纲还没有骨架的，先按 `../../references/deep-reading-contract.md` 第 7 节建骨架，标“初稿”，请用户确认；
    - 没有全文的，标“受阻”，停在这一步。
 2. **第一轮：定位。** 读题录、摘要、引言、讨论、结论和参考文献，边读边记“事实 + 页码”。
-3. **第二轮：方法、数据与结果。** 包括表图和补充材料。所有结果都记，零结果和相反结果也记；核心图做反向阅读。
+3. **第二轮：方法、数据与结果。** 包括表图和补充材料。所有结果都记，零结果和相反结果也记；核心图做反向阅读。 主要结果用 `scripts/check_reported_stats.py` 验算（`../../references/reading-note-style.md` 6.1），对不上的先查、再算，能判定的当场判定。
 4. **第三轮：批判与写作转化。**
    - 把“作者声称”“结果显示”“我的推断”分开；
    - 对照七章节检查清单确认查清。
@@ -45,7 +45,7 @@ description: Local subskill for close reading of one level-3 or level-4 empirica
    - 再写“这篇和我的研究有什么关系”和“对我的论文有什么用”；
    - 最后写“30 秒看懂”。
 
-   写之前先看 `../../references/reading-note-example-d1.md`（3 级看 `reading-note-example-d2.md`）和 `../../references/writing-before-after.md`。按 `reading-note-style.md` 第 0 节分三个区写：讲解区只讲这篇做了什么、发现了什么、数字是什么意思，一段最多一句限定；研究的局限写在“我的评价”；核对中发现的小出入写在“疑问与待核”。先把事实和页码列成底稿，再写成给新同学看的段落。每条发现的段落末尾空一格，加块编号。
+   写之前先看 `../../references/reading-note-example-d1.md`（3 级看 `reading-note-example-d2.md`）和 `../../references/writing-before-after.md`。按 `reading-note-style.md` 第 0 节分三个区写：讲解区只讲这篇做了什么、发现了什么、数字是什么意思，一段最多一句限定；研究的局限写在“我的评价”；查过、算过仍定不下来的小出入写在“疑问与待核”。先把事实和页码列成底稿，再写成给新同学看的段落。每条发现的段落末尾空一格，加块编号。
 6. **连知识库**：知识库靠这一步一篇一篇长起来，不能省。按 `../knowledge-vault/SKILL.md` 的“每写完一篇笔记”做七步：
    - 列节点、查重、新建或补讲义（动笔前已经做了的，这里只补漏）；
    - 补关联、写证据；

@@ -3,8 +3,9 @@
 
 查五类问题，结果写进一个 xlsx（汇总、笔记、知识卡、数字核对、坏链接、矩阵），命令行打印各类数量：
 1. 版式：速览框是否在开头、该有的小节是否齐、篇幅够不够、工具和方法有没有补课框、标题是否写成了限制；
-2. 讲法：句号后或段尾连着的页码、一段里多处限定、讲解区出现项目代号或内部用语、用中文数字计数、
-   块编号前缺空格；
+2. 讲法：句号后或段尾连着的页码、一段里多处限定、讲解区出现项目代号或内部用语（含“待核”“不擅自”这类核对用语）、
+   用中文数字计数、块编号前缺空格、收集限定句的小节（如“方法与解释补充”）、教学示例标签不是“教学示例（虚构）”、
+   公式写成 \\( \\) 或 \\[ \\]（Obsidian 不显示）、控制字符（脚本把 \\f 这类转义吃掉了）；知识卡里，完整的方法讲义要有公式；
 3. 链接：双链、嵌入的小节、块编号、PDF 页码、图片是否都找得到；
 4. 数字：段落里的统计数字能不能在它所引的 PDF 页（前后各放宽 1 页）上找到。找不到的不一定错：
    可能是笔记换算过（应写成“约……”或写明怎么算），可能来自图（文字层里没有），可能页码标错了；
@@ -37,7 +38,8 @@ PILE = re.compile(r"[。！？]\s*(?:" + ONE_PAGE + r")|(?<![（(、—])(?:" + 
 # 防御性限定的说法；“能不能”“是不是”这类问句和“而不是”这类对照不算
 CAVEAT = re.compile(r"不能说明|不能证明|不能写成|不能把|不能将|不能据此|不能直接|不能用|不能当|不能算|不能替代|不能视为"
                     r"|不等于|不等同|不意味着|不代表|不授|不升级|不算|不作为|不足以|不宜|不应|不可|未必能")
-INTERNAL = re.compile(r"原页|原图|图读|目视|表文冲突|口径|不授|不升级|不计新增|挂载|单人提取待核|如实保留|如实记为|不擅自|不偷偷|证据槽|槽位")
+INTERNAL = re.compile(r"原页|原图|图读|目视|表文冲突|口径|不授|不升级|不计新增|挂载|单人提取待核|如实保留|如实记为|不擅自|不偷偷|证据槽|槽位"
+                      r"|擅自|冒充|补造|悄改|不猜|需核|仍待核|待核")
 CODE = re.compile(r"(?<![A-Za-z0-9])(?:C[1-3]|E[1-5]|M[0-2]|D[0-3])(?![A-Za-z0-9])|(?<![A-Za-z])PF(?![A-Za-z])"
                   r"|本轮|外部补充|精读篇数|[CEM] ?等级|结构\d{3,4}")
 CN_NUM = re.compile(r"(?<![第一二三四五六七八九十百千万两几])(?:[二三四五六七八九]?十[一二三四五六七八九]?|[三四五六七八九]|百)"
@@ -45,6 +47,12 @@ CN_NUM = re.compile(r"(?<![第一二三四五六七八九十百千万两几])(?:
                     r"|领域|维度|因子|时点|分量|侧面|章节|阶段|条目|指标|模型)")
 BLOCK_GLUED = re.compile(r"(?<=\S)\^[A-Za-z0-9][\w-]*[ \t]*$", re.M)
 LIMIT_TITLE = re.compile(r"边界|限度|不等于|不能|并非|而非")
+# 把各段限定句挪出来集中存放的小节（reading-note-style.md 第 0 节第 7 条）；“补充分析”“补充材料”不算
+ORPHAN_HEAD = re.compile(r"(?:方法|解释|说明|限定|注意).{0,3}补充|补充(?:说明|解释|限定)")
+TEACH = re.compile(r"教学示例(（[^）]*）)?(?=\*{0,2}\s*[：:])")
+# Obsidian 不显示 \( \) 和 \[ \]；\[ 只在里面像公式时才算，免得误报转义的方括号
+BAD_MATH = re.compile(r"\\\(.+?\\\)|\\\[(?=[^\]\n]*(?:\\[A-Za-z]|[=^_]))")
+CTRL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]|\r(?!\n)")
 TOOLNAME = re.compile(r"[A-Za-z][A-Za-z]*(?:-[A-Za-z]+)*[- ]?\d+(?:\.\d+)?")
 NUM = re.compile(r"(?<![A-Za-z0-9_.])(?:\d+\.\d+|\.\d+|\d{2,})(?![A-Za-z0-9_])")
 NODE_TYPES = {"概念", "测量工具", "结局", "变量", "方法", "样本"}
@@ -295,6 +303,19 @@ def check_note(p: Path, idx: Index, pdfs: Pdfs, d1_sections: list[str], verify: 
     glued = len(BLOCK_GLUED.findall(body))
     if glued:
         issues.append(f"{glued} 个块编号前缺空格")
+    orphan = [h for h in (norm(m.group(1)) for m in re.finditer(r"^#{2,4}\s+(.*?)\s*$", body, re.M))
+              if ORPHAN_HEAD.search(h) and h not in EVAL_H2]
+    if orphan:
+        issues.append("有收集限定句的小节：" + "、".join(orphan) + "（句子放回原段改写，删掉小节）")
+    labels = [m.group(1) or "" for m in TEACH.finditer(body)]
+    odd = [x for x in labels if x != "（虚构）"]
+    if odd:
+        issues.append(f"{len(odd)} 处教学示例标签不是“教学示例（虚构）”")
+    math_bad, ctrl = len(BAD_MATH.findall(body)), len(CTRL.findall(text))
+    if math_bad:
+        issues.append(f"{math_bad} 处公式用了 \\( \\) 或 \\[ \\]，Obsidian 不显示，改用 $…$")
+    if ctrl:
+        issues.append(f"有 {ctrl} 个控制字符（多半是脚本把 \\f、\\a 这类转义吃掉了）")
     piles = caveat_paras = 0
     codes, cn, internal = Counter(), Counter(), Counter()
     for h2, h3, line in blocks(body):
@@ -318,6 +339,7 @@ def check_note(p: Path, idx: Index, pdfs: Pdfs, d1_sections: list[str], verify: 
                 "中文计数": "、".join(f"{k}×{v}" for k, v in cn.most_common(5)),
                 "补课框": len(re.findall(r"\[!tip\]", body)),
                 "发现块": len(re.findall(r"\s\^f\d+\s*$", body, re.M)),
+                "收集限定句的小节": "、".join(orphan), "教学示例标签不统一": len(odd), "公式问题": math_bad + ctrl,
                 "问题": "；".join(issues)})
     check_links(body, p.stem, idx, pdfs, bad)
     return row
@@ -349,6 +371,13 @@ def check_card(p: Path, idx: Index, pdfs: Pdfs, uses: Counter, bad: list) -> dic
     codes = Counter(m.group(0) for m in CODE.finditer(lesson))
     if codes:
         issues.append("讲义里有项目代号：" + "、".join(codes))
+    if typ == "方法" and tier == "完整" and "$" not in body:
+        issues.append("方法讲义没有公式（写出核心公式，用 $…$）")
+    math_bad, ctrl = len(BAD_MATH.findall(body)), len(CTRL.findall(text))
+    if math_bad:
+        issues.append(f"{math_bad} 处公式用了 \\( \\) 或 \\[ \\]，Obsidian 不显示，改用 $…$")
+    if ctrl:
+        issues.append(f"有 {ctrl} 个控制字符（多半是脚本把 \\f、\\a 这类转义吃掉了）")
     for line in section(body, "关联").splitlines():
         if line.startswith("- "):
             parts = [x.strip() for x in line[2:].split("｜")]
@@ -357,7 +386,7 @@ def check_card(p: Path, idx: Index, pdfs: Pdfs, uses: Counter, bad: list) -> dic
                 break
     check_links(body, p.stem, idx, pdfs, bad)
     return {"卡片": p.stem, "类型": typ, "讲义": tier, "是什么字数": n, "被几篇笔记用到": uses[p.stem],
-            "问题": "；".join(issues)}
+            "公式问题": math_bad + ctrl, "问题": "；".join(issues)}
 
 
 def check_matrix(path: Path, vocab: dict, notes: dict[str, dict], node_names: set[str]) -> list[tuple]:
@@ -485,6 +514,9 @@ def main() -> None:
         ("讲解区有代号的笔记", sum(1 for r in note_rows if r["讲解区代号"])),
         ("讲解区有内部用语的笔记", sum(1 for r in note_rows if r["讲解区内部用语"])),
         ("用中文数字计数的笔记", sum(1 for r in note_rows if r["中文计数"])),
+        ("有收集限定句小节的笔记", sum(1 for r in note_rows if r["收集限定句的小节"])),
+        ("教学示例标签不统一的笔记", sum(1 for r in note_rows if r["教学示例标签不统一"])),
+        ("公式写法或控制字符有问题的笔记和知识卡", sum(1 for r in note_rows + card_rows if r["公式问题"])),
         ("核对的数字", sum(r.get("核数字", 0) for r in note_rows)),
         ("所引页上没找到的数字", len(nums)),
         ("  其中可能是换算", sum(1 for r in nums if r[3] == "可能是换算")),

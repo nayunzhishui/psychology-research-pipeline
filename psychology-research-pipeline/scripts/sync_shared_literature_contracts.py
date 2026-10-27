@@ -34,6 +34,7 @@ SHARED_SCRIPTS = (
     "check_reading_outputs.py",
     "tidy_reading_notes.py",
     "citation_tracking.py",
+    "check_reported_stats.py",
 )
 
 

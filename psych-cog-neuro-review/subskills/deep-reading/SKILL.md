@@ -37,7 +37,8 @@ description: Local subskill for close reading of one level-3 or level-4 cognitiv
 3. **第二轮：方法、数据与结果。**
    - 逐项记下范式、对照条件、试次、采集参数、预处理、伪迹和试次排除、ROI 或全脑、时间窗或频带、多重比较；
    - 行为、主观、神经和生理结果分开记，零结果和相反结果也记；
-   - 脑图、波形、时频图做反向阅读。
+   - 脑图、波形、时频图做反向阅读；
+   - 主要结果用 `scripts/check_reported_stats.py` 验算（`../../references/reading-note-style.md` 6.1），对不上的先查、再算，能判定的当场判定。
 4. **第三轮：批判与写作转化。**
    - 把“作者声称”“结果显示”“我的机制推断”分开；
    - 检查有没有反向推断，有没有跨模态尺度的跳跃；
@@ -48,7 +49,7 @@ description: Local subskill for close reading of one level-3 or level-4 cognitiv
    - 再写评价和用处；
    - 最后写“30 秒看懂”。
 
-   写之前先看 `../../references/reading-note-example-d1.md`（3 级看 `reading-note-example-d2.md`）和 `../../references/writing-before-after.md`。按 `reading-note-style.md` 第 0 节分三个区写：讲解区只讲这篇做了什么、发现了什么、数字是什么意思，一段最多一句限定；研究的局限写在“我的评价”；核对中发现的小出入写在“疑问与待核”。先把事实和页码列成底稿，再写成给新同学看的段落。每条发现的段落末尾空一格，加块编号。
+   写之前先看 `../../references/reading-note-example-d1.md`（3 级看 `reading-note-example-d2.md`）和 `../../references/writing-before-after.md`。按 `reading-note-style.md` 第 0 节分三个区写：讲解区只讲这篇做了什么、发现了什么、数字是什么意思，一段最多一句限定；研究的局限写在“我的评价”；查过、算过仍定不下来的小出入写在“疑问与待核”。先把事实和页码列成底稿，再写成给新同学看的段落。每条发现的段落末尾空一格，加块编号。
 6. **连知识库**：知识库靠这一步一篇一篇长起来，不能省。按 `../knowledge-vault/SKILL.md` 的“每写完一篇笔记”做七步：
    - 列节点、查重、新建或补讲义（动笔前已经做了的，这里只补漏）；
    - 补关联、写证据；
