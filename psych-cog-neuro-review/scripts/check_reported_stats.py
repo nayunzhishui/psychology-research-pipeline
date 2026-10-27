@@ -171,11 +171,17 @@ def fmt(x: float, digits: int = 3) -> str:
 
 
 def fmt_p(p: float) -> str:
-    return "< .001" if p < 0.001 else fmt(p)
+    """p 不到 .001 时给两位有效数字，验算时要看到具体大小（如原文写 .0002）。"""
+    if p >= 0.001:
+        return fmt(p)
+    if p < 1e-6:
+        return "< .000001"
+    digits = -math.floor(math.log10(p)) + 1  # 两位有效数字需要的小数位数
+    return f"{p:.{digits}f}".replace("0.", ".", 1)
 
 
 def p_eq(p: float) -> str:
-    return "p < .001" if p < 0.001 else f"p = {fmt(p)}"
+    return f"p < .001（约 {fmt_p(p)}）" if p < 0.001 else f"p = {fmt(p)}"
 
 
 class Report:
@@ -217,7 +223,8 @@ class Report:
         else:
             ok = lo <= v + h and v - h <= hi
         shown = ("p " + op + " " if op != "=" else "p = ") + reported.strip().lstrip("pP<>=≤≥ ")
-        msg = f"报告的 {shown}：" + ("相符" if ok else f"不相符（按报告的数算，p 在 {fmt_p(lo)} 到 {fmt_p(hi)} 之间）")
+        span = f"约为 {fmt_p(lo)}" if fmt_p(lo) == fmt_p(hi) else f"在 {fmt_p(lo)} 到 {fmt_p(hi)} 之间"
+        msg = f"报告的 {shown}：" + ("相符" if ok else f"不相符（按报告的数算，p {span}）")
         mid = (lo + hi) / 2
         if not ok and op == "=" and mid > 0 and (8.5 < v / mid < 11.5 or 8.5 < mid / v < 11.5):
             msg += "；相差约 10 倍，像是少了或多了一个 0"
