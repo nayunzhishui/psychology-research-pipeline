@@ -3,7 +3,7 @@
 
 查五类问题，结果写进一个 xlsx（汇总、笔记、知识卡、数字核对、坏链接、矩阵），命令行打印各类数量：
 1. 版式：速览框是否在开头、该有的小节是否齐、篇幅够不够、工具和方法有没有补课框、标题是否写成了限制；
-2. 讲法：句号后或段尾连着的页码、一段里多处限定、讲解区出现项目代号或内部用语（含“待核”“不擅自”这类核对用语）、
+2. 讲法：句号后或段尾连着的页码、一段里多处限定、一句里叠用限定词、防御套话（anti-defensive-writing.md）、讲解区出现项目代号或内部用语（含“待核”“不擅自”这类核对用语）、
    用中文数字计数、块编号前缺空格、收集限定句的小节（如“方法与解释补充”）、教学示例标签不是“教学示例（虚构）”、
    公式写成 \\( \\) 或 \\[ \\]（Obsidian 不显示）、控制字符（脚本把 \\f 这类转义吃掉了）；知识卡里，完整的方法讲义要有公式；
 3. 链接：双链、嵌入的小节、块编号、PDF 页码、图片是否都找得到；
@@ -46,6 +46,11 @@ CN_NUM = re.compile(r"(?<![第一二三四五六七八九十百千万两几])(?:
                     r"(?!分之)(?:个|篇|项|道|题|名|人|次(?![项方])|年|周|天|岁|波|组|类|页|张|条|所|种|份|处|档|轮|位|例"
                     r"|领域|维度|因子|时点|分量|侧面|章节|阶段|条目|指标|模型)")
 BLOCK_GLUED = re.compile(r"(?<=\S)\^[A-Za-z0-9][\w-]*[ \t]*$", re.M)
+# 说不确定的限定词（reading-note-style.md 第 0 节第 8 条）；一句里出现两种以上算堆叠，同一个词出现两次不算
+# 防御套话（anti-defensive-writing.md 第 3 节）：空提醒、修改痕迹、介绍文件本身、模型腔过渡
+STOCK = re.compile(r"需谨慎|谨慎解释|有待进一步|尚需进一步|仍需进一步|需要进一步研究|值得注意的是|需要指出的是|不可否认"
+                   r"|本文不讨论|本文不涉及|不在本文讨论范围|本节将|下文将|如前所述|综上所述|上一版|现改为|此处原为")
+HEDGE = re.compile(r"(?<!不)可能(?!性)|或许|也许|似乎|大概|在?一定程度上|在?某种程度上|某种意义上|初步|有待|尚需|仍需|倾向于")
 LIMIT_TITLE = re.compile(r"边界|限度|不等于|不能|并非|而非")
 # 把各段限定句挪出来集中存放的小节（reading-note-style.md 第 0 节第 7 条）；“补充分析”“补充材料”不算
 ORPHAN_HEAD = re.compile(r"(?:方法|解释|说明|限定|注意).{0,3}补充|补充(?:说明|解释|限定)")
@@ -271,6 +276,12 @@ def check_numbers(note: str, h2: str, para: str, idx: Index, pdfs: Pdfs, nums: l
                      "；".join(f"{q.stem} 第 {','.join(map(str, sorted(v)))} 页" for q, v in pages.items())))
 
 
+def stacked_hedges(text: str) -> int:
+    """数一段里有几句叠用了两种以上的限定词。"""
+    return sum(1 for s in re.split(r"[。！？；]", text)
+               if len({m.group(0).lstrip("在") for m in HEDGE.finditer(s)}) >= 2)
+
+
 def check_note(p: Path, idx: Index, pdfs: Pdfs, d1_sections: list[str], verify: bool, bad: list, nums: list) -> dict:
     text = idx.text(p)
     meta, body = frontmatter(text)
@@ -316,7 +327,7 @@ def check_note(p: Path, idx: Index, pdfs: Pdfs, d1_sections: list[str], verify: 
         issues.append(f"{math_bad} 处公式用了 \\( \\) 或 \\[ \\]，Obsidian 不显示，改用 $…$")
     if ctrl:
         issues.append(f"有 {ctrl} 个控制字符（多半是脚本把 \\f、\\a 这类转义吃掉了）")
-    piles = caveat_paras = 0
+    piles = caveat_paras = stacked = stock = 0
     codes, cn, internal = Counter(), Counter(), Counter()
     for h2, h3, line in blocks(body):
         kind = line.lstrip()[:1]
@@ -326,6 +337,8 @@ def check_note(p: Path, idx: Index, pdfs: Pdfs, d1_sections: list[str], verify: 
         if kind not in (">", "|", "!") and not in_eval:
             if len(CAVEAT.findall(plain)) >= 2:
                 caveat_paras += 1
+            stacked += stacked_hedges(plain)
+            stock += len(STOCK.findall(plain))
             internal.update(m.group(0) for m in INTERNAL.finditer(plain))
         summary = kind == ">" and h2 == ""
         if not summary and not in_eval:
@@ -333,7 +346,7 @@ def check_note(p: Path, idx: Index, pdfs: Pdfs, d1_sections: list[str], verify: 
         cn.update(m.group(0) for m in CN_NUM.finditer(plain))
         if verify and PAGE_LINK.search(line):
             check_numbers(p.stem, h2, line, idx, pdfs, nums, row)
-    row.update({"句外或连着的页码": piles, "多处限定的段": caveat_paras,
+    row.update({"句外或连着的页码": piles, "多处限定的段": caveat_paras, "限定词堆叠的句": stacked, "防御套话": stock,
                 "讲解区代号": "、".join(f"{k}×{v}" for k, v in codes.most_common(6)),
                 "讲解区内部用语": "、".join(f"{k}×{v}" for k, v in internal.most_common(6)),
                 "中文计数": "、".join(f"{k}×{v}" for k, v in cn.most_common(5)),
@@ -511,6 +524,8 @@ def main() -> None:
         ("有版式问题的笔记", sum(1 for r in note_rows if r["问题"])),
         ("句外或连着的页码", sum(r["句外或连着的页码"] for r in note_rows)),
         ("多处限定的段", sum(r["多处限定的段"] for r in note_rows)),
+        ("限定词堆叠的句", sum(r["限定词堆叠的句"] for r in note_rows)),
+        ("防御套话", sum(r["防御套话"] for r in note_rows)),
         ("讲解区有代号的笔记", sum(1 for r in note_rows if r["讲解区代号"])),
         ("讲解区有内部用语的笔记", sum(1 for r in note_rows if r["讲解区内部用语"])),
         ("用中文数字计数的笔记", sum(1 for r in note_rows if r["中文计数"])),

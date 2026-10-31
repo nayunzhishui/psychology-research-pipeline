@@ -33,7 +33,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 2. `evidence-search`：正式综述检索、核心文献的前后向引文追踪和检索饱和记录。
 3. `zotero-ingest`：结构化题录批量导入父条目、Zotero/PDF 状态核验和下载后挂载；Connector 仅作单篇补充。
 4. `literature-screen`：分类、纳排和 1–4 级相关性评级。
-5. `literature-matrix`：唯一逐篇精读入口：三轮阅读、七章节检查，写中文阅读笔记、填阅读矩阵、把证据挂进证据提纲。
+5. `literature-matrix`：唯一逐篇精读入口：先完整深读并产出逐段对照译文与阅读笔记，再匹配主张、记录空白/未来方向/候选理论贡献，填矩阵并挂证据。
 6. `star-map`：基于阅读矩阵和激活扩散权重制作 HTML 文献星图。
 7. `source-alignment`：正文—参考文献—原文证据对齐。
 8. `manuscript-write`：APA 综述正文写作。
@@ -51,12 +51,13 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 
 ## 文献操作核心合同
 
-任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文精读时再读取 `references/deep-reading-contract.md` 和 `references/reading-note-style.md` 并调用 `subskills/literature-matrix/`；建知识库、新建概念节点或更新激活扩散时读取 `references/knowledge-vault-contract.md` 并调用 `subskills/knowledge-vault/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`；读取关键图、制作证据地图/理论图/流程图、写图注或审计最终图件时再读取 `references/evidence-figure-contract.md`。通用综述覆盖层继续负责综述类型、PRISMA/范围综述透明性、质量工具、证据综合和理论贡献，不得降低公共合同。
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文精读时再读取 `references/deep-reading-contract.md` 和 `references/reading-note-style.md` 并调用 `subskills/literature-matrix/`；建知识库、新建概念节点或更新激活扩散时读取 `references/knowledge-vault-contract.md` 并调用 `subskills/knowledge-vault/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`；读取关键图、制作证据地图/理论图/流程图、写图注或审计最终图件时再读取 `references/evidence-figure-contract.md`。通用综述覆盖层继续负责综述类型、PRISMA/范围综述透明性、质量工具、证据综合和理论贡献，不得降低公共合同。写阅读笔记、证据提纲和正文时，限定与措辞按 `references/anti-defensive-writing.md` 校准：限定和证据对上，局限只写一次，成品不写过程和指令。
 
 ## 给人看的产出
 
 - 给人读的东西一律中文，按文章结构排，先结论后细节，能点开原文：
-  - 阅读笔记：读完 PDF 直接写成段落，每个数字都带可点开的 PDF 页码，放在 Obsidian 知识库里；
+  - 阅读笔记：读完 PDF 直接写成段落，保留与现有主张不匹配的主要/次要及相反发现，每个数字都带可点开的 PDF 页码，放在 Obsidian 知识库里；
+  - 对照译文：新增全文深读时同步产出同PDF逐页逐段对应的Markdown，仅保留原文页链，在阅读笔记开头放译文入口；格式与校订范围见 `references/reading-note-style.md` 第10节；
   - 阅读矩阵：另有脚本生成的阅读页，前几列给人看，点一下就能打开笔记和 PDF；
   - 证据提纲：主张和证据按章、节、段从上往下写。
 - 知识库边读边长：第一次精读时初始化；之后每读完一篇，这篇涉及的概念、工具、结局（或变量）、方法和样本，库里没有的建卡，已有的补上关联和证据；每批跑一次激活扩散。

@@ -77,6 +77,18 @@ def test_check_note_flags_the_common_problems(tmp_path: Path) -> None:
     assert "C2" in row["讲解区代号"]
 
 
+def test_stacked_hedges_count_distinct_words_only() -> None:
+    assert cro.stacked_hedges("这可能在一定程度上提示二者相关。") == 1
+    assert cro.stacked_hedges("差异可能来自取样，也可能来自测量。") == 0
+    assert cro.stacked_hedges("两者不可能同时成立；可能性很低。") == 0
+    assert cro.stacked_hedges("初步结果有待重复。或许如此。") == 1
+
+
+def test_stock_defensive_phrases_are_counted() -> None:
+    assert len(cro.STOCK.findall("结果需谨慎解释，有待进一步研究。本节将介绍方法。")) == 3
+    assert not cro.STOCK.findall("作者谨慎地选择了样本。")
+
+
 def test_questions_are_not_counted_as_caveats() -> None:
     assert not cro.CAVEAT.findall("能不能觉察情绪、是不是风险因素，而不是别的")
 

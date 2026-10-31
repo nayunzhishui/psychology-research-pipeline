@@ -20,6 +20,7 @@ CONTRACTS = (
     "evidence-figure-contract.md",
     "reading-note-style.md",
     "knowledge-vault-contract.md",
+    "anti-defensive-writing.md",
     # 写作示范和取值表模板：三个 skill 的阅读产出用同一套标准
     "reading-note-example-d1.md",
     "reading-note-example-d2.md",

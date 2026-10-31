@@ -54,7 +54,7 @@ description: Use this standalone Chinese-first main skill folder for cognitive n
 
 ## 文献操作核心合同
 
-任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文精读时再读取 `references/deep-reading-contract.md` 和 `references/reading-note-style.md` 并调用 `subskills/deep-reading/`；建知识库、新建概念节点或更新激活扩散时读取 `references/knowledge-vault-contract.md` 并调用 `subskills/knowledge-vault/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`；读取关键神经/生理图、制作机制图/证据图、写图注或审计最终图件时再读取 `references/evidence-figure-contract.md`。认知神经覆盖层继续负责模态、范式、预处理、分析灵活性、反向推断、机制上限、跨模态综合和图像完整性，不得降低公共合同。
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文精读时再读取 `references/deep-reading-contract.md` 和 `references/reading-note-style.md` 并调用 `subskills/deep-reading/`；建知识库、新建概念节点或更新激活扩散时读取 `references/knowledge-vault-contract.md` 并调用 `subskills/knowledge-vault/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`；读取关键神经/生理图、制作机制图/证据图、写图注或审计最终图件时再读取 `references/evidence-figure-contract.md`。认知神经覆盖层继续负责模态、范式、预处理、分析灵活性、反向推断、机制上限、跨模态综合和图像完整性，不得降低公共合同。写阅读笔记、证据提纲和正文时，限定与措辞按 `references/anti-defensive-writing.md` 校准：限定和证据对上，局限只写一次，成品不写过程和指令。
 
 ## 给人看的产出
 
