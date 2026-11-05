@@ -56,6 +56,7 @@ description: Local subskill for close reading of one level-3 or level-4 empirica
    - 七章节和三轮状态。
 8. **挂证据提纲**
    - 方向按 `../../references/deep-reading-contract.md` 第 7 节的定义判断：检验了这条主张、结果一致就是“支持”；“限定”只用于结果本身划出了主张成立的边界，不是“这篇有局限”。
+   - 综述和元分析：标了背景以外方向的，在链接后注明“（元分析，不计独立样本）”这类类型；笔记加“借鉴与区别”一节，借鉴清单用在哪一节，就在提纲那一节的“可借鉴的综述：”一行加链接（`../../references/deep-reading-contract.md` 7.3）。
    - 引言主张挂“支持”“相反”等证据；
    - 讨论主张把本研究结果和这篇并排挂上；
    - 做问题涌现检查（`../../references/deep-reading-contract.md` 第 7 节第 5 条）：新问题、问题的新角度、相反结果、结构问题，以及找不到合适主张的发现，都记进结构改良记录（模板 `../../templates/结构改良记录模板_structure_findings.csv`），不自己加主张。

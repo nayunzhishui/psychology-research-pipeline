@@ -10,6 +10,7 @@ sys.path.insert(0, str(SCRIPTS))
 
 import check_reading_outputs as cro  # noqa: E402
 import tidy_reading_notes as trn  # noqa: E402
+import export_evidence_outline as eeo  # noqa: E402
 
 
 def test_numerals_keep_tool_names_and_ranges_readable() -> None:
@@ -151,3 +152,30 @@ def test_full_method_card_needs_a_formula(tmp_path: Path) -> None:
     card.write_text(head + body.replace("误差。", "误差：$y = b_0 + b_1 x + e$。", 1), encoding="utf-8")
     row = cro.check_card(card, cro.Index(tmp_path, cro.SKIP_DIRS), cro.Pdfs(None), cro.Counter(), [])
     assert "方法讲义没有公式" not in row["问题"]
+
+
+def test_review_note_needs_borrowing_section(tmp_path: Path) -> None:
+    lit = tmp_path / "知识库" / "文献"
+    lit.mkdir(parents=True)
+    note = ("---\n类型: 文献\n阅读深度: D2\n设计: 叙述综述\n---\n\n> [!summary] 速览\n\n"
+            "# 某某 2023 综述认为损害越重问题越重\n\n## 对我的文章有什么用\n\n能用在第 3 节。\n")
+    (lit / "某某 2023.md").write_text(note, encoding="utf-8")
+    (lit / "某某 2022.md").write_text(note + "\n### 借鉴与区别\n\n借它按结局域分节的做法（第 3 页）。 ^j1\n",
+                                    encoding="utf-8")
+    idx = cro.Index(tmp_path, cro.SKIP_DIRS)
+    lack = cro.check_note(lit / "某某 2023.md", idx, cro.Pdfs(None), cro.D2_SECTIONS, False, [], [])
+    done = cro.check_note(lit / "某某 2022.md", idx, cro.Pdfs(None), cro.D2_SECTIONS, False, [], [])
+    assert "借鉴与区别" in lack["问题"]
+    assert "借鉴与区别" not in done["问题"]
+
+
+def test_review_evidence_with_a_direction_says_not_independent() -> None:
+    notes = {"某某 2023": {"设计": "元分析", "块编号": "f1"}, "某某 2024": {"设计": "横断", "块编号": "f1"}}
+    rows = [("支持", "[[某某 2023#^f1|某某 2023]]：合并相关为 .40（第 5 页）"),
+            ("支持", "[[某某 2023#^f1|某某 2023]]（元分析，不计独立样本）：合并相关为 .40（第 5 页）"),
+            ("背景", "[[某某 2023#^f1|某某 2023]]：给出定义（第 2 页）"),
+            ("支持", "[[某某 2024#^f1|某某 2024]]：相关为 .30（第 4 页）")]
+    claims = [{"id": "3.2-1-1", "fields": {}, "evidence": rows}]
+    flagged = [i for i in eeo.check(claims, notes, True) if "不计独立样本" in i[1]]
+    assert len(flagged) == 1
+    assert flagged[0][2].startswith("[[某某 2023#^f1|某某 2023]]：")

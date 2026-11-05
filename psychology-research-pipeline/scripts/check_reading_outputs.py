@@ -67,6 +67,7 @@ D2_SECTIONS = ["为什么读这篇", "研究怎么做", "主要发现", "我的�
 EVAL_H2 = {"我的评价", "对我的文章有什么用", "疑问与待核", "提取记录", "可能被追问的问题", "原文摘录"}
 CODE_OK_H3 = {"证据等级为什么这样定"}
 THEORY = re.compile(r"理论|综述|评论|述评|概念|方法学|方法论|社论")
+REVIEW = re.compile(r"综述|元分析|荟萃|系统评价|叙述整合|review|meta-analy", re.I)
 SKIP_DIRS = {".obsidian", ".trash", ".git"}
 
 
@@ -282,6 +283,15 @@ def stacked_hedges(text: str) -> int:
                if len({m.group(0).lstrip("在") for m in HEDGE.finditer(s)}) >= 2)
 
 
+def is_review(meta: dict[str, str]) -> bool:
+    """笔记属性里的设计或文献类型，主要类型是综述或元分析。"""
+    for key in ("设计", "文献类型"):
+        first = re.split(r"[；;]", meta.get(key, "") or "", maxsplit=1)[0]
+        if REVIEW.search(re.sub(r"^\s*主要\s*[：:=]\s*", "", first)):
+            return True
+    return False
+
+
 def check_note(p: Path, idx: Index, pdfs: Pdfs, d1_sections: list[str], verify: bool, bad: list, nums: list) -> dict:
     text = idx.text(p)
     meta, body = frontmatter(text)
@@ -302,6 +312,9 @@ def check_note(p: Path, idx: Index, pdfs: Pdfs, d1_sections: list[str], verify: 
         missing = [s for s in need if norm(s) not in h2s]
         if missing:
             issues.append("缺小节：" + "、".join(missing))
+    if (is_review(meta) and depth in ("D1", "D2", "3", "4", "3 级", "4 级")
+            and not re.search(r"^#{2,4}\s*借鉴与区别", body, re.M)):
+        issues.append("综述或元分析缺“借鉴与区别”一节（写法见 reading-note-style.md 3.2）")
     floor = 6000 if depth in ("D1", "4", "4 级") else 2000 if depth in ("D2", "3", "3 级") else 0
     if floor and row["字数"] < floor:
         issues.append(f"字数 {row['字数']} 低于 {floor}")

@@ -12,9 +12,11 @@
   - **证据强度**：……  - **可以写成**：……  - **不能写成**：……  - **缺口**：……  - **状态**：……
 
 证据方向只用：支持、零结果、相反、混合、限定、背景（实证论文的结果主张另可用“本研究结果”）。
+综述和元分析标了背景以外的方向时，在链接后注明类型，如“[[笔记名#^f2|作者 年份]]（元分析，不计独立样本）：……”。
 提纲是唯一来源；两个导出文件每次都整体重写，不要手改。
 
-导出时顺带自检，只提示、不改提纲：证据行有没有链到笔记里的发现块、块编号在不在、行末有没有页码；
+导出时顺带自检，只提示、不改提纲：证据行有没有链到笔记里的发现块、块编号在不在、行末有没有页码，
+综述和元分析标了背景以外的方向时有没有注明“不计独立样本”；
 已挂证据的主张，状态是否还停在“待填证据”，证据概述、可以写成、不能写成、缺口是否还空着。
 发现的问题写进总表的“待修”页，并在命令行列出。
 
@@ -53,6 +55,7 @@ FIELD = re.compile(r"^- \*\*(.+?)\*\*[：:]\s*(.*)$")
 EVIDENCE = re.compile(r"^\s+-\s+(支持|零结果|相反|反对|混合|限定|背景|本研究结果)\s*｜\s*(.+)$")
 LINK = re.compile(r"\[\[([^\]|#]+)(?:#([^\]|]*))?(?:\|([^\]]*))?\]\]")
 LOCATION = re.compile(r"[（(]([^（）()]*(?:页|表|图)[^（）()]*)[）)]\s*[。.；;]?\s*$")
+REVIEW = re.compile(r"综述|元分析|荟萃|系统评价|叙述整合|review|meta-analy", re.I)
 
 
 def frontmatter(text: str) -> dict[str, str]:
@@ -76,6 +79,15 @@ def load_notes(kb: Path | None) -> dict[str, dict[str, str]]:
     return notes
 
 
+def is_review(meta: dict[str, str]) -> bool:
+    """笔记属性里的设计或文献类型，主要类型是综述或元分析。"""
+    for key in ("设计", "文献类型"):
+        first = re.split(r"[；;]", meta.get(key, "") or "", maxsplit=1)[0]
+        if REVIEW.search(re.sub(r"^\s*主要\s*[：:=]\s*", "", first)):
+            return True
+    return False
+
+
 def check(claims: list[dict], notes: dict[str, dict[str, str]], have_kb: bool) -> list[tuple[str, str, str]]:
     """找出常见的挂接问题，返回（主张编号，问题，涉及的内容）。只提示，不改提纲。"""
     issues = []
@@ -87,7 +99,7 @@ def check(claims: list[dict], notes: dict[str, dict[str, str]], have_kb: bool) -
             empty = [k for k in ("证据概述", "证据强度", "可以写成", "不能写成", "缺口") if not f.get(k)]
             if empty:
                 issues.append((item["id"], "已挂证据，这几栏还空着：" + "、".join(empty), ""))
-        for _, text in item["evidence"]:
+        for direction, text in item["evidence"]:
             link = LINK.search(text)
             if not link:
                 issues.append((item["id"], "证据行没有链接阅读笔记", text[:60]))
@@ -100,6 +112,9 @@ def check(claims: list[dict], notes: dict[str, dict[str, str]], have_kb: bool) -
                     issues.append((item["id"], "链接的阅读笔记不存在", target))
                 elif anchor.startswith("^") and anchor[1:] not in notes[target].get("块编号", "").split():
                     issues.append((item["id"], f"笔记里找不到块编号 {anchor}", target))
+                if (target in notes and direction not in ("背景", "本研究结果") and is_review(notes[target])
+                        and "不计独立样本" not in text):
+                    issues.append((item["id"], "综述或元分析标了背景以外的方向，链接后没注明“不计独立样本”", text[:60]))
             if not LOCATION.search(text):
                 issues.append((item["id"], "行末括号里没有页码、表或图", text[:60]))
     return issues
