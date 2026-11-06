@@ -7,7 +7,7 @@ description: Local subskill under psych-cog-neuro-review for writing cognitive n
 
 ## 职责与入口
 
-把已核验的行为、主观、神经/生理和方法证据写成机制、理论、方法、范式或指标综述。开始前完整读取 `../../references/evidence-grounded-writing-contract.md`；涉及脑图、波形、时频图、机制图、图注或视觉审计时同时读取`../../references/evidence-figure-contract.md`。输入必须包含冻结协议、阅读矩阵、证据账本、机制矩阵、方法/预处理评价、证据提纲（按章、节、段列出机制主张与证据）和矛盾登记；阅读笔记提供逐篇细节。起草时逐段对照证据提纲写，提纲里的“可以写成”和“不能写成”是措辞上限。
+把已核验的行为、主观、神经/生理和方法证据写成机制、理论、方法、范式或指标综述。开始前完整读取 `../../references/evidence-grounded-writing-contract.md`；涉及脑图、波形、时频图、机制图、图注或视觉审计时同时读取`../../references/evidence-figure-contract.md`。输入必须包含冻结协议、阅读矩阵、证据账本、机制矩阵、方法/预处理评价、证据提纲（按章、节、段列出机制主张与证据）和矛盾登记；阅读笔记提供逐篇细节。起草时逐段对照证据提纲写，提纲里的“可以写成”和“不能写成”是措辞上限。中文稿同时读取 `../../references/review-writing-standard.md`（综述写作规范：期刊行文、文风、引文和投稿格式，以及与反防御写作冲突时的处理）；写完一节运行 `python ../../scripts/check_review_prose.py <草稿>` 自查文风。
 
 ## 认知神经覆盖层
 

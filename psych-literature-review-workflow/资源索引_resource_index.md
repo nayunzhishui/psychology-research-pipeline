@@ -25,7 +25,7 @@
 | 知识库 | `knowledge-vault` | `概念卡模板_concept_card.md`；规则见 `references/knowledge-vault-contract.md`；脚本 `scripts/init_knowledge_vault.py`、`scripts/spreading_activation.py` | `阅读矩阵检查表_literature_matrix.md` | — |
 | 证据提纲 | `literature-matrix` / `manuscript-write` | `证据提纲模板_evidence_outline.md`；导出 `scripts/export_evidence_outline.py`（同时生成 `主张证据对应表_claim_evidence_map.csv`） | `阅读矩阵检查表_literature_matrix.md` | `证据综合质量评分表_synthesis_quality.md` |
 | 文献星图 | `star-map` | `文献星图权重表模板_star_map_weights.csv` | `阅读矩阵检查表_literature_matrix.md` | `证据综合质量评分表_synthesis_quality.md` |
-| 正文写作 | `manuscript-write` | `综述正文模板_review_manuscript.md` | `整合型综述质量检查表_integrative_review_quality.md` | `综述写作质量评分表_review_writing_quality.md`、`理论贡献评分表_theoretical_contribution.md` |
+| 正文写作 | `manuscript-write` | `综述正文模板_review_manuscript.md` | `整合型综述质量检查表_integrative_review_quality.md` | `综述写作质量评分表_review_writing_quality.md`、`理论贡献评分表_theoretical_contribution.md`；规范 `references/review-writing-standard.md`，自查 `scripts/check_review_prose.py` |
 | 来源对齐 | `source-alignment` | `来源对齐表模板_source_alignment_table.csv` | `来源对齐检查表_source_alignment.md` | `引用风险评分表_citation_risk.md` |
 | 模拟审稿 | `submission-review` | `模拟审稿意见模板_simulated_reviews.md`、`修改矩阵模板_revision_matrix.csv` | `投稿前检查表_submission_readiness.md`、`严格停止条件清单_stop_conditions.md` | `顶刊预备度评分表_top_journal_readiness.md` |
 

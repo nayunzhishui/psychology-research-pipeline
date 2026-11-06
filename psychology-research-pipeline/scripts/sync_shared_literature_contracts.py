@@ -26,6 +26,8 @@ CONTRACTS = (
     "reading-note-example-d2.md",
     "writing-before-after.md",
     "matrix-vocabulary-template.json",
+    # 中文综述的期刊行文、文风、引文和投稿格式
+    "review-writing-standard.md",
 )
 SHARED_SCRIPTS = (
     "init_knowledge_vault.py",
@@ -36,6 +38,7 @@ SHARED_SCRIPTS = (
     "tidy_reading_notes.py",
     "citation_tracking.py",
     "check_reported_stats.py",
+    "check_review_prose.py",
 )
 
 

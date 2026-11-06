@@ -390,3 +390,19 @@ def test_repository_has_no_retired_fourth_workflow() -> None:
     if (REPO_ROOT / ".git").exists():
         retired = REPO_ROOT / "psych-review-workflow"
         assert not retired.exists() or not any(path.is_file() for path in retired.rglob("*"))
+
+
+def test_review_writing_standard_is_synchronized_and_routed() -> None:
+    texts = [
+        (root / "references" / "review-writing-standard.md").read_text(encoding="utf-8")
+        for root in SKILL_ROOTS
+    ]
+    assert texts[0] == texts[1] == texts[2]
+    for marker in ("综述写作规范", "第 19 条", "第 20 条", "句式库", "check_review_prose.py"):
+        assert marker in texts[0]
+    for root in SKILL_ROOTS:
+        manuscript_text = (
+            root / "subskills" / "manuscript-write" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        assert "review-writing-standard.md" in manuscript_text
+        assert (root / "scripts" / "check_review_prose.py").exists()
