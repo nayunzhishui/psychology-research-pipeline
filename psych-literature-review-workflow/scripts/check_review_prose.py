@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """中文综述草稿的文风自查。
 
-按 references/review-writing-standard.md 第 5 节的目标值逐项判定，检查段落和句子的长短起伏，
-并列出禁用的过渡词和目录句。参照取自《心理科学进展》2024—2026 年 40 篇综述的逐篇统计：
+按 references/review-writing-standard.md 第 5 节的目标值逐项判定，检查段落和句子的长短起伏、
+句式和引用的分布，并列出禁用的过渡词和目录句。参照取自《心理科学进展》2024—2026 年 40 篇综述的逐篇统计：
 - 全文指标：各篇数值的四分位范围（中间一半篇目所在的区间）；
 - 长短起伏：取范例小节的第 10 百分位作提示线，低于它说明比九成范例小节都整齐。按小节而不按整篇算，
-  因为单个小节本来就比整篇整齐；段落的切分受 PDF 版面影响，提示线取得更宽。
+  因为单个小节本来就比整篇整齐；段落的切分受 PDF 版面影响，提示线取得更宽；
+- 句式与引用：取范例小节的第 90（或第 10）百分位作提示线，只抓比九成范例小节都多（或都少）的写法，
+  如句句“一项研究发现”、两两“X 与 Y 相关”。每段引用数按一区期刊综述小节的第 75 百分位提示（第 11.4 节）；
+- 论证动作：数一数一区期刊综述常做的几件事（写出证据强弱和研究项数、替代解释、标明本文的推论），
+  全文一处都没有时提示。参照是 7 篇一区期刊叙述综述的逐段统计。
 
 统计前去掉 YAML 头、Obsidian 注释、标题行、表格行、表题、表注和括号里的引文。只读，不改文件。
 
@@ -60,6 +64,49 @@ SPREAD_TARGETS: dict[str, tuple[float, str, str]] = {
     "长于 60 字的句子 %": (14, "范例小节 29%（四分位 20%—39%）",
                      "长句太少：不必把长句都拆开，一句可以交代清楚样本、测法和结果"),
 }
+
+# 句式与引用：(提示线, "高"或"低", 范例参照, 越线时怎么改)。按范例小节的第 90（或第 10）百分位定线，
+# 只在比九成范例小节都多（或都少）时提示。用词指标按去掉引文的正文算，引用指标按带引文的原文段落算。
+PATTERN_TARGETS: dict[str, tuple[float, str, str, str]] = {
+    "以“一项”开头的句子 %": (3, "高", "范例小节第 90 百分位 0%",
+                       "“一项……研究发现”式开头太多：先写结论再引研究，或用“例如，……”“有研究……”、叙述引用"),
+    "“越……越……”/万字": (7.3, "高", "范例小节中位数 0，第 90 百分位 7.3",
+                      "“越……越……”太多：一节用一两次，其余直接写方向和强度"),
+    "“一致”/万字": (17, "高", "范例小节中位数 0，第 90 百分位 17",
+                 "“一致”太多：直接写结果的方向和大小，少用“与……一致”概括"),
+    "“相关”/万字": (44, "高", "范例小节中位数 11，第 90 百分位 44",
+                 "“X 与 Y 相关”太多：先写结论再挑代表研究，批量的系数放进表。"
+                 "不要只换成“关系”“关联”，那只会让另一个词超标"),
+    "“相关、关系、关联”合计/万字": (64, "高", "范例小节中位数 22，第 90 百分位 64",
+                          "两两关系的陈述太多：合并成结论句，把逐项系数放进表"),
+    "不引文献的段 %": (14, "低", "范例小节中位数 36%，第 10 百分位 14%",
+                  "每段都引文献：提出问题、下判断、做过渡和总结的段可以不引，引用留给交代证据的段"),
+    "每段引用数（中位数）": (4, "高", "范例小节中位数 1、第 90 百分位 2.5；一区综述小节中位数 2.5、第 75 百分位 4",
+                    "每段引用比四分之三的一区综述小节还密：一个论点挑两三项代表研究，其余放进表或附表，也要顾及参考文献总数"),
+}
+
+# 论证动作：一区期刊综述常做、目标期刊范例少做的几件事。只数，不判错；全文一处都没有时提示。
+MOVES: dict[str, tuple[str, str, str]] = {
+    "写出证据强弱或研究项数": (
+        r"(?:至少|只有|仅有|共有?|已有)\s?\d+\s?项|\d+\s?项(?:研究|横断|纵向|前瞻|实验|追踪)"
+        r"|[一两三四五六七八九十几多数少]项(?:研究|横断|纵向|前瞻|实验|追踪)|(?:尚无|没有|很少有?|少有)(?:研究|一项)"
+        r"|(?:较强|较弱|有限|初步|一致|充分|混合|直接)的(?:证据|支持)|证据(?:较为|比较|十分|仍|尚|还)?(?:充分|有限|不足|薄弱|较少|很少|最多)",
+        "一区综述每百段约 22 处，《心理科学进展》约 4 处",
+        "没有交代证据有多强：证据段的首句可以写“至少 X 项研究……”“目前只有一项研究……”“尚无……研究”"),
+    "替代解释": (
+        r"另一种(?:解释|可能)|替代(?:性)?解释|也可能(?:是|反映|来自|源于)|既可能[^。]{2,40}也可能",
+        "一区综述每百段约 1 处，写得好的 4—5 处；《心理科学进展》几乎没有",
+        "关键的发现可以写一种替代解释，并说明什么设计能分辨"),
+    "标明本文的推论": (
+        r"本文(?:认为|推测|提出|主张|据此)",
+        "一区综述作者自称每百句约 8 次，《心理科学进展》约 2 次",
+        ""),
+}
+YEAR = r"(?:19|20)\d{2}[a-z]?"
+CITE_GROUP = re.compile(r"[（(][^（）()]*?" + YEAR + r"[^（）()]*[)）]")
+ONLY_YEAR = re.compile(r"[（(]\s*" + YEAR + r"\s*[)）]")
+NARRATIVE = re.compile(r"(?:[A-Z][A-Za-zÀ-ÿ'\-]+(?: et al\.| 等人?| 和 [A-Z][A-Za-zÀ-ÿ'\-]+| & [A-Z][A-Za-zÀ-ÿ'\-]+)?"
+                       r"|[一-鿿]{2,4}(?:等人?)?)\s?[（(]" + YEAR + r"[)）]")
 
 BANNED: dict[str, str] = {
     "值得注意的是": "删掉过渡词，直接说事（反防御写作第 20 条）",
@@ -221,6 +268,79 @@ def spread_rows(s: dict[str, float]) -> list[dict]:
     return rows
 
 
+def raw_paragraphs(raw: str) -> list[str]:
+    """带引文的正文段落：去掉 YAML 头、注释和代码块，跳过标题、表格、引用块、表题和表注。"""
+    raw = re.sub(r"\A---\n.*?\n---\n", "", raw, flags=re.S)
+    raw = re.sub(r"%%.*?%%", "", raw, flags=re.S)
+    raw = re.sub(r"```.*?```", "", raw, flags=re.S)
+    out = []
+    for p in re.split(r"\n\s*\n", raw):
+        p = p.strip().replace("*", "")
+        if han(p) >= PARA_MIN_HAN and not re.match(r"^(#|\||>)", p) and not CAPTION.match(p):
+            out.append(p)
+    return out
+
+
+def n_cites(p: str) -> int:
+    """一段里引了几项文献：括号引用数年份，叙述引用“某某等人(年份)”各算一项。"""
+    groups = [g for g in CITE_GROUP.findall(p) if not ONLY_YEAR.fullmatch(g)]
+    return sum(len(re.findall(YEAR, g)) for g in groups) + len(NARRATIVE.findall(p))
+
+
+def patterns(raw: str, text: str) -> dict[str, float]:
+    sents = sentences(text)
+    cites = [n_cites(p) for p in raw_paragraphs(raw)]
+    return {
+        "以“一项”开头的句子 %": 100 * sum(bool(re.match(r"^[^一-鿿]*一项", s)) for s in sents) / len(sents)
+        if sents else 0.0,
+        "“越……越……”/万字": per(text, r"越[^，。；]{1,14}越"),
+        "“一致”/万字": per(text, "一致"),
+        "“相关”/万字": per(text, "相关"),
+        "“相关、关系、关联”合计/万字": per(text, "相关|关系|关联"),
+        "不引文献的段 %": 100 * sum(c == 0 for c in cites) / len(cites) if cites else 0.0,
+        "每段引用数（中位数）": median(cites),
+        "_段落数": len(cites),
+        "_句子数": len(sents),
+    }
+
+
+def judge_pattern(name: str, value: float, p: dict[str, float], n_han: int) -> tuple[str, str]:
+    if name in ("不引文献的段 %", "每段引用数（中位数）"):
+        enough = p["_段落数"] >= MIN_PARAS
+    elif name.startswith("以"):
+        enough = p["_句子数"] >= MIN_SENTS
+    else:
+        enough = n_han >= MIN_HAN
+    if not enough:
+        return "不判断", "段落、句子或字数太少"
+    line, side, _, fix = PATTERN_TARGETS[name]
+    over = value > line if side == "高" else value < line
+    return ("偏多" if side == "高" else "偏少", fix) if over else ("在范围内", "")
+
+
+def pattern_rows(p: dict[str, float], n_han: int) -> list[dict]:
+    rows = []
+    for name, (_, _, ref, _) in PATTERN_TARGETS.items():
+        verdict, fix = judge_pattern(name, p[name], p, n_han)
+        rows.append({"指标": name, "草稿": round(p[name], 1), "范例参照": ref, "判定": verdict, "怎么改": fix})
+    return rows
+
+
+def moves(text: str, n_paras: int) -> list[dict]:
+    """数论证动作。按去掉引文的正文数；不足 6 段不判断。"""
+    rows = []
+    for name, (pattern, ref, fix) in MOVES.items():
+        n = len(re.findall(pattern, text))
+        if n_paras < MIN_PARAS:
+            verdict, advice = "不判断", "段落太少"
+        elif n == 0:
+            verdict, advice = ("可以加上", fix) if fix else ("没有", "")
+        else:
+            verdict, advice = "有", ""
+        rows.append({"动作": name, "草稿": n, "参照": ref, "判定": verdict, "怎么改": advice})
+    return rows
+
+
 def report(path: Path) -> dict:
     raw = path.read_text(encoding="utf-8")
     text = clean(raw)
@@ -232,6 +352,8 @@ def report(path: Path) -> dict:
         rows.append({"指标": name, "草稿": round(value, 1), "目标": f"{low:g}—{high:g}", "判定": verdict, "怎么改": fix})
     return {"文件": str(path), "汉字": han(text), "短稿": han(text) < MIN_HAN, "指标": rows,
             "长短起伏": spread_rows(spread(text)),
+            "句式与引用": pattern_rows(patterns(raw, text), han(text)),
+            "论证动作": moves(text, len(raw_paragraphs(raw))),
             "禁用词": [{"行": n, "词": p, "怎么改": a} for n, p, a in banned_hits(raw)]}
 
 
@@ -246,6 +368,14 @@ def render(r: dict) -> str:
             "| 指标 | 草稿 | 范例参照 | 判定 | 怎么改 |", "|---|---|---|---|---|"]
     for row in r["长短起伏"]:
         out.append(f"| {row['指标']} | {row['草稿']} | {row['范例参照']} | {row['判定']} | {row['怎么改']} |")
+    out += ["", "句式与引用（只在比九成范例小节都多或都少时提示）：", "",
+            "| 指标 | 草稿 | 范例参照 | 判定 | 怎么改 |", "|---|---|---|---|---|"]
+    for row in r["句式与引用"]:
+        out.append(f"| {row['指标']} | {row['草稿']} | {row['范例参照']} | {row['判定']} | {row['怎么改']} |")
+    out += ["", "论证动作（一区期刊综述的做法，只数次数，全文一处都没有时提示）：", "",
+            "| 动作 | 草稿（处） | 参照 | 判定 | 怎么改 |", "|---|---|---|---|---|"]
+    for row in r["论证动作"]:
+        out.append(f"| {row['动作']} | {row['草稿']} | {row['参照']} | {row['判定']} | {row['怎么改']} |")
     out.append("")
     if r["禁用词"]:
         out.append(f"禁用的过渡词和目录句 {len(r['禁用词'])} 处：")

@@ -68,3 +68,59 @@ def test_spread_does_not_judge_short_drafts(tmp_path: Path) -> None:
     verdicts = spread_verdicts(MID * 3 + "\n\n" + MID * 3, tmp_path)
     assert verdicts["段长变异系数"] == "不判断"
     assert verdicts["句长变异系数"] == "不判断"
+
+
+def pattern_verdicts(text: str, tmp_path: Path) -> dict[str, str]:
+    draft = tmp_path / "草稿.md"
+    draft.write_text(text, encoding="utf-8")
+    return {row["指标"]: row["判定"] for row in crp.report(draft)["句式与引用"]}
+
+
+def test_n_cites_counts_parenthetical_and_narrative_citations() -> None:
+    p = "焦虑升高(Smith, 2020; Lee & Kim, 2021)。Clark 等人(2018)发现了同样的结果。张三等(2019)认为两者有别。"
+    assert crp.n_cites(p) == 4
+
+
+def test_patterns_flag_study_openers_pairwise_correlations_and_citation_piles(tmp_path: Path) -> None:
+    study = "一项针对大学生的研究发现，焦虑与抑郁的得分显著相关。"
+    cited = ("一项针对大学生的研究发现，焦虑与抑郁的得分显著相关"
+             "(Smith, 2020; Lee, 2021; Wang, 2022; Chen, 2023; Zhao, 2024)。")
+    verdicts = pattern_verdicts("\n\n".join([cited + study * 7] * 8), tmp_path)
+    assert verdicts["以“一项”开头的句子 %"] == "偏多"
+    assert verdicts["“相关”/万字"] == "偏多"
+    assert verdicts["“相关、关系、关联”合计/万字"] == "偏多"
+    assert verdicts["不引文献的段 %"] == "偏少"
+    assert verdicts["每段引用数（中位数）"] == "偏多"
+
+
+def test_patterns_accept_selective_citations_and_uncited_judgements(tmp_path: Path) -> None:
+    cited = "甲组的平均分明显高于乙组(Smith, 2020)，二者的差异在统计上显著。"
+    paras = [LONG * 2 + MID * 2 if i in (0, 3, 8) else cited + LONG * 2 + MID for i in range(9)]
+    verdicts = pattern_verdicts("\n\n".join(paras), tmp_path)
+    assert set(verdicts.values()) == {"在范围内"}, verdicts
+
+
+def test_patterns_do_not_judge_short_drafts(tmp_path: Path) -> None:
+    verdicts = pattern_verdicts(MID * 3, tmp_path)
+    assert set(verdicts.values()) == {"不判断"}
+
+
+def move_verdicts(text: str, tmp_path: Path) -> dict[str, str]:
+    draft = tmp_path / "草稿.md"
+    draft.write_text(text, encoding="utf-8")
+    return {row["动作"]: row["判定"] for row in crp.report(draft)["论证动作"]}
+
+
+def test_moves_suggest_evidence_strength_and_alternatives_when_absent(tmp_path: Path) -> None:
+    verdicts = move_verdicts("\n\n".join([LONG + MID] * 7), tmp_path)
+    assert verdicts["写出证据强弱或研究项数"] == "可以加上"
+    assert verdicts["替代解释"] == "可以加上"
+    assert verdicts["标明本文的推论"] == "没有"
+
+
+def test_moves_count_graded_evidence_alternatives_and_stance(tmp_path: Path) -> None:
+    paras = [LONG + MID] * 6 + ["至少 5 项研究发现甲组高于乙组，目前只有一项研究追踪了变化。"
+                                "另一种解释是两组的测量时点不同。本文认为，这一差异主要来自基线。"]
+    verdicts = move_verdicts("\n\n".join(paras), tmp_path)
+    assert set(verdicts.values()) == {"有"}, verdicts
+    assert move_verdicts(MID * 3, tmp_path)["替代解释"] == "不判断"
