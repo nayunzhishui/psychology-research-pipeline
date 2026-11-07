@@ -8,14 +8,18 @@
   因为单个小节本来就比整篇整齐；段落的切分受 PDF 版面影响，提示线取得更宽；
 - 句式与引用：取范例小节的第 90（或第 10）百分位作提示线，只抓比九成范例小节都多（或都少）的写法，
   如句句“一项研究发现”、两两“X 与 Y 相关”。每段引用数按一区期刊综述小节的第 75 百分位提示（第 11.4 节）；
-- 论证动作：数一数一区期刊综述常做的几件事（写出证据强弱和研究项数、替代解释、标明本文的推论），
-  全文一处都没有时提示。参照是 7 篇一区期刊叙述综述的逐段统计。
+- 论证动作：数一数一区期刊综述常做的几件事（写出证据强弱、替代解释、标明本文的推论），
+  全文一处都没有时提示。参照是 7 篇一区期刊叙述综述的逐段统计；
+- 项数与穷尽说法：列出“至少 8 项研究”“只有 3 项”“尚无研究”“本文只找到”“唯一的研究”这类说法。
+  非系统检索的叙述综述写这些，等于声称检索已经穷尽（第 11.3 节）；系统综述和元分析加 --systematic 跳过；
+- 可能重复的句子：不同段落里说法高度重合的句子，用来查同一判断是否说了不止一次（第 11.8 节）。
 
 统计前去掉 YAML 头、Obsidian 注释、标题行、表格行、表题、表注和括号里的引文。只读，不改文件。
 
 用法：
     python scripts/check_review_prose.py 草稿.md [草稿2.md ...]
     python scripts/check_review_prose.py 草稿.md --json
+    python scripts/check_review_prose.py 草稿.md --systematic   # 系统综述、元分析：不查项数
 """
 from __future__ import annotations
 
@@ -87,12 +91,12 @@ PATTERN_TARGETS: dict[str, tuple[float, str, str, str]] = {
 
 # 论证动作：一区期刊综述常做、目标期刊范例少做的几件事。只数，不判错；全文一处都没有时提示。
 MOVES: dict[str, tuple[str, str, str]] = {
-    "写出证据强弱或研究项数": (
-        r"(?:至少|只有|仅有|共有?|已有)\s?\d+\s?项|\d+\s?项(?:研究|横断|纵向|前瞻|实验|追踪)"
-        r"|[一两三四五六七八九十几多数少]项(?:研究|横断|纵向|前瞻|实验|追踪)|(?:尚无|没有|很少有?|少有)(?:研究|一项)"
-        r"|(?:较强|较弱|有限|初步|一致|充分|混合|直接)的(?:证据|支持)|证据(?:较为|比较|十分|仍|尚|还)?(?:充分|有限|不足|薄弱|较少|很少|最多)",
-        "一区综述每百段约 22 处，《心理科学进展》约 4 处",
-        "没有交代证据有多强：证据段的首句可以写“至少 X 项研究……”“目前只有一项研究……”“尚无……研究”"),
+    "写出证据强弱": (
+        r"(?:较强|较弱|有限|初步|一致|充分|混合|直接)的(?:证据|支持)|证据(?:较为|比较|十分|仍|尚|还)?(?:充分|有限|不足|薄弱)"
+        r"|方向(?:相同|一致|相反)|结果同向|初步(?:的)?支持",
+        "一区综述每百段约 22 处（多半用研究项数表达），《心理科学进展》约 4 处",
+        "没有交代证据有多强：用设计、信息源和结果是否一致来说，如“自评、访谈评定和临床组比较的结果方向相同”；"
+        "非系统检索不写研究项数（第 11.3 节）"),
     "替代解释": (
         r"另一种(?:解释|可能)|替代(?:性)?解释|也可能(?:是|反映|来自|源于)|既可能[^。]{2,40}也可能",
         "一区综述每百段约 1 处，写得好的 4—5 处；《心理科学进展》几乎没有",
@@ -102,6 +106,21 @@ MOVES: dict[str, tuple[str, str, str]] = {
         "一区综述作者自称每百句约 8 次，《心理科学进展》约 2 次",
         ""),
 }
+# 项数与穷尽说法：非系统检索的叙述综述不写（第 11.3 节）。指代引到的研究（“上述两项研究”“这些研究”）不算。
+NUM = r"(?:[0-9０-９]+|[一两二三四五六七八九十几]+)"
+COUNT_CLAIMS: dict[str, str] = {
+    "研究项数": r"(?:至少|只有|仅有|共有?|已有|本文(?:只|共)?找到)\s?" + NUM + r"\s?(?:项|篇)"
+                r"|[0-9０-９]+\s?(?:项|篇)(?:研究|横断|纵向|前瞻|实验|追踪|报告)",
+    "说没有研究": r"(?:尚无|还没有|没有|尚未有|很少有?|少有)(?:直接|专门|系统|任何)?的?(?:研究|证据)"
+                 r"|本文(?:还)?没有找到|(?:研究|证据)(?:还|仍)?(?:很少|较少|很缺乏|缺乏)",
+    "全称说法": r"唯一[^。，；]{0,15}研究|证据最多|无论(?:用|采用)?哪一?[类种]",
+}
+COUNT_ADVICE = ("非系统检索不报研究项数，也不说没有研究：只描述引到的研究（“这些研究”“上述两项研究”），"
+                "缺口写成“这一问题需要……的研究来回答”（第 11.3 节）")
+REFERRING = re.compile(r"(?:上述|这|该|此|前述|以上|上面)\s?$")
+REPEAT_MIN_HAN = 15
+REPEAT_LINE = 0.6
+
 YEAR = r"(?:19|20)\d{2}[a-z]?"
 CITE_GROUP = re.compile(r"[（(][^（）()]*?" + YEAR + r"[^（）()]*[)）]")
 ONLY_YEAR = re.compile(r"[（(]\s*" + YEAR + r"\s*[)）]")
@@ -221,14 +240,62 @@ def spread(text: str) -> dict[str, float]:
     }
 
 
+def body_lines(raw: str) -> list[tuple[int, str]]:
+    """正文行和行号：YAML 头、跨行的 %% 注释换成空行（行号不变），跳过标题、表格和引用块。"""
+    def blank(m: re.Match) -> str:
+        return "\n" * m.group(0).count("\n")
+
+    raw = re.sub(r"\A---\n.*?\n---\n", blank, raw.replace("\r\n", "\n"), flags=re.S)
+    raw = re.sub(r"%%.*?%%", blank, raw, flags=re.S)
+    return [(n, line) for n, line in enumerate(raw.splitlines(), 1) if not re.match(r"^\s*(#|\||>)", line)]
+
+
 def banned_hits(raw: str) -> list[tuple[int, str, str]]:
     hits = []
-    for lineno, line in enumerate(raw.splitlines(), 1):
-        body = re.sub(r"%%.*?%%", "", line)
+    for lineno, body in body_lines(raw):
         for phrase, advice in BANNED.items():
             if phrase in body:
                 hits.append((lineno, phrase, advice))
     return hits
+
+
+def count_claims(raw: str) -> list[dict]:
+    """项数与穷尽说法。前面是“上述”“这”等指代词的（如“上述两项研究”），是在描述引到的研究，不算。"""
+    hits = []
+    for lineno, body in body_lines(raw):
+        for kind, pattern in COUNT_CLAIMS.items():
+            for m in re.finditer(pattern, body):
+                if REFERRING.search(body[max(0, m.start() - 4):m.start()]):
+                    continue
+                hits.append({"行": lineno, "词": m.group(0), "类型": kind})
+    return hits
+
+
+def bigrams(s: str) -> set[str]:
+    h = "".join(HAN.findall(s))
+    return {h[i:i + 2] for i in range(len(h) - 1)}
+
+
+def repeats(text: str, line: float = REPEAT_LINE) -> list[dict]:
+    """不同段落里说法高度重合的句子。先去掉一成以上句子都有的高频双字（主题词），
+    再看较短一句的双字有多少出现在另一句里；达到六成算可能重复。只是提示，要人看。"""
+    items = [(pi, s, bigrams(s)) for pi, p in enumerate(paragraphs(text))
+             for s in sentences(p) if han(s) >= REPEAT_MIN_HAN]
+    df: dict[str, int] = {}
+    for _, _, grams in items:
+        for g in grams:
+            df[g] = df.get(g, 0) + 1
+    common = {g for g, n in df.items() if n > max(3, 0.1 * len(items))}
+    hits = []
+    for i, (pa, sa, ga) in enumerate(items):
+        for pb, sb, gb in items[i + 1:]:
+            a, b = ga - common, gb - common
+            if pa == pb or min(len(a), len(b)) < 6:
+                continue
+            share = len(a & b) / min(len(a), len(b))
+            if share >= line:
+                hits.append({"段": [pa + 1, pb + 1], "重合": round(share, 2), "句一": sa, "句二": sb})
+    return sorted(hits, key=lambda h: -h["重合"])
 
 
 def judge(name: str, value: float) -> tuple[str, str]:
@@ -341,8 +408,8 @@ def moves(text: str, n_paras: int) -> list[dict]:
     return rows
 
 
-def report(path: Path) -> dict:
-    raw = path.read_text(encoding="utf-8")
+def report(path: Path, systematic: bool = False) -> dict:
+    raw = path.read_text(encoding="utf-8").replace("\r\n", "\n")
     text = clean(raw)
     m = metrics(text)
     rows = []
@@ -354,7 +421,9 @@ def report(path: Path) -> dict:
             "长短起伏": spread_rows(spread(text)),
             "句式与引用": pattern_rows(patterns(raw, text), han(text)),
             "论证动作": moves(text, len(raw_paragraphs(raw))),
-            "禁用词": [{"行": n, "词": p, "怎么改": a} for n, p, a in banned_hits(raw)]}
+            "禁用词": [{"行": n, "词": p, "怎么改": a} for n, p, a in banned_hits(raw)],
+            "项数与穷尽说法": None if systematic else count_claims(raw),
+            "可能重复的句子": repeats(text)}
 
 
 def render(r: dict) -> str:
@@ -382,6 +451,22 @@ def render(r: dict) -> str:
         out += [f"- 第 {h['行']} 行“{h['词']}”：{h['怎么改']}" for h in r["禁用词"]]
     else:
         out.append("没有禁用的过渡词和目录句。")
+    claims = r["项数与穷尽说法"]
+    if claims is None:
+        out.append("系统综述或元分析：没有查项数与穷尽说法。")
+    elif claims:
+        out.append(f"项数与穷尽说法 {len(claims)} 处（非系统检索的叙述综述不写）：")
+        out += [f"- 第 {h['行']} 行“{h['词']}”（{h['类型']}）" for h in claims]
+        out.append(f"  怎么改：{COUNT_ADVICE}")
+    else:
+        out.append("没有项数与穷尽说法。")
+    reps = r["可能重复的句子"]
+    if reps:
+        out.append(f"可能重复的句子 {len(reps)} 对（不同段落里说法高度重合；同一判断全章只说一次，第 11.8 节）：")
+        for h in reps[:12]:
+            out.append(f"- 第 {h['段'][0]} 段与第 {h['段'][1]} 段（重合 {h['重合']}）：“{h['句一']}”／“{h['句二']}”")
+    else:
+        out.append("没有说法高度重合的句子。")
     return "\n".join(out)
 
 
@@ -389,10 +474,11 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="中文综述草稿的文风自查")
     ap.add_argument("files", nargs="+", type=Path)
     ap.add_argument("--json", action="store_true", help="输出 JSON")
+    ap.add_argument("--systematic", action="store_true", help="系统综述或元分析：不查项数与穷尽说法")
     args = ap.parse_args(argv)
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    results = [report(f) for f in args.files]
+    results = [report(f, args.systematic) for f in args.files]
     if args.json:
         print(json.dumps(results, ensure_ascii=False, indent=2))
     else:

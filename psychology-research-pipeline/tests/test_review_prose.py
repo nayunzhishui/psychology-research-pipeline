@@ -113,14 +113,47 @@ def move_verdicts(text: str, tmp_path: Path) -> dict[str, str]:
 
 def test_moves_suggest_evidence_strength_and_alternatives_when_absent(tmp_path: Path) -> None:
     verdicts = move_verdicts("\n\n".join([LONG + MID] * 7), tmp_path)
-    assert verdicts["写出证据强弱或研究项数"] == "可以加上"
+    assert verdicts["写出证据强弱"] == "可以加上"
     assert verdicts["替代解释"] == "可以加上"
     assert verdicts["标明本文的推论"] == "没有"
 
 
 def test_moves_count_graded_evidence_alternatives_and_stance(tmp_path: Path) -> None:
-    paras = [LONG + MID] * 6 + ["至少 5 项研究发现甲组高于乙组，目前只有一项研究追踪了变化。"
+    paras = [LONG + MID] * 6 + ["自评、访谈和他评的结果方向相同，甲组都高于乙组。"
                                 "另一种解释是两组的测量时点不同。本文认为，这一差异主要来自基线。"]
     verdicts = move_verdicts("\n\n".join(paras), tmp_path)
     assert set(verdicts.values()) == {"有"}, verdicts
     assert move_verdicts(MID * 3, tmp_path)["替代解释"] == "不判断"
+
+
+def test_moves_no_longer_count_study_numbers_as_evidence_strength(tmp_path: Path) -> None:
+    paras = [LONG + MID] * 6 + ["至少 5 项研究发现甲组高于乙组。"]
+    assert move_verdicts("\n\n".join(paras), tmp_path)["写出证据强弱"] == "可以加上"
+
+
+def test_count_claims_flag_study_counts_and_claims_of_absence(tmp_path: Path) -> None:
+    draft = tmp_path / "草稿.md"
+    draft.write_text("至少 8 项研究发现甲组更高。本文只找到 2 项。尚无研究检验这一点。\n\n"
+                     "这是唯一用父母报告的研究，证据最多的是内化问题。\n%%\n至少 3 项（注释里的不算）\n%%\n",
+                     encoding="utf-8")
+    kinds = [h["类型"] for h in crp.report(draft)["项数与穷尽说法"]]
+    assert kinds.count("研究项数") == 2 and kinds.count("说没有研究") == 1 and kinds.count("全称说法") == 2, kinds
+
+
+def test_count_claims_accept_references_to_cited_studies_and_research_needs(tmp_path: Path) -> None:
+    draft = tmp_path / "草稿.md"
+    draft.write_text("上述两项研究都发现甲组更高，这 2 项研究的样本不同。这一问题需要纵向研究来回答。\n", encoding="utf-8")
+    assert crp.report(draft)["项数与穷尽说法"] == []
+    assert crp.report(draft, systematic=True)["项数与穷尽说法"] is None
+
+
+def test_repeats_flag_the_same_judgement_in_two_paragraphs(tmp_path: Path) -> None:
+    claim = "人格功能损害与总体困扰和内化问题的同向变化最为一致，外化问题的结果较少。"
+    others = ["甲组在随访中的平均分高于乙组，差异在三个时点上都保持稳定。",
+              "睡眠时长与次日的情绪评分没有明显的联系，只在周末略有不同。",
+              "父母报告的照料负担随孩子年龄增长而下降，男孩下降得更快。",
+              "访谈评分与自评问卷的一致性在临床样本中高于社区样本。"]
+    text = "\n\n".join([claim + others[0], others[1] + others[2], others[3] + claim])
+    hits = crp.repeats(text)
+    assert len(hits) == 1 and hits[0]["段"] == [1, 3], hits
+    assert crp.repeats("\n\n".join([others[0] + others[1], others[2] + others[3]])) == []
