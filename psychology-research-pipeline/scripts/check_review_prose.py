@@ -1,23 +1,28 @@
 #!/usr/bin/env python3
-"""中文综述草稿的文风自查。
+"""中文综述草稿的自查。属于写完才查的那一层，配合 references/review-prose-checklist.md 使用。
 
-按 references/review-writing-standard.md 第 5 节的目标值逐项判定，检查段落和句子的长短起伏、
-句式和引用的分布，并列出禁用的过渡词和目录句。参照取自《心理科学进展》2024—2026 年 40 篇综述的逐篇统计：
+默认输出两栏：
+- 硬错误：
+  - 项数与穷尽说法：“至少 8 项研究”“只有 3 项”“尚无研究”“本文只找到”“唯一的研究”这类说法。非系统检索的
+    叙述综述写这些，等于声称检索已经穷尽；系统综述和元分析加 --systematic 跳过；
+  - 禁用的说法：“反方”这类标签、空过渡和目录句；
+  - 段尾防御：每段最后一句是限制、保留或“还需要……的研究来回答”。展望一节写研究建议是对的，那里的提示可以忽略；
+  - 可能重复的句子：不同段落里说法高度重合的句子，用来查同一判断是否说了不止一次；
+- 骨架：每段的首句和末句，用来做首句连读和末句列表。
+
+加 --style 再输出文风参考：全文指标、长短起伏、句式与引用、论证动作。参照取自《心理科学进展》2024—2026 年
+40 篇综述和 7 篇一区期刊叙述综述的统计（review-prose-checklist.md 第 5 节）：
 - 全文指标：各篇数值的四分位范围（中间一半篇目所在的区间）；
-- 长短起伏：取范例小节的第 10 百分位作提示线，低于它说明比九成范例小节都整齐。按小节而不按整篇算，
-  因为单个小节本来就比整篇整齐；段落的切分受 PDF 版面影响，提示线取得更宽；
-- 句式与引用：取范例小节的第 90（或第 10）百分位作提示线，只抓比九成范例小节都多（或都少）的写法，
-  如句句“一项研究发现”、两两“X 与 Y 相关”。每段引用数按一区期刊综述小节的第 75 百分位提示（第 11.4 节）；
-- 论证动作：数一数一区期刊综述常做的几件事（写出证据强弱、替代解释、标明本文的推论），
-  全文一处都没有时提示。参照是 7 篇一区期刊叙述综述的逐段统计；
-- 项数与穷尽说法：列出“至少 8 项研究”“只有 3 项”“尚无研究”“本文只找到”“唯一的研究”这类说法。
-  非系统检索的叙述综述写这些，等于声称检索已经穷尽（第 11.3 节）；系统综述和元分析加 --systematic 跳过；
-- 可能重复的句子：不同段落里说法高度重合的句子，用来查同一判断是否说了不止一次（第 11.8 节）。
+- 长短起伏：取范例小节的第 10 百分位作提示线，低于它说明比九成范例小节都整齐；
+- 句式与引用：取范例小节的第 90（或第 10）百分位作提示线，只抓比九成范例小节都多（或都少）的写法；
+- 论证动作：数一数一区期刊综述常做的几件事，全文一处都没有时提示。
+这些数值只作参考，不作目标：句子按内容改，不为凑数而改。
 
 统计前去掉 YAML 头、Obsidian 注释、标题行、表格行、表题、表注和括号里的引文。只读，不改文件。
 
 用法：
     python scripts/check_review_prose.py 草稿.md [草稿2.md ...]
+    python scripts/check_review_prose.py 草稿.md --style        # 加上文风参考
     python scripts/check_review_prose.py 草稿.md --json
     python scripts/check_review_prose.py 草稿.md --systematic   # 系统综述、元分析：不查项数
 """
@@ -90,23 +95,20 @@ PATTERN_TARGETS: dict[str, tuple[float, str, str, str]] = {
 }
 
 # 论证动作：一区期刊综述常做、目标期刊范例少做的几件事。只数，不判错；全文一处都没有时提示。
+# 不数“替代解释”：逐项补替代解释会把正文写成自我反驳，反证只在关键处写（review-writing-standard.md 第 4 节）。
 MOVES: dict[str, tuple[str, str, str]] = {
     "写出证据强弱": (
         r"(?:较强|较弱|有限|初步|一致|充分|混合|直接)的(?:证据|支持)|证据(?:较为|比较|十分|仍|尚|还)?(?:充分|有限|不足|薄弱)"
         r"|方向(?:相同|一致|相反)|结果同向|初步(?:的)?支持",
         "一区综述每百段约 22 处（多半用研究项数表达），《心理科学进展》约 4 处",
-        "没有交代证据有多强：用设计、信息源和结果是否一致来说，如“自评、访谈评定和临床组比较的结果方向相同”；"
-        "非系统检索不写研究项数（第 11.3 节）"),
-    "替代解释": (
-        r"另一种(?:解释|可能)|替代(?:性)?解释|也可能(?:是|反映|来自|源于)|既可能[^。]{2,40}也可能",
-        "一区综述每百段约 1 处，写得好的 4—5 处；《心理科学进展》几乎没有",
-        "关键的发现可以写一种替代解释，并说明什么设计能分辨"),
+        "没有交代证据有多强：用设计、信息源和结果是否一致来说，如“自评、访谈评定和临床组比较的结果方向相同”"
+        "（review-writing-standard.md 第 3 节）"),
     "标明本文的推论": (
         r"本文(?:认为|推测|提出|主张|据此)",
         "一区综述作者自称每百句约 8 次，《心理科学进展》约 2 次",
         ""),
 }
-# 项数与穷尽说法：非系统检索的叙述综述不写（第 11.3 节）。指代引到的研究（“上述两项研究”“这些研究”）不算。
+# 项数与穷尽说法：非系统检索的叙述综述不写（review-writing-standard.md 第 3 节）。指代引到的研究（“上述两项研究”“这些研究”）不算。
 NUM = r"(?:[0-9０-９]+|[一两二三四五六七八九十几]+)"
 COUNT_CLAIMS: dict[str, str] = {
     "研究项数": r"(?:至少|只有|仅有|共有?|已有|本文(?:只|共)?找到)\s?" + NUM + r"\s?(?:项|篇)"
@@ -115,8 +117,8 @@ COUNT_CLAIMS: dict[str, str] = {
                  r"|本文(?:还)?没有找到|(?:研究|证据)(?:还|仍)?(?:很少|较少|很缺乏|缺乏)",
     "全称说法": r"唯一[^。，；]{0,15}研究|证据最多|无论(?:用|采用)?哪一?[类种]",
 }
-COUNT_ADVICE = ("非系统检索不报研究项数，也不说没有研究：只描述引到的研究（“这些研究”“上述两项研究”），"
-                "缺口写成“这一问题需要……的研究来回答”（第 11.3 节）")
+COUNT_ADVICE = ("非系统检索不报研究项数，也不说没有研究：只描述引到的研究（“这些研究”“上述两项研究”）；"
+                "研究建议写进展望（review-writing-standard.md 第 3、4 节）")
 REFERRING = re.compile(r"(?:上述|这|该|此|前述|以上|上面)\s?$")
 REPEAT_MIN_HAN = 15
 REPEAT_LINE = 0.6
@@ -137,10 +139,31 @@ BANNED: dict[str, str] = {
     "下文将": "目录句：用上一段的结论引出下一段的问题（第 19 条）",
     "如前所述": "直接写内容（第 19 条）",
     "具有一定的": "说具体是什么、有多大",
-    "有待进一步研究": "写成一项具体的研究：什么样本、什么设计、回答什么问题",
+    "有待进一步研究": "删掉；研究建议写成一项具体的研究（什么样本、什么设计、回答什么问题），放进展望",
     "具有重要意义": "写具体的用处",
     "笔者": "用“本文”或“本研究”",
+    "反方": "点名写：某某等人(年份)认为……",
+    "反对者": "点名写：某某等人(年份)认为……",
 }
+
+# 段尾防御：段落最后一句是限制、保留或“还需要……”（review-prose-checklist.md 第 3 节第 1 类）。
+DEFENSIVE_ENDINGS: tuple[str, ...] = (
+    r"还需要[^。]{0,40}(?:研究|检验|证据|比较|数据)",
+    r"(?:有待|尚待|尚需|仍需|还需)[^。]{0,20}(?:研究|检验|验证|确认|探讨)",
+    r"(?:只能|仍只能|只宜|只可)(?:看作|视为|算作|当作)",
+    r"还不能(?:把|说明|下结论|确定|区分|回答|断定|排除|分开)",
+    r"(?:回答|分辨|区分|分开)不了",
+    r"要靠[^。]{0,24}(?:纵向|进一步|未来|更多|追踪)",
+    r"需要[^。]{0,40}(?:才能|来)(?:回答|检验|分辨|区分|确认|判断|说明)",
+    r"(?:只|仅)是[^。]{0,8}(?:描述性|初步|探索性)",
+    r"(?:本节|本部分|本章|本文)[^。]{0,30}需要[^。]{0,24}(?:复核|检验|验证)",
+    r"需(?:谨慎|慎重)(?:解释|看待|对待)",
+)
+# 以转折开头、接着讲研究没做到什么的段尾句，如“但这项研究固定的是总分而非症状分，没有……”
+TURN_LIMIT = re.compile(r"^(?:但|但是|然而|不过)[，,]?[^。]*(?:没有|并非|而非|未|还不|尚未|只|仅|取决于)")
+DEFENSIVE_ADVICE = ("段尾落在判断上，或引出下一段的问题：限制写在那项证据旁边一次，共同的局限放结尾一章，"
+                    "研究建议放展望；反证写清原因和对论点的含义（review-writing-standard.md 第 4 节）")
+SKELETON_CUT = 60
 
 
 def clean(text: str) -> str:
@@ -269,6 +292,55 @@ def count_claims(raw: str) -> list[dict]:
                     continue
                 hits.append({"行": lineno, "词": m.group(0), "类型": kind})
     return hits
+
+
+def para_blocks(raw: str) -> list[tuple[int, str]]:
+    """正文段落和起始行号：按空行切分正文行（已去掉 YAML 头、注释、标题、表格和引用块）。"""
+    blocks: list[tuple[int, str]] = []
+    cur: list[str] = []
+    start = 0
+    for lineno, line in body_lines(raw) + [(0, "")]:
+        if line.strip():
+            if not cur:
+                start = lineno
+            cur.append(line.strip())
+        elif cur:
+            blocks.append((start, "".join(cur)))
+            cur = []
+    return blocks
+
+
+def plain(p: str) -> str:
+    """去掉链接、括号里的引文和强调符号，供列出首句和末句。"""
+    p = re.sub(r"\[\[[^\]|]*\|([^\]]*)\]\]", r"\1", p)
+    p = re.sub(r"\[\[([^\]]*)\]\]", r"\1", p)
+    p = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", p)
+    p = re.sub(r"\([^()]*?(?:19|20)\d{2}[a-z]?[^()]*\)", "", p)
+    p = re.sub(r"（[^（）]*?(?:19|20)\d{2}[a-z]?[^（）]*）", "", p)
+    return p.replace("*", "").strip()
+
+
+def sent_list(p: str) -> list[str]:
+    return [s.strip() for s in re.findall(r"[^。？！?!]+[。？！?!]?", p) if han(s) >= 4]
+
+
+def defensive_ending(sentence: str) -> bool:
+    return any(re.search(pat, sentence) for pat in DEFENSIVE_ENDINGS) or bool(TURN_LIMIT.search(sentence))
+
+
+def skeleton(raw: str) -> list[dict]:
+    """每段的首句和末句，并标出末句是不是段尾防御。表题、表注和不足 20 字的段不算。"""
+    out = []
+    for lineno, block in para_blocks(raw):
+        p = plain(block)
+        if han(p) < PARA_MIN_HAN or CAPTION.match(p):
+            continue
+        sents = sent_list(p)
+        if not sents:
+            continue
+        out.append({"段": len(out) + 1, "行": lineno, "首句": sents[0], "末句": sents[-1],
+                    "段尾防御": defensive_ending(sents[-1])})
+    return out
 
 
 def bigrams(s: str) -> set[str]:
@@ -417,40 +489,46 @@ def report(path: Path, systematic: bool = False) -> dict:
         verdict, fix = judge(name, value)
         low, high = TARGETS[name][:2]
         rows.append({"指标": name, "草稿": round(value, 1), "目标": f"{low:g}—{high:g}", "判定": verdict, "怎么改": fix})
+    bones = skeleton(raw)
     return {"文件": str(path), "汉字": han(text), "短稿": han(text) < MIN_HAN, "指标": rows,
             "长短起伏": spread_rows(spread(text)),
             "句式与引用": pattern_rows(patterns(raw, text), han(text)),
             "论证动作": moves(text, len(raw_paragraphs(raw))),
             "禁用词": [{"行": n, "词": p, "怎么改": a} for n, p, a in banned_hits(raw)],
             "项数与穷尽说法": None if systematic else count_claims(raw),
-            "可能重复的句子": repeats(text)}
+            "段尾防御": [{"段": b["段"], "行": b["行"], "末句": b["末句"]} for b in bones if b["段尾防御"]],
+            "可能重复的句子": repeats(text),
+            "骨架": bones}
 
 
-def render(r: dict) -> str:
-    out = [f"## {r['文件']}", f"正文汉字 {r['汉字']}（去掉引文、标题、表格、表题和表注）。"]
+def cut(s: str, n: int = SKELETON_CUT) -> str:
+    return s if len(s) <= n else s[:n] + "……"
+
+
+def render_style(r: dict) -> list[str]:
+    out = ["", "### 文风参考（只作参考，不作目标；句子按内容改，不为凑数而改）"]
     if r["短稿"]:
-        out.append(f"草稿不足 {MIN_HAN} 汉字，比例指标不稳定，主要看禁用词。")
-    out += ["", "| 指标 | 草稿 | 目标（范例四分位） | 判定 | 怎么改 |", "|---|---|---|---|---|"]
+        out.append(f"草稿不足 {MIN_HAN} 汉字，比例指标不稳定。")
+    out += ["", "| 指标 | 草稿 | 范例四分位 | 判定 | 偏离时先看 |", "|---|---|---|---|---|"]
     for row in r["指标"]:
         out.append(f"| {row['指标']} | {row['草稿']} | {row['目标']} | {row['判定']} | {row['怎么改']} |")
     out += ["", "长短起伏（只在比九成范例小节都整齐时提示）：", "",
-            "| 指标 | 草稿 | 范例参照 | 判定 | 怎么改 |", "|---|---|---|---|---|"]
+            "| 指标 | 草稿 | 范例参照 | 判定 | 偏离时先看 |", "|---|---|---|---|---|"]
     for row in r["长短起伏"]:
         out.append(f"| {row['指标']} | {row['草稿']} | {row['范例参照']} | {row['判定']} | {row['怎么改']} |")
     out += ["", "句式与引用（只在比九成范例小节都多或都少时提示）：", "",
-            "| 指标 | 草稿 | 范例参照 | 判定 | 怎么改 |", "|---|---|---|---|---|"]
+            "| 指标 | 草稿 | 范例参照 | 判定 | 偏离时先看 |", "|---|---|---|---|---|"]
     for row in r["句式与引用"]:
         out.append(f"| {row['指标']} | {row['草稿']} | {row['范例参照']} | {row['判定']} | {row['怎么改']} |")
     out += ["", "论证动作（一区期刊综述的做法，只数次数，全文一处都没有时提示）：", "",
             "| 动作 | 草稿（处） | 参照 | 判定 | 怎么改 |", "|---|---|---|---|---|"]
     for row in r["论证动作"]:
         out.append(f"| {row['动作']} | {row['草稿']} | {row['参照']} | {row['判定']} | {row['怎么改']} |")
-    out.append("")
-    if r["禁用词"]:
-        out.append(f"禁用的过渡词和目录句 {len(r['禁用词'])} 处：")
-        out += [f"- 第 {h['行']} 行“{h['词']}”：{h['怎么改']}" for h in r["禁用词"]]
-    else:
-        out.append("没有禁用的过渡词和目录句。")
+    return out
+
+
+def render(r: dict, style: bool = False) -> str:
+    out = [f"## {r['文件']}", f"正文汉字 {r['汉字']}（去掉引文、标题、表格、表题和表注）。", "", "### 硬错误", ""]
     claims = r["项数与穷尽说法"]
     if claims is None:
         out.append("系统综述或元分析：没有查项数与穷尽说法。")
@@ -460,20 +538,42 @@ def render(r: dict) -> str:
         out.append(f"  怎么改：{COUNT_ADVICE}")
     else:
         out.append("没有项数与穷尽说法。")
+    if r["禁用词"]:
+        out.append(f"禁用的过渡词和目录句 {len(r['禁用词'])} 处（含“反方”这类标签）：")
+        out += [f"- 第 {h['行']} 行“{h['词']}”：{h['怎么改']}" for h in r["禁用词"]]
+    else:
+        out.append("没有禁用的过渡词和目录句。")
+    ends = r["段尾防御"]
+    if ends:
+        out.append(f"段尾防御 {len(ends)} 处（展望一节写研究建议是对的，那里的提示可以忽略）：")
+        out += [f"- 第 {h['段']} 段（第 {h['行']} 行）末句：“{cut(h['末句'], 80)}”" for h in ends]
+        out.append(f"  怎么改：{DEFENSIVE_ADVICE}")
+    else:
+        out.append("没有段尾防御。")
     reps = r["可能重复的句子"]
     if reps:
-        out.append(f"可能重复的句子 {len(reps)} 对（不同段落里说法高度重合；同一判断全章只说一次，第 11.8 节）：")
+        out.append(f"可能重复的句子 {len(reps)} 对（不同段落里说法高度重合；同一判断全章只说一次）：")
         for h in reps[:12]:
             out.append(f"- 第 {h['段'][0]} 段与第 {h['段'][1]} 段（重合 {h['重合']}）：“{h['句一']}”／“{h['句二']}”")
     else:
         out.append("没有说法高度重合的句子。")
+    out += ["", "### 骨架（首句连起来读应当是这一节的论证；末句应当是判断或引向下一段的问题）", "",
+            "| 段 | 行 | 首句 | 末句 |", "|---|---|---|---|"]
+    for b in r["骨架"]:
+        mark = "（段尾防御）" if b["段尾防御"] else ""
+        out.append(f"| {b['段']} | {b['行']} | {cut(b['首句'])} | {cut(b['末句'])}{mark} |")
+    if style:
+        out += render_style(r)
+    else:
+        out += ["", "加 --style 查看文风参考数值（只作参考，不作目标）。"]
     return "\n".join(out)
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="中文综述草稿的文风自查")
+    ap = argparse.ArgumentParser(description="中文综述草稿的自查：硬错误和骨架，--style 加上文风参考")
     ap.add_argument("files", nargs="+", type=Path)
     ap.add_argument("--json", action="store_true", help="输出 JSON")
+    ap.add_argument("--style", action="store_true", help="加上文风参考数值（只作参考，不作目标）")
     ap.add_argument("--systematic", action="store_true", help="系统综述或元分析：不查项数与穷尽说法")
     args = ap.parse_args(argv)
     if hasattr(sys.stdout, "reconfigure"):
@@ -482,7 +582,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.json:
         print(json.dumps(results, ensure_ascii=False, indent=2))
     else:
-        print("\n\n".join(render(r) for r in results))
+        print("\n\n".join(render(r, args.style) for r in results))
     return 0
 
 

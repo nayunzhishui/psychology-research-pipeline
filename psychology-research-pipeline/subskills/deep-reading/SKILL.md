@@ -45,7 +45,7 @@ description: Local subskill for close reading of one level-3 or level-4 empirica
    - 再写“这篇和我的研究有什么关系”和“对我的论文有什么用”；
    - 最后写“30 秒看懂”。
 
-   写之前先看 `../../references/reading-note-example-d1.md`（3 级看 `reading-note-example-d2.md`）和 `../../references/writing-before-after.md`。按 `reading-note-style.md` 第 0 节分三个区写：讲解区只讲这篇做了什么、发现了什么、数字是什么意思，一段最多一句限定；研究的局限写在“我的评价”；查过、算过仍定不下来的小出入写在“疑问与待核”。先把事实和页码列成底稿，再写成给新同学看的段落。每条发现的段落末尾空一格，加块编号。
+   写之前先看 `../../references/reading-note-example-d1.md`（3 级看 `reading-note-example-d2.md`）；写完对照 `../../references/writing-before-after.md` 和 `../../references/anti-defensive-writing.md` 自查。按 `reading-note-style.md` 第 0 节分三个区写：讲解区只讲这篇做了什么、发现了什么、数字是什么意思，一段最多一句限定；研究的局限写在“我的评价”；查过、算过仍定不下来的小出入写在“疑问与待核”。先把事实和页码列成底稿，再写成给新同学看的段落。每条发现的段落末尾空一格，加块编号。
 6. **连知识库**：知识库靠这一步一篇一篇长起来，不能省。按 `../knowledge-vault/SKILL.md` 的“每写完一篇笔记”做七步：
    - 列节点、查重、新建或补讲义（动笔前已经做了的，这里只补漏）；
    - 补关联、写证据；

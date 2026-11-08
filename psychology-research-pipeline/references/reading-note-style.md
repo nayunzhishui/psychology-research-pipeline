@@ -32,14 +32,14 @@
    - 同一处已经因为同一条意见改过的，下一轮不再为它加限定，除非有了新证据。
 10. **把指令和编辑过程写进成品。** 被要求“不写 X”，就在正文写“本文不讨论 X”；删掉一段后，在标题里注“（不含 X）”；写“上一版……现改为……”“此处原为……”。“不写 X”的意思是成品里没有 X：正文、标题和注释里都没有。编辑过程写进提取记录或交接，不进正文。
 
-第 8–10 条参照了几份公开的写作规范：HERO-Anti-OverDefense（github.com/wanshuiyin/HERO-Anti-OverDefense）的第 7、9 条和案例 SIB-003、SIB-004；Humanizer（github.com/blader/humanizer）及中文版 Humanizer-zh（github.com/op7418/Humanizer-zh）的第 5、9、23、25 条；stop-slop 第 7 条；proselint 的 hedging 检查；research-plugins 的 academic-tone-guide。它们的共同点是：限定要和证据对上，两个方向都会出错；局限集中写一次；成品只写结果，不写过程和指令。完整的条目、必须保留的限定和改写步骤见 `anti-defensive-writing.md`，动笔前和自检时都要对照。
+第 8–10 条参照了几份公开的写作规范：HERO-Anti-OverDefense（github.com/wanshuiyin/HERO-Anti-OverDefense）的第 7、9 条和案例 SIB-003、SIB-004；Humanizer（github.com/blader/humanizer）及中文版 Humanizer-zh（github.com/op7418/Humanizer-zh）的第 5、9、23、25 条；stop-slop 第 7 条；proselint 的 hedging 检查；research-plugins 的 academic-tone-guide。它们的共同点是：限定要和证据对上，两个方向都会出错；局限集中写一次；成品只写结果，不写过程和指令。完整的条目、必须保留的限定和改写步骤见 `anti-defensive-writing.md`，写完自检时对照；动笔前看本节的写法和示范。
 
 **写的顺序：两遍写，一遍查。**
 1. **事实底稿**：三轮读完，先把要用的事实和页码列成清单。底稿只给自己看，不进笔记。
 2. **讲解稿**：按模板一节一节写成段落，每段都想着一个没读过这篇的新同学。
 3. **自检**：运行 `scripts/check_reading_outputs.py`（命令见第 7 节），把报出的问题全部改掉；再做一次读者测试，只读笔记、不看 PDF，能不能回答五个问题：这篇问了什么？怎么做的？发现了什么？关键数字是什么意思？能用到我的论证的哪一步？有一个答不上来，就回去补。
 
-**先看示范再动笔**：`reading-note-example-d1.md`（4 级，随机对照试验）、`reading-note-example-d2.md`（3 级简版，量表开发）和 `writing-before-after.md`（真实笔记改写前后的对照）都在本 skill 的 `references/` 里。
+**先看示范再动笔**：`reading-note-example-d1.md`（4 级，随机对照试验）和 `reading-note-example-d2.md`（3 级简版，量表开发）都在本 skill 的 `references/` 里。`writing-before-after.md` 是真实笔记改写前后的对照，里面有改前的毛病，写完自检时再看。
 
 ## 1 写给谁
 

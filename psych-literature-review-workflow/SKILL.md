@@ -51,7 +51,7 @@ description: Use this standalone Chinese-first main skill folder for psychology 
 
 ## 文献操作核心合同
 
-任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文精读时再读取 `references/deep-reading-contract.md` 和 `references/reading-note-style.md` 并调用 `subskills/literature-matrix/`；建知识库、新建概念节点或更新激活扩散时读取 `references/knowledge-vault-contract.md` 并调用 `subskills/knowledge-vault/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`；读取关键图、制作证据地图/理论图/流程图、写图注或审计最终图件时再读取 `references/evidence-figure-contract.md`。通用综述覆盖层继续负责综述类型、PRISMA/范围综述透明性、质量工具、证据综合和理论贡献，不得降低公共合同。写阅读笔记、证据提纲和正文时，限定与措辞按 `references/anti-defensive-writing.md` 校准：限定和证据对上，局限只写一次，成品不写过程和指令。中文综述正文另按 `references/review-writing-standard.md`（综述写作规范）写，并用 `scripts/check_review_prose.py` 自查文风。
+任务涉及检索、Zotero、PDF、全文阅读、证据账本、补检索、方法判断或模拟审稿时，先完整读取 `references/literature-operations-contract.md`。执行3–4级全文精读时再读取 `references/deep-reading-contract.md` 和 `references/reading-note-style.md` 并调用 `subskills/literature-matrix/`；建知识库、新建概念节点或更新激活扩散时读取 `references/knowledge-vault-contract.md` 并调用 `subskills/knowledge-vault/`；正式正文写作或章节重写时读取 `references/evidence-grounded-writing-contract.md` 并调用 `subskills/manuscript-write/`；读取关键图、制作证据地图/理论图/流程图、写图注或审计最终图件时再读取 `references/evidence-figure-contract.md`。通用综述覆盖层继续负责综述类型、PRISMA/范围综述透明性、质量工具、证据综合和理论贡献，不得降低公共合同。写阅读笔记、证据提纲和正文时，写作规则分三层：动笔前读写法和好样例（笔记看 `references/reading-note-style.md` 和示范，综述正文看 `references/review-writing-standard.md`）；写完再用 `references/anti-defensive-writing.md` 和检查清单查限定与措辞：限定和证据对上，局限只写一次，成品只写结果；证据底线照写作合同。中文综述正文按 `references/review-writing-standard.md` 先列论证表、再逐段写；每段写完对照 `references/review-prose-checklist.md`，并运行 `scripts/check_review_prose.py`。
 
 ## 给人看的产出
 

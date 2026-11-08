@@ -111,19 +111,19 @@ def move_verdicts(text: str, tmp_path: Path) -> dict[str, str]:
     return {row["动作"]: row["判定"] for row in crp.report(draft)["论证动作"]}
 
 
-def test_moves_suggest_evidence_strength_and_alternatives_when_absent(tmp_path: Path) -> None:
+def test_moves_suggest_evidence_strength_and_no_longer_ask_for_alternatives(tmp_path: Path) -> None:
     verdicts = move_verdicts("\n\n".join([LONG + MID] * 7), tmp_path)
     assert verdicts["写出证据强弱"] == "可以加上"
-    assert verdicts["替代解释"] == "可以加上"
+    assert "替代解释" not in verdicts
     assert verdicts["标明本文的推论"] == "没有"
 
 
-def test_moves_count_graded_evidence_alternatives_and_stance(tmp_path: Path) -> None:
+def test_moves_count_graded_evidence_and_stance(tmp_path: Path) -> None:
     paras = [LONG + MID] * 6 + ["自评、访谈和他评的结果方向相同，甲组都高于乙组。"
-                                "另一种解释是两组的测量时点不同。本文认为，这一差异主要来自基线。"]
+                                "本文认为，这一差异主要来自基线。"]
     verdicts = move_verdicts("\n\n".join(paras), tmp_path)
     assert set(verdicts.values()) == {"有"}, verdicts
-    assert move_verdicts(MID * 3, tmp_path)["替代解释"] == "不判断"
+    assert move_verdicts(MID * 3, tmp_path)["标明本文的推论"] == "不判断"
 
 
 def test_moves_no_longer_count_study_numbers_as_evidence_strength(tmp_path: Path) -> None:
@@ -148,7 +148,7 @@ def test_count_claims_accept_references_to_cited_studies_and_research_needs(tmp_
 
 
 def test_repeats_flag_the_same_judgement_in_two_paragraphs(tmp_path: Path) -> None:
-    claim = "人格功能损害与总体困扰和内化问题的同向变化最为一致，外化问题的结果较少。"
+    claim = "睡眠问题与总体困扰和内化问题的同向变化最为一致，外化问题的结果较少。"
     others = ["甲组在随访中的平均分高于乙组，差异在三个时点上都保持稳定。",
               "睡眠时长与次日的情绪评分没有明显的联系，只在周末略有不同。",
               "父母报告的照料负担随孩子年龄增长而下降，男孩下降得更快。",
@@ -157,3 +157,46 @@ def test_repeats_flag_the_same_judgement_in_two_paragraphs(tmp_path: Path) -> No
     hits = crp.repeats(text)
     assert len(hits) == 1 and hits[0]["段"] == [1, 3], hits
     assert crp.repeats("\n\n".join([others[0] + others[1], others[2] + others[3]])) == []
+
+
+def test_defensive_endings_flag_last_sentences_that_hedge(tmp_path: Path) -> None:
+    draft = tmp_path / "草稿.md"
+    draft.write_text(
+        "甲组的焦虑低于乙组(Smith, 2020)。然而，这些研究只并列了两组系数，还需要检验相关之差的研究来回答。\n\n"
+        "访谈评定的结果方向相同。但这项研究固定的是总分而非症状分，没有对两类进行统计检验。\n\n"
+        "一般因子占主导，说明量表首先测的是一个总体水平。\n\n"
+        "## 4 展望\n\n本文的论点需要用不含症状内容的效标，在纵向研究中才能回答。\n",
+        encoding="utf-8",
+    )
+    result = crp.report(draft)
+    flagged = [h["段"] for h in result["段尾防御"]]
+    assert flagged == [1, 2, 4], result["段尾防御"]
+    assert "段尾防御 3 处" in crp.render(result)
+
+
+def test_skeleton_lists_first_and_last_sentences_without_citations(tmp_path: Path) -> None:
+    draft = tmp_path / "草稿.md"
+    draft.write_text("---\n类型: 草稿\n---\n# 标题\n\n正念训练能降低焦虑(Smith, 2020)。第二句写证据。"
+                     "最后一句落在判断上。%% 主张 1 %%\n\n**表 1　样本特征**\n\n只有一句的过渡段，用上一段的结论引出下一段要回答的问题。\n",
+                     encoding="utf-8")
+    bones = crp.report(draft)["骨架"]
+    assert [b["段"] for b in bones] == [1, 2], bones
+    assert bones[0]["首句"] == "正念训练能降低焦虑。" and bones[0]["末句"] == "最后一句落在判断上。"
+    assert bones[1]["首句"] == bones[1]["末句"]
+    assert not any(b["段尾防御"] for b in bones)
+
+
+def test_labels_like_fangfang_are_banned(tmp_path: Path) -> None:
+    draft = tmp_path / "草稿.md"
+    draft.write_text("反方的研究认为甲组更高，反对者也这样看。\n", encoding="utf-8")
+    assert {"反方", "反对者"} <= {hit["词"] for hit in crp.report(draft)["禁用词"]}
+
+
+def test_style_tables_only_with_style_flag(tmp_path: Path) -> None:
+    draft = tmp_path / "草稿.md"
+    draft.write_text("\n\n".join([LONG + MID] * 7), encoding="utf-8")
+    result = crp.report(draft)
+    plain_text, styled = crp.render(result), crp.render(result, style=True)
+    assert "### 硬错误" in plain_text and "### 骨架" in plain_text
+    assert "长短起伏" not in plain_text and "加 --style" in plain_text
+    assert "### 文风参考" in styled and "长短起伏" in styled

@@ -398,11 +398,19 @@ def test_review_writing_standard_is_synchronized_and_routed() -> None:
         for root in SKILL_ROOTS
     ]
     assert texts[0] == texts[1] == texts[2]
-    for marker in ("综述写作规范", "第 19 条", "第 20 条", "句式库", "check_review_prose.py"):
+    for marker in ("综述写作规范", "三层规则", "论证表", "逐段写", "句式库", "review-prose-checklist.md"):
         assert marker in texts[0]
+    checklists = [
+        (root / "references" / "review-prose-checklist.md").read_text(encoding="utf-8")
+        for root in SKILL_ROOTS
+    ]
+    assert checklists[0] == checklists[1] == checklists[2]
+    for marker in ("写作时不读", "段尾防御", "第 19 条", "第 20 条", "check_review_prose.py"):
+        assert marker in checklists[0]
     for root in SKILL_ROOTS:
         manuscript_text = (
             root / "subskills" / "manuscript-write" / "SKILL.md"
         ).read_text(encoding="utf-8")
         assert "review-writing-standard.md" in manuscript_text
+        assert "review-prose-checklist.md" in manuscript_text
         assert (root / "scripts" / "check_review_prose.py").exists()

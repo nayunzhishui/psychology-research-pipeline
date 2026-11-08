@@ -7,7 +7,7 @@ description: Local subskill under psych-literature-review-workflow for APA-style
 
 ## 职责与入口
 
-把已筛选、深读和按研究家族综合的心理学证据写成可追溯综述。开始前完整读取 `../../references/evidence-grounded-writing-contract.md`；涉及证据地图、理论模型、流程图、图注或视觉审计时同时读取`../../references/evidence-figure-contract.md`。输入为冻结协议、检索/筛选记录、阅读笔记、阅读矩阵、证据账本、证据提纲（按章、节、段列出主张与证据）、质量评价、矛盾与空白登记及综合备忘录。起草时逐段对照证据提纲写，提纲里的“可以写成”和“不能写成”是措辞上限。中文稿同时读取 `../../references/review-writing-standard.md`（综述写作规范：期刊行文、文风、引文和投稿格式，以及与反防御写作冲突时的处理）；写完一节运行 `python ../../scripts/check_review_prose.py <草稿>` 自查文风。
+把已筛选、深读和按研究家族综合的心理学证据写成可追溯综述。开始前完整读取 `../../references/evidence-grounded-writing-contract.md`；涉及证据地图、理论模型、流程图、图注或视觉审计时同时读取`../../references/evidence-figure-contract.md`。输入为冻结协议、检索/筛选记录、阅读笔记、阅读矩阵、证据账本、证据提纲（按章、节、段列出主张与证据）、质量评价、矛盾与空白登记及综合备忘录。起草时逐段对照证据提纲写，提纲里的“可以写成”和“不能写成”是措辞上限。中文稿动笔前读取 `../../references/review-writing-standard.md`（综述写作规范：论证表在先、逐段写，以及结构、段落、反证、文风、引文和投稿格式），按论证表一次写一段；每段写完读取 `../../references/review-prose-checklist.md` 对照检查，并运行 `python ../../scripts/check_review_prose.py <草稿>`，处理“硬错误”一栏，再写下一段。
 
 ## 综述类型路由
 
